@@ -11,6 +11,12 @@ DEP = font.o image.o
 all : $(TARGET).o $(DEP)
 	gcc $(TARGET).o $(DEP) $(FLAGS)
 
+nix : 
+	gcc -I/usr/include/SDL2 -D_REENTRANT -Wall -g -c image.c -o image.o
+	gcc -I/usr/include/SDL2 -D_REENTRANT -Wall -g -c main.c -o main.o
+	gcc -o bin/DinoRun image.o main.o -L/usr/lib -lSDL2
+
+
 $(TARGET).o : $(TARGET).c
 	gcc $(TARGET).c $(FLAGS) -c
 

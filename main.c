@@ -6,6 +6,9 @@
 #include "font.h"
 #include "image.h"
 
+#define WINDOW_WIDTH 1920/2
+#define WINDOW_HEIGHT 1080/2
+
 SDL_Window* init_window(void);
 void destroy_media(SDL_Surface*);
 void handler(SDL_Window*, struct Jimage**);
@@ -19,12 +22,12 @@ int main(int argc, char* argv[]){
 	SDL_Surface* win_surface = NULL;
 
 	window = init_window();
-	
+
 	win_surface = SDL_GetWindowSurface(window);
 
 	// The asset array, maximum of 30 assets allowed.
 	struct Jimage* assets[30];
-	char* level_package[] = {"Assets\\bg_fill.bmp", "Assets\\block.bmp"};
+	char* level_package[] = {"Assets/bg_fill.bmp", "Assets/block.bmp"};
 
 	load_assets(assets, level_package, sizeof(level_package)/sizeof(level_package[0]));
 	// TODO Remember to free these later, you are not freeing them now!
@@ -33,7 +36,7 @@ int main(int argc, char* argv[]){
 
 	//EXAMPLE OF JDATA
 	//SDL_Color S_color = {94, 129, 172};
-	
+
 	//struct Jfont* greeting = make_font(500, 500, 40, S_color, "This is a test");
 	//SDL_BlitSurface(greeting->img, NULL, win_surface, &greeting->rect);
 
@@ -51,7 +54,7 @@ int main(int argc, char* argv[]){
 
 	SDL_DestroyWindow(window);
 	window = NULL;
-	
+
 	SDL_Quit();
 	return 0;
 }
@@ -66,7 +69,7 @@ SDL_Window* init_window(){
 		return NULL;
 	}
 
-	window = SDL_CreateWindow("DinoRun", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1920, 1080, SDL_WINDOW_SHOWN);
+	window = SDL_CreateWindow("DinoRun", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
 
 	if(window == NULL){
 		printf("SDL could not create window! SDL Error: %s\n", SDL_GetError());
@@ -91,9 +94,9 @@ void update(SDL_Window* window, struct Jimage** assets){
 	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
 
 	// Gravity for character
-	int gravity = -1;
+	int gravity = -2;
 
-	int y = 1080 - assets[1]->rect.h;
+	int y = WINDOW_HEIGHT - assets[1]->rect.h;
 
 	if(assets[1]->rect.y < y)
 		assets[1]->rect.y = assets[1]->rect.y - gravity;
@@ -109,8 +112,8 @@ void update(SDL_Window* window, struct Jimage** assets){
 
 void handler(SDL_Window* window, struct Jimage** assets){
 	bool quit = false;
-	SDL_Event e; 
-	while(!quit){ 
+	SDL_Event e;
+	while(!quit){
 		while(SDL_PollEvent(&e) != 0){
 			if(e.type == SDL_QUIT)
 				quit = true;
