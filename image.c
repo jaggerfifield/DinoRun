@@ -12,7 +12,8 @@ typedef struct{
 
 bool image_init();
 Jimage* make_image(int, int, char*);
-SDL_Surface* render_image(Jimage*);
+SDL_Surface* load_image(Jimage*);
+void color_key(Jimage*);
 
 Jimage* make_image(int x, int y, char* path){
 	if(!image_init())
@@ -25,7 +26,7 @@ Jimage* make_image(int x, int y, char* path){
 	rect.y = y;
 
 	image->path = path;
-	image->img = render_image(image);
+	image->img = load_image(image);
 
 	rect.h = image->img->h;
 	rect.w = image->img->w;
@@ -35,10 +36,14 @@ Jimage* make_image(int x, int y, char* path){
 	return image;
 }
 
-SDL_Surface* render_image(Jimage* image){
-	return SDL_LoadBMP(strcat(SDL_GetBasePath(), image->path));
+void color_key(Jimage* image){
+	//              The surface, Enabeled            the format,  color black
+	SDL_SetColorKey(image->img, SDL_TRUE, SDL_MapRGB(image->img->format, 0, 0, 0));
 }
 
+SDL_Surface* load_image(Jimage* image){
+	return SDL_LoadBMP(strcat(SDL_GetBasePath(), image->path));
+}
 
 bool image_init(){
 	bool success = true;

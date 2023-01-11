@@ -27,12 +27,12 @@ int main(int argc, char* argv[]){
 
 	// The asset array, maximum of 30 assets allowed.
 	struct Jimage* assets[30];
-	char* level_package[] = {"Assets/bg_fill.bmp", "Assets/block.bmp"};
+	char* level_package[] = {"Assets/bg_fill.bmp", "Assets/dino.bmp"};
 
 	load_assets(assets, level_package, sizeof(level_package)/sizeof(level_package[0]));
 	// TODO Remember to free these later, you are not freeing them now!
 	assets[1]->rect.x = 100;
-
+	color_key(assets[1]);
 
 	//EXAMPLE OF JDATA
 	//SDL_Color S_color = {94, 129, 172};
