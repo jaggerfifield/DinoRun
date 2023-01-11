@@ -13,13 +13,20 @@ else
 
 	LINK := -lSDL2
 
-	IPATH := /usr/include/SDL2
-	LPATH := /usr/lib
+	IPATH := .\include
+	LPATH := .\lib 
+
+	# IPATH := /usr/include/SDL2
+	# LPATH := /usr/lib
 endif
 
 DEP := image.o
 
 all : main.o $(DEP)
+
+	@echo Empty build folder
+	rm -r ./bin/*
+
 	@echo Building for $(OS)
 	gcc -o bin/DinoRun $(DEP) main.o -L$(LPATH) $(LINK)
 	
