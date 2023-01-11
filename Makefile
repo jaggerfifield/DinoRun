@@ -1,38 +1,35 @@
-TARGET = main
-LINK = -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf
+# Detect OS
+ifeq ($(OS), Windows_NT)
+	OS := WIN
+	LINK := -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf
 
-IPATH = .\include
-LPATH = .\lib 
+	IPATH := .\include
+	LPATH := .\lib 
 
-FLAGS = -I$(IPATH) -L$(LPATH) -std=c99 -Wall -O $(LINK)
+	FLAGS := -I$(IPATH) -L$(LPATH) -std=c99 -Wall -O $(LINK)
+	DEP := font.o image.o
+else
+	OS := NIX
 
-DEP = font.o image.o
+	LINK := -lSDL2
 
-all : $(TARGET).o $(DEP)
-	gcc $(TARGET).o $(DEP) $(FLAGS)
+	IPATH := /usr/include/SDL2
+	LPATH := /usr/lib
+endif
 
-nix : 
-	gcc -I/usr/include/SDL2 -D_REENTRANT -Wall -g -c image.c -o image.o
-	gcc -I/usr/include/SDL2 -D_REENTRANT -Wall -g -c main.c -o main.o
-	gcc -o bin/DinoRun image.o main.o -L/usr/lib -lSDL2
+DEP := image.o
 
+all : main.o $(DEP)
+	@echo Building for $(OS)
+	gcc -o bin/DinoRun $(DEP) main.o -L$(LPATH) $(LINK)
+	
+	@echo Copy Assets to folder
+	cp -r Assets bin/
+	cp -r SDL2.dll bin/
 
-$(TARGET).o : $(TARGET).c
-	gcc $(TARGET).c $(FLAGS) -c
+image.o : image.c
+	gcc -I$(IPATH) -D_REENTRANT -Wall -g -c image.c -o image.o
 
-font.o : font.c font.h
-	gcc font.c font.h $(FLAGS) -c
+main.o : main.c
+	gcc -I$(IPATH) -D_REENTRANT -Wall -g -c main.c -o main.o
 
-image.o : image.c image.h
-	gcc image.c image.h $(FLAGS) -c
-
-clean :
-	rm ./*.o
-	rm ./*.gch
-	rm ./dbg.exe
-
-dbg : $(TARGET).o $(DEP)
-	gcc $(TARGET).o $(DEP) $(FLAGS) -ggdb -g -o dbg
-
-mem : all
-	drmemory.exe -light -count_leaks a.exe
