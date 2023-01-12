@@ -1,4 +1,10 @@
+#ifdef WIN
 #include <SDL.h>
+#endif
+
+#ifdef NIX
+#include <SDL2/SDL.h>
+#endif
 
 struct Jimage{
 	char* path;

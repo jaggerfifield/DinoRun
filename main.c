@@ -1,9 +1,14 @@
+#ifdef WIN
 #include <SDL.h>
-#include <SDL_ttf.h>
+#endif
+
+#ifdef NIX
+#include <SDL2/SDL.h>
+#endif
+
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "font.h"
 #include "image.h"
 
 #define WINDOW_WIDTH 1920/2

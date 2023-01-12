@@ -3,40 +3,57 @@ ifeq ($(OS), Windows_NT)
 	OS := WIN
 	LINK := -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf
 
-	IPATH := .\include
-	LPATH := .\lib 
+	IPATH := -I.\include
+	LPATH := -L.\lib
 
-	FLAGS := -I$(IPATH) -L$(LPATH) -std=c99 -Wall -O $(LINK)
 	DEP := font.o image.o
 else
 	OS := NIX
 
 	LINK := -lSDL2
 
-	IPATH := .\include
-	LPATH := .\lib 
-
-	# IPATH := /usr/include/SDL2
-	# LPATH := /usr/lib
+	IPATH :=
+	LPATH :=
 endif
 
-DEP := image.o
+DEP := ./Objects/$(OS)/image.o ./Objects/$(OS)/main.o
 
-all : main.o $(DEP)
+all : project main.o image.o
 
-	@echo Empty build folder
+	@echo =====Empty build folder=====
+	@echo . >> ./bin/file.txt
 	rm -r ./bin/*
+	@echo
 
-	@echo Building for $(OS)
-	gcc -o bin/DinoRun $(DEP) main.o -L$(LPATH) $(LINK)
-	
-	@echo Copy Assets to folder
+	@echo =====Building for $(OS)=====
+	gcc -o bin/DinoRun $(DEP) -D $(OS) $(LPATH) $(LINK)
+	@echo
+
+	@echo =====Copy Assets to folder=====
 	cp -r Assets bin/
 	cp -r SDL2.dll bin/
+	@echo
 
 image.o : image.c
-	gcc -I$(IPATH) -D_REENTRANT -Wall -g -c image.c -o image.o
+	@echo =====Compile image.c=====
+	gcc $(IPATH) -D $(OS) -Wall -g -c image.c -o ./Objects/$(OS)/image.o
+	@echo
 
 main.o : main.c
-	gcc -I$(IPATH) -D_REENTRANT -Wall -g -c main.c -o main.o
+	@echo =====Compie main.c=====
+	gcc $(IPATH) -D $(OS) -Wall -g -c main.c -o ./Objects/$(OS)/main.o
+	@echo
 
+project :
+	@echo =====Create project directory=====
+	mkdir ./bin
+	mkdir ./Objects
+	mkdir ./Objects/$(OS)
+	@echo done >> project
+	@echo
+
+clean :
+	@echo =====Removing all past build files=====
+	rm -r ./bin
+	rm -r ./Objects
+	rm project
