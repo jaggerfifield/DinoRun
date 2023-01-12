@@ -3,8 +3,8 @@ ifeq ($(OS), Windows_NT)
 	OS := WIN
 	LINK := -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf
 
-	IPATH := -I.\include
-	LPATH := -L.\lib
+	IPATH := -I.\SDL\include
+	LPATH := -L.\SDL\lib
 
 	DEP := font.o image.o
 else
