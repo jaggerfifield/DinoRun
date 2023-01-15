@@ -1,0 +1,25 @@
+id ICON "./Assets/icon.ico"
+
+1 VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+      VALUE "CompanyName", "Bd"
+      VALUE "FileDescription", "A"
+      VALUE "FileVersion", "0.1"
+      VALUE "InternalName", "game"
+      VALUE "LegalCopyright", ""
+      VALUE "OriginalFilename", "game.exe"
+      VALUE "ProductName", "game"
+      VALUE "ProductVersion", "1.0"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1252
+  END
+END
