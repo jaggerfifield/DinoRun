@@ -47,7 +47,6 @@ struct Jdata* add_data(struct Jdata* node, int type, int id, int x, int y, char*
 		node->tail = new_node;
 	}
 
-	printf("node->tail is : %d\n", node->tail->id);
 	return node;
 }
 

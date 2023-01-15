@@ -13,9 +13,6 @@
 #include "font.h"
 #include "jdata.h"
 
-#define WINDOW_WIDTH 1920/2
-#define WINDOW_HEIGHT 1080/2
-
 SDL_Window* init_window(void);
 void destroy_media(SDL_Surface*);
 void handler(SDL_Window*);
@@ -23,6 +20,7 @@ void update(SDL_Window*, struct Jdata*);
 
 enum Data {JIMAGE, JFONT};
 enum State {MENU, PLAY};
+enum Pos {CENTER = -1, I4 = -2, II4 = -3, III4 = -4, IV4 = -5, I3 = -6, II3 = -7, III3 = -8};
 
 int main(int argc, char* argv[]){
 	// Create a SDL window
@@ -75,9 +73,9 @@ void handler(SDL_Window* window){
 
 	// Load the menu state
 	struct Jdata* menu = init("menu", JIMAGE, 0, bg, NULL);
-	menu = add_data(menu, JFONT, 1, 0, 0, "Assets/font.ttf", "Play");
-	menu = add_data(menu, JFONT, 2, 0, 100, "Assets/font.ttf", "Exit");
-	menu = add_data(menu, JFONT, 3, 0, 200, "Assets/font.ttf", "Another");
+	menu = add_data(menu, JFONT, 1, CENTER, 0, "Assets/font.ttf", "Play");
+	menu = add_data(menu, JFONT, 2, CENTER, 100, "Assets/font.ttf", "Exit");
+	menu = add_data(menu, JFONT, 3, CENTER, 200, "Assets/font.ttf", "Another");
 	
 	// Load the run state
 	struct Jdata* runner = init("runner", JIMAGE, 0, bg, NULL);

@@ -3,45 +3,56 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-typedef struct{
-	int size;
-	SDL_Rect rect;
-	SDL_Color color;
-	SDL_Surface* img;
-	char* text;
-	char* path;
-}Jfont;
+#include "font.h"
+
+//typedef struct{
+//	int size;
+//	SDL_Rect rect;
+//	SDL_Color color;
+//	SDL_Surface* img;
+//	char* text;
+//	char* path;
+//}Jfont;
 
 bool font_init();
-SDL_Surface* render_font(Jfont*);
+SDL_Surface* render_font(struct Jfont*);
 
-Jfont* make_font(int x, int y, int s, SDL_Color col, char* path, char* content){
+struct Jfont* make_font(int x, int y, int s, SDL_Color col, char* path, char* content){
 	if(!font_init())
 		return NULL;
 
-	Jfont* font = malloc(sizeof(Jfont));
+	struct Jfont* font = malloc(sizeof(struct Jfont));
 	SDL_Rect rect;
-
-	rect.x = x;
-	rect.y = y;
-	rect.w = 0;
-	rect.h = 0;
 
 	char* string;
 	string = content;
 
 	font->size = s;
-	font->rect = rect;
 	font->color = col;
 	font->text = string;
 	font->path = path;
 
 	font->img = render_font(font);
 
+	if(x == -1)
+		rect.x = (WINDOW_WIDTH / 2) - (font->img->w / 2);
+	else
+		rect.x = x;
+
+	if(y == -1)
+		rect.y = (WINDOW_HEIGHT / 2) - (font->img->h / 2);
+	else
+		rect.y = y;
+
+	rect.w = font->img->w;
+	rect.h = font->img->h;
+
+	font->rect = rect;
+	
 	return font;
 }
 
-SDL_Surface* render_font(Jfont* font){
+SDL_Surface* render_font(struct Jfont* font){
 	TTF_Font* fnt = TTF_OpenFont(font->path, font->size);
 	return TTF_RenderText_Solid(fnt, font->text, font->color);
 }

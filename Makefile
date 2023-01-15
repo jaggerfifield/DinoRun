@@ -15,6 +15,8 @@ else
 	LPATH :=
 endif
 
+DEF := -DWINDOW_WIDTH=1920/2 -DWINDOW_HEIGHT=1080/2
+
 TST := ./Objects/$(OS)/
 DEP := ./Objects/$(OS)/jdata.o ./Objects/$(OS)/font.o ./Objects/$(OS)/image.o ./Objects/$(OS)/main.o
 
@@ -24,7 +26,7 @@ all : project main.o image.o font.o jdata.o
 	rm -r ./bin/*
 	@echo
 	@echo =====Building for $(OS)=====
-	gcc -o bin/DinoRun $(DEP) -D $(OS) $(LPATH) $(LINK)
+	gcc -o bin/DinoRun $(DEP) $(DEF) -D $(OS) $(LPATH) $(LINK)
 	@echo
 	@echo =====Copy Assets to folder=====
 	cp -r Assets bin/
@@ -34,22 +36,22 @@ all : project main.o image.o font.o jdata.o
 
 jdata.o : jdata.c
 	@echo =====Compile jdata.c=====
-	gcc $(IPATH) -D $(OS) -Wall -g -c jdata.c -o ./Objects/$(OS)/jdata.o
+	gcc $(IPATH) -D $(OS) $(DEF) -Wall -g -c jdata.c -o ./Objects/$(OS)/jdata.o
 	@echo
 
 font.o : font.c
 	@echo =====Compile font.c=====
-	gcc $(IPATH) -D $(OS) -Wall -g -c font.c -o $(TST)font.o
+	gcc $(IPATH) -D $(OS) $(DEF) -Wall -g -c font.c -o $(TST)font.o
 	@echo
 
 image.o : image.c
 	@echo =====Compile image.c=====
-	gcc $(IPATH) -D $(OS) -Wall -g -c image.c -o ./Objects/$(OS)/image.o
+	gcc $(IPATH) -D $(OS) $(DEF) -Wall -g -c image.c -o ./Objects/$(OS)/image.o
 	@echo
 
 main.o : main.c
 	@echo =====Compie main.c=====
-	gcc $(IPATH) -D $(OS) -Wall -g -c main.c -o ./Objects/$(OS)/main.o
+	gcc $(IPATH) -D $(OS) $(DEF) -Wall -g -c main.c -o ./Objects/$(OS)/main.o
 	@echo
 
 project :
@@ -57,7 +59,7 @@ project :
 	mkdir ./bin
 	mkdir ./Objects
 	mkdir ./Objects/$(OS)
-	@echo done >> project
+	@echo Do not delete >> project
 	@echo
 
 clean :
