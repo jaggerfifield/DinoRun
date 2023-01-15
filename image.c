@@ -10,22 +10,18 @@
 #include <stdbool.h>
 #include <string.h>
 
-typedef struct{
-	char* path;
-	SDL_Rect rect;
-	SDL_Surface* img;
-}Jimage;
+#include "image.h"
 
 bool image_init();
-Jimage* make_image(int, int, char*);
-SDL_Surface* load_image(Jimage*);
-void color_key(Jimage*);
+struct Jimage* make_image(int, int, char*);
+SDL_Surface* load_image(struct Jimage*);
+void color_key(struct Jimage*);
 
-Jimage* make_image(int x, int y, char* path){
+struct Jimage* make_image(int x, int y, char* path){
 	if(!image_init())
 		return NULL;
 
-	Jimage* image = malloc(sizeof(Jimage));
+	struct Jimage* image = malloc(sizeof(struct Jimage));
 	SDL_Rect rect;
 
 	rect.x = x;
@@ -42,12 +38,12 @@ Jimage* make_image(int x, int y, char* path){
 	return image;
 }
 
-void color_key(Jimage* image){
+void color_key(struct Jimage* image){
 	//              The surface, Enabeled            the format,  color black
 	SDL_SetColorKey(image->img, SDL_TRUE, SDL_MapRGB(image->img->format, 0, 0, 0));
 }
 
-SDL_Surface* load_image(Jimage* image){
+SDL_Surface* load_image(struct Jimage* image){
 	return SDL_LoadBMP(strcat(SDL_GetBasePath(), image->path));
 }
 

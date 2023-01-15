@@ -9,12 +9,13 @@ typedef struct{
 	SDL_Color color;
 	SDL_Surface* img;
 	char* text;
+	char* path;
 }Jfont;
 
 bool font_init();
 SDL_Surface* render_font(Jfont*);
 
-Jfont* make_font(int x, int y, int s, SDL_Color col, char* content){
+Jfont* make_font(int x, int y, int s, SDL_Color col, char* path, char* content){
 	if(!font_init())
 		return NULL;
 
@@ -33,6 +34,7 @@ Jfont* make_font(int x, int y, int s, SDL_Color col, char* content){
 	font->rect = rect;
 	font->color = col;
 	font->text = string;
+	font->path = path;
 
 	font->img = render_font(font);
 
@@ -40,7 +42,7 @@ Jfont* make_font(int x, int y, int s, SDL_Color col, char* content){
 }
 
 SDL_Surface* render_font(Jfont* font){
-	TTF_Font* fnt = TTF_OpenFont("./arial.ttf", font->size);
+	TTF_Font* fnt = TTF_OpenFont(font->path, font->size);
 	return TTF_RenderText_Solid(fnt, font->text, font->color);
 }
 

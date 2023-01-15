@@ -6,7 +6,6 @@ ifeq ($(OS), Windows_NT)
 	IPATH := -I.\SDL\include
 	LPATH := -L.\SDL\lib
 
-	DEP := font.o image.o
 else
 	OS := NIX
 
@@ -16,22 +15,31 @@ else
 	LPATH :=
 endif
 
-DEP := ./Objects/$(OS)/image.o ./Objects/$(OS)/main.o
+TST := ./Objects/$(OS)/
+DEP := ./Objects/$(OS)/jdata.o ./Objects/$(OS)/font.o ./Objects/$(OS)/image.o ./Objects/$(OS)/main.o
 
-all : project main.o image.o
-
+all : project main.o image.o font.o jdata.o
 	@echo =====Empty build folder=====
 	@echo . >> ./bin/file.txt
 	rm -r ./bin/*
 	@echo
-
 	@echo =====Building for $(OS)=====
 	gcc -o bin/DinoRun $(DEP) -D $(OS) $(LPATH) $(LINK)
 	@echo
-
 	@echo =====Copy Assets to folder=====
 	cp -r Assets bin/
 	cp -r SDL2.dll bin/
+	cp -r SDL2_ttf.dll bin/
+	@echo
+
+jdata.o : jdata.c
+	@echo =====Compile jdata.c=====
+	gcc $(IPATH) -D $(OS) -Wall -g -c jdata.c -o ./Objects/$(OS)/jdata.o
+	@echo
+
+font.o : font.c
+	@echo =====Compile font.c=====
+	gcc $(IPATH) -D $(OS) -Wall -g -c font.c -o $(TST)font.o
 	@echo
 
 image.o : image.c

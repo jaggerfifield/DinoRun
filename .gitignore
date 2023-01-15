@@ -1,0 +1,6 @@
+Assets/KRA
+*.o
+*.gch
+*.exe
+project
+bin/*
