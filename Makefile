@@ -19,7 +19,7 @@ DEF := -D$(OS) -DWINDOW_WIDTH=1920/2 -DWINDOW_HEIGHT=1080/2
 
 NAME := game.exe
 
-DEP := jdata.o font.o image.o main.o
+DEP := menu.o jdata.o font.o image.o main.o
 
 all : ico.res project $(DEP)
 	@echo =====Empty build folder=====
@@ -33,6 +33,11 @@ all : ico.res project $(DEP)
 	cp -r Assets bin/
 	cp -r SDL2.dll bin/
 	cp -r SDL2_ttf.dll bin/
+	@echo
+
+menu.o : menu.c
+	@echo =====Compile menu.c=====
+	gcc $(IPATH) $(DEF) -Wall -g -c menu.c
 	@echo
 
 jdata.o : jdata.c

@@ -5,15 +5,6 @@
 
 #include "font.h"
 
-//typedef struct{
-//	int size;
-//	SDL_Rect rect;
-//	SDL_Color color;
-//	SDL_Surface* img;
-//	char* text;
-//	char* path;
-//}Jfont;
-
 bool font_init();
 SDL_Surface* render_font(struct Jfont*);
 

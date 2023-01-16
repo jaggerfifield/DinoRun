@@ -13,13 +13,15 @@
 #include "font.h"
 #include "jdata.h"
 
+#include "menu.h"
+
 SDL_Window* init_window(void);
 void destroy_media(SDL_Surface*);
 void handler(SDL_Window*);
-void update(SDL_Window*, struct Jdata*);
+//void update(SDL_Window*, struct Jdata*);
 
 enum Data {JIMAGE, JFONT};
-enum State {MENU, PLAY};
+enum State {MENU, PLAY, STORY, EXIT};
 enum Pos {CENTER = -1, I4 = -2, II4 = -3, III4 = -4, IV4 = -5, I3 = -6, II3 = -7, III3 = -8};
 
 int main(int argc, char* argv[]){
@@ -69,59 +71,25 @@ void handler(SDL_Window* window){
 
 	int state = MENU;
 	
-	struct Jimage* bg = make_image(0,0,"Assets/bg_fill.bmp");
-
-	// Load the menu state
-	struct Jdata* menu = init("menu", JIMAGE, 0, bg, NULL);
-	menu = add_data(menu, JFONT, 1, CENTER, 0, "Assets/font.ttf", "Play");
-	menu = add_data(menu, JFONT, 2, CENTER, 100, "Assets/font.ttf", "Exit");
-	menu = add_data(menu, JFONT, 3, CENTER, 200, "Assets/font.ttf", "Another");
-	
-	// Load the run state
-	struct Jdata* runner = init("runner", JIMAGE, 0, bg, NULL);
-	runner = add_data(runner, JIMAGE, 1, 100, 0, "Assets/dino.bmp", "");
-
-	bool quit = false;
-
-	SDL_Event e;
-
-	while(!quit){
-		while(SDL_PollEvent(&e) != 0){
-			if(e.type == SDL_QUIT)
-				quit = true;
-			else if(e.type == SDL_MOUSEBUTTONDOWN)
-				printf("Mouse Down\n");
-			else if(e.type == SDL_KEYDOWN){
-				printf("Key Down!\n");
-			}
-		}
-
+	while(true){
 		if(state == MENU){
-			int i; // Handle what the menu does?
+			state = menu_state(window);
+		}else if(state == PLAY){
+			printf("PLAY is not ready!\n");
+			state = MENU;
+			//play_state(window, e);
+		}else if(state == STORY){
+			printf("STORY is not finished\n");
+			state = MENU;
+			//story_state(window, e);
+		}else if(state == EXIT){
+			printf("Exit state!");
+			return;
+		
+		}else{
+			printf("Unknown state! Going to menu!\n");
+			state = MENU;
 		}
-
-		update(window, menu);
 	}
 }
-
-void update(SDL_Window* window, struct Jdata* data){
-	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
-
-	struct Jdata* node = data;
-
-	while(node != NULL){
-		if(node->type == JIMAGE){
-			struct Jimage* temp = node->data;
-			SDL_BlitSurface(temp->img, NULL, win_surface, &temp->rect);
-		}else if(node->type == JFONT){
-			struct Jfont* temp = node->data;
-			SDL_BlitSurface(temp->img, NULL, win_surface, &temp->rect);
-		}
-
-		node = node->next;
-	}
-
-	SDL_UpdateWindowSurface(window);
-}
-
 
