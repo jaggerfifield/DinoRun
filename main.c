@@ -14,14 +14,11 @@
 #include "jdata.h"
 
 #include "menu.h"
+#include "main.h"
 
 SDL_Window* init_window(void);
 void destroy_media(SDL_Surface*);
 void handler(SDL_Window*);
-
-enum Data {JIMAGE, JFONT};
-enum State {MENU, PLAY, STORY, EXIT};
-enum Pos {CENTER = -1, I4 = -2, II4 = -3, III4 = -4, IV4 = -5, I3 = -6, II3 = -7, III3 = -8};
 
 int main(int argc, char* argv[]){
 	// Create a SDL window
@@ -30,14 +27,8 @@ int main(int argc, char* argv[]){
 
 	window = init_window();
 
-	win_surface = SDL_GetWindowSurface(window);
-
 	// The main window loop.
 	handler(window);
-
-	// Free all resources from examples and SDL
-	SDL_FreeSurface(win_surface);
-	win_surface = NULL;
 
 	SDL_DestroyWindow(window);
 	window = NULL;
@@ -48,10 +39,9 @@ int main(int argc, char* argv[]){
 
 SDL_Window* init_window(){
 	// Init SDL and create the window
-	int status = SDL_Init(SDL_INIT_VIDEO);
 	SDL_Window* window = NULL;
 
-	if(status < 0){
+	if(SDL_Init(SDL_INIT_VIDEO) < 0){
 		printf("SDL could not init! SDL_Error: %s\n", SDL_GetError());
 		return NULL;
 	}

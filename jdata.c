@@ -13,6 +13,7 @@
 #include "jdata.h"
 #include "image.h"
 #include "font.h"
+#include "main.h"
 
 struct Jdata* init(char* name, int type, int id, void* data, void* next){
 	struct Jdata* data_node = malloc(sizeof(struct Jdata));
@@ -48,5 +49,22 @@ struct Jdata* add_data(struct Jdata* node, int type, int id, int x, int y, char*
 	}
 
 	return node;
+}
+
+void jdata_free(struct Jdata* data){
+	struct Jdata* node = data;
+	while(node != NULL){
+		if(node->type == JIMAGE){
+			image_free(node->data);
+			node->data = NULL;
+		}else if(node->type == JFONT){
+			font_free(node->data);
+			node->data = NULL;
+		}
+		
+		node = node->next;
+	}
+	
+	free(data);
 }
 

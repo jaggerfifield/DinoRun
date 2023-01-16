@@ -12,6 +12,7 @@
 #include <stdbool.h>
 
 #include "font.h"
+#include "main.h"
 
 bool font_init();
 SDL_Surface* render_font(struct Jfont*);
@@ -31,14 +32,15 @@ struct Jfont* make_font(int x, int y, int s, SDL_Color col, char* path, char* co
 	font->text = string;
 	font->path = path;
 
+	font->img = NULL;
 	font->img = render_font(font);
 
-	if(x == -1)
+	if(x == CENTER)
 		rect.x = (WINDOW_WIDTH / 2) - (font->img->w / 2);
 	else
 		rect.x = x;
 
-	if(y == -1)
+	if(y == CENTER)
 		rect.y = (WINDOW_HEIGHT / 2) - (font->img->h / 2);
 	else
 		rect.y = y;
@@ -52,8 +54,16 @@ struct Jfont* make_font(int x, int y, int s, SDL_Color col, char* path, char* co
 }
 
 SDL_Surface* render_font(struct Jfont* font){
+	if(font->img != NULL){
+		font_free(font);
+	}
 	TTF_Font* fnt = TTF_OpenFont(font->path, font->size);
 	return TTF_RenderText_Solid(fnt, font->text, font->color);
+}
+
+void font_free(struct Jfont* font){
+	SDL_FreeSurface(font->img);
+	font->img = NULL;
 }
 
 bool font_init(){

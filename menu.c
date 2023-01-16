@@ -12,11 +12,8 @@
 #include "image.h"
 #include "font.h"
 #include "jdata.h"
+#include "main.h"
 
-enum Ids {ID_BACKGROUND, ID_PLAY, ID_STORY, ID_EXIT};
-enum State {MENU, PLAY, STORY, EXIT};
-enum Pos {CENTER = -1};
-enum Data {JIMAGE, JFONT};
 #define MENU_SIZE 3
 
 int state;
@@ -30,10 +27,10 @@ int menu_state(SDL_Window* window){
 
 	struct Jimage* bg = make_image(0, 0, "Assets/bg_fill.bmp");
 
-	struct Jdata* menu = init("menu", JIMAGE, ID_BACKGROUND, bg, NULL);
-	menu = add_data(menu, JFONT, ID_PLAY, CENTER, 0, path, "Play");
-	menu = add_data(menu, JFONT, ID_STORY, CENTER, 100, path, "Story");
-	menu = add_data(menu, JFONT, ID_EXIT, CENTER, 200, path, "Exit");
+	struct Jdata* menu = init("menu", JIMAGE, ID_MENU_BACKGROUND, bg, NULL);
+	menu = add_data(menu, JFONT, ID_MENU_PLAY, CENTER, 0, path, "Play");
+	menu = add_data(menu, JFONT, ID_MENU_STORY, CENTER, 100, path, "Story");
+	menu = add_data(menu, JFONT, ID_MENU_EXIT, CENTER, 200, path, "Exit");
 
 	bool quit = false;
 
@@ -54,7 +51,7 @@ int menu_state(SDL_Window* window){
 		update(window, menu, location);
 	}
 	
-	image_free(bg);
+	jdata_free(menu);
 
 	return state;
 }
@@ -120,6 +117,7 @@ void update(SDL_Window* window, struct Jdata* data, int location){
 	}
 
 	SDL_UpdateWindowSurface(window);
+	SDL_FreeSurface(win_surface);
 }
 
 

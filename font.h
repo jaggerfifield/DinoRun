@@ -13,5 +13,5 @@ struct Jfont{
 
 struct Jfont* make_font(int, int, int, SDL_Color, char*, char*);
 SDL_Surface* render_font(struct Jfont*);
-void free_font(struct Jfont*);
+void font_free(struct Jfont*);
 
