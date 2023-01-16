@@ -44,7 +44,17 @@ void color_key(struct Jimage* image){
 }
 
 SDL_Surface* load_image(struct Jimage* image){
-	return SDL_LoadBMP(strcat(SDL_GetBasePath(), image->path));
+	char path[100];
+
+	strcpy(path, SDL_GetBasePath());
+	strcat(path, image->path);
+	
+	return SDL_LoadBMP(path);
+}
+
+void image_free(struct Jimage* image){
+	SDL_FreeSurface(image->img);
+	free(image);
 }
 
 bool image_init(){

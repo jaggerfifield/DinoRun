@@ -54,6 +54,8 @@ int menu_state(SDL_Window* window){
 		update(window, menu, location);
 	}
 	
+	image_free(bg);
+
 	return state;
 }
 

@@ -18,7 +18,6 @@
 SDL_Window* init_window(void);
 void destroy_media(SDL_Surface*);
 void handler(SDL_Window*);
-//void update(SDL_Window*, struct Jdata*);
 
 enum Data {JIMAGE, JFONT};
 enum State {MENU, PLAY, STORY, EXIT};

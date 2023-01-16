@@ -16,3 +16,4 @@ struct Jimage* make_image(int, int, char*);
 SDL_Surface* render_image(struct Jimage*);
 void free_image(struct Jimage*);
 void color_key(struct Jimage*);
+void image_free(struct Jimage*);
