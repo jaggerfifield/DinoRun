@@ -2,6 +2,7 @@
 ifeq ($(OS), Windows_NT)
 	OS := WIN
 	LINK := -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf
+	RESO := ico.res
 
 	IPATH := -I.\SDL\include
 	LPATH := -L.\SDL\lib
@@ -9,7 +10,8 @@ ifeq ($(OS), Windows_NT)
 else
 	OS := NIX
 
-	LINK := -lSDL2
+	LINK := -lSDL2 -lSDL2_ttf
+	RESO :=
 
 	IPATH :=
 	LPATH :=
@@ -21,13 +23,13 @@ NAME := game.exe
 
 DEP := menu.o jdata.o font.o image.o main.o
 
-all : ico.res project $(DEP)
+all : $(RESO) project $(DEP)
 	@echo =====Empty build folder=====
 	@echo . >> ./bin/file.txt
 	rm -r ./bin/*
 	@echo
 	@echo =====Building for $(OS)=====
-	gcc -o bin/$(NAME) $(DEP) $(DEF) $(LPATH) $(LINK) ico.res
+	gcc -o bin/$(NAME) $(DEP) $(DEF) $(LPATH) $(LINK) $(RESO)
 	@echo
 	@echo =====Copy Assets to folder=====
 	cp -r Assets bin/
