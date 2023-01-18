@@ -23,7 +23,6 @@ void handler(SDL_Window*);
 int main(int argc, char* argv[]){
 	// Create a SDL window
 	SDL_Window* window = NULL;
-	SDL_Surface* win_surface = NULL;
 
 	window = init_window();
 

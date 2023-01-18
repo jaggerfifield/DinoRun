@@ -77,5 +77,4 @@ clean :
 	@echo =====Removing all past build files=====
 	rm -r ./bin
 	rm ./*.o
-	rm ico.res
 	rm project
