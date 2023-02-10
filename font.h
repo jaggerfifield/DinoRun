@@ -8,10 +8,10 @@ struct Jfont{
 	SDL_Color color;
 	SDL_Surface* img;
 	char* text;
-	char* path;
+	const char* path;
 };
 
-struct Jfont* make_font(int, int, int, SDL_Color, char*, char*);
+struct Jfont* make_font(int, int, int, SDL_Color, const char*, char*);
 SDL_Surface* render_font(struct Jfont*);
 void font_free(struct Jfont*);
 

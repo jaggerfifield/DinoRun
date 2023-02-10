@@ -19,7 +19,7 @@ endif
 
 DEF := -D$(OS) -DWINDOW_WIDTH=1920/2 -DWINDOW_HEIGHT=1080/2
 
-NAME := game.exe
+NAME := game
 
 DEP := menu.o jdata.o font.o image.o main.o
 
@@ -29,7 +29,7 @@ all : $(RESO) project $(DEP)
 	rm -r ./bin/*
 	@echo
 	@echo =====Building for $(OS)=====
-	gcc -o bin/$(NAME) $(DEP) $(DEF) $(LPATH) $(LINK) $(RESO)
+	gcc -ggdb -o bin/$(NAME) $(DEP) $(DEF) $(LPATH) $(LINK) $(RESO)
 	@echo
 	@echo =====Copy Assets to folder=====
 	cp -r Assets bin/

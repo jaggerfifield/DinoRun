@@ -17,7 +17,7 @@
 bool font_init();
 SDL_Surface* render_font(struct Jfont*);
 
-struct Jfont* make_font(int x, int y, int s, SDL_Color col, char* path, char* content){
+struct Jfont* make_font(int x, int y, int s, SDL_Color col, const char* path, char* content){
 	if(!font_init())
 		return NULL;
 
@@ -35,6 +35,10 @@ struct Jfont* make_font(int x, int y, int s, SDL_Color col, char* path, char* co
 	font->img = NULL;
 	font->img = render_font(font);
 
+	if(font->img == NULL){
+		printf("NULL! SDL_Error %s\n", SDL_GetError());
+	}
+
 	if(x == CENTER)
 		rect.x = (WINDOW_WIDTH / 2) - (font->img->w / 2);
 	else
@@ -44,9 +48,9 @@ struct Jfont* make_font(int x, int y, int s, SDL_Color col, char* path, char* co
 		rect.y = (WINDOW_HEIGHT / 2) - (font->img->h / 2);
 	else
 		rect.y = y;
-
-	rect.w = font->img->w;
-	rect.h = font->img->h;
+	// This is segmentaion fault
+	//rect.w = font->img->w;
+	//rect.h = font->img->h;
 
 	font->rect = rect;
 	
@@ -55,7 +59,8 @@ struct Jfont* make_font(int x, int y, int s, SDL_Color col, char* path, char* co
 
 SDL_Surface* render_font(struct Jfont* font){
 	if(font->img != NULL){
-		font_free(font);
+		SDL_FreeSurface(font->img);
+		font->img = NULL;
 	}
 	TTF_Font* fnt = TTF_OpenFont(font->path, font->size);
 	return TTF_RenderText_Solid(fnt, font->text, font->color);
@@ -64,6 +69,7 @@ SDL_Surface* render_font(struct Jfont* font){
 void font_free(struct Jfont* font){
 	SDL_FreeSurface(font->img);
 	font->img = NULL;
+	free(font);
 }
 
 bool font_init(){

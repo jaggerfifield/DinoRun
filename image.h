@@ -7,12 +7,12 @@
 #endif
 
 struct Jimage{
-	char* path;
+	const char* path;
 	SDL_Rect rect;
 	SDL_Surface* img;
 };
 
-struct Jimage* make_image(int, int, char*);
+struct Jimage* make_image(int, int, const char*);
 SDL_Surface* render_image(struct Jimage*);
 void free_image(struct Jimage*);
 void color_key(struct Jimage*);

@@ -13,11 +13,11 @@
 #include "image.h"
 
 bool image_init();
-struct Jimage* make_image(int, int, char*);
-SDL_Surface* load_image(struct Jimage*);
+struct Jimage* make_image(int, int, const char*);
+SDL_Surface* load_image(const char*);
 void color_key(struct Jimage*);
 
-struct Jimage* make_image(int x, int y, char* path){
+struct Jimage* make_image(int x, int y, const char* path){
 	if(!image_init())
 		return NULL;
 
@@ -28,8 +28,9 @@ struct Jimage* make_image(int x, int y, char* path){
 	rect.y = y;
 
 	image->path = path;
-	image->img = load_image(image);
+	image->img = load_image(path);
 
+	// Segmentaion fault
 	rect.h = image->img->h;
 	rect.w = image->img->w;
 
@@ -43,13 +44,8 @@ void color_key(struct Jimage* image){
 	SDL_SetColorKey(image->img, SDL_TRUE, SDL_MapRGB(image->img->format, 0, 0, 0));
 }
 
-SDL_Surface* load_image(struct Jimage* image){
-	char path[100];
-
-	strcpy(path, SDL_GetBasePath());
-	strcat(path, image->path);
-	
-	return SDL_LoadBMP(path);
+SDL_Surface* load_image(const char* path){
+	return SDL_LoadBMP("Assets/bg_fill.bmp");
 }
 
 void image_free(struct Jimage* image){
