@@ -13,9 +13,10 @@
 #include "jdata.h"
 #include "image.h"
 
-int state;
+static int state;
+static int timer = 3000;
 
-void update(SDL_Window*, struct Jdata*);
+static void update(SDL_Window*, struct Jdata*);
 
 int play_state(SDL_Window* window, struct Jdata* data){
 	state = PLAY;
@@ -36,12 +37,23 @@ int play_state(SDL_Window* window, struct Jdata* data){
 
 }
 
-void update(SDL_Window*, struct Jdata* data){
+static void update(SDL_Window* window, struct Jdata* data){
 	struct Jdata* node = data;
 
 	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
 
-	while(node != NULL){
+	if(timer > 0){
+		struct Jfont* temp;
+		if(timer == 3000){
+			temp = find_node(data, ID_PLAY_3);
+			SDL_BlitSurface(temp->img, NULL, win_surface, &temp->rect);
+		}
+
+		timer = timer - 1;
+	}
+	
+
+	while((node != NULL) && timer == 0){
 		if(node->type == JFONT){
 			struct Jfont* temp = node->data;
 		}else if(node->type == JIMAGE){

@@ -2,6 +2,10 @@
 #include <SDL.h>
 #endif
 
+#ifdef NIX
+#include <SDL2/SDL.h>
+#endif
+
 struct Jfont{
 	int size;
 	SDL_Rect rect;

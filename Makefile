@@ -21,7 +21,7 @@ DEF := -D$(OS) -DWINDOW_WIDTH=1920/2 -DWINDOW_HEIGHT=1080/2
 
 NAME := game
 
-DEP := menu.o jdata.o font.o image.o main.o
+DEP := play.o menu.o jdata.o font.o image.o main.o
 
 all : $(RESO) project $(DEP)
 	@echo =====Empty build folder=====
@@ -35,6 +35,11 @@ all : $(RESO) project $(DEP)
 	cp -r Assets bin/
 	cp -r SDL2.dll bin/
 	cp -r SDL2_ttf.dll bin/
+	@echo
+
+play.o : play.c
+	@echo =====Compile play.c=====
+	gcc $(IPATH) $(DEF) -Wall -g -c play.c
 	@echo
 
 menu.o : menu.c

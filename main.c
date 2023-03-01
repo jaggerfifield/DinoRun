@@ -66,6 +66,13 @@ struct Jdata* load_data(int target){
 		data = add_data(data, JFONT, ID_MENU_PLAY, CENTER, 0, font, "Play");
 		data = add_data(data, JFONT, ID_MENU_STORY, CENTER, 100, font, "Story");
 		data = add_data(data, JFONT, ID_MENU_EXIT, CENTER, 200, font, "Exit");
+	} else if(target == LPLAY){
+		struct Jimage* bg = make_image(0,0, "Assets/bg_fill.bmp");
+		data = init("play", JIMAGE, ID_PLAY_BACKGROUND, bg, NULL);
+		data = add_data(data, JIMAGE, ID_PLAY_PLAYER, 0, 0, "Assets/dino.bmp", NULL);
+		data = add_data(data, JFONT, ID_PLAY_3, CENTER, CENTER, font, "3");
+		data = add_data(data, JFONT, ID_PLAY_2, CENTER, CENTER, font, "2");
+		data = add_data(data, JFONT, ID_PLAY_1, CENTER, CENTER, font, "1");
 	}
 
 	return data;
@@ -82,9 +89,10 @@ void handler(SDL_Window* window){
 			jdata_free(menu_data);
 			menu_data = NULL;
 		}else if(state == PLAY){
-			printf("PLAY is not ready!\n");
-			state = MENU;
-			//play_state(window, e);
+			struct Jdata* play_data = load_data(LPLAY);
+			state = play_state(window, play_data);
+			jdata_free(play_data);
+			play_data = NULL;
 		}else if(state == STORY){
 			printf("STORY is not finished\n");
 			state = MENU;

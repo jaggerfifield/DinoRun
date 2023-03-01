@@ -16,10 +16,10 @@
 
 #define MENU_SIZE 3
 
-int state;
+static int state;
 
 int handle_keys(SDL_Event, int, bool*);
-void update(SDL_Window*, struct Jdata*, int, bool*);
+static void update(SDL_Window*, struct Jdata*, int, bool*);
 
 int menu_state(SDL_Window* window, struct Jdata* data){
 	state = MENU;
@@ -79,7 +79,7 @@ int handle_keys(SDL_Event e, int location, bool* update_flag){
 	return location;
 }
 
-void update(SDL_Window* window, struct Jdata* data, int location, bool* update_flag){
+static void update(SDL_Window* window, struct Jdata* data, int location, bool* update_flag){
 	// Update the selected font
 	struct Jdata* node = data;
 	

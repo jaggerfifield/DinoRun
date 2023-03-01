@@ -51,6 +51,19 @@ struct Jdata* add_data(struct Jdata* node, int type, int id, int x, int y, const
 	return node;
 }
 
+void* find_node(struct Jdata* data, int id){
+	struct Jdata* node = data;
+
+	while(node != NULL){
+		if(node->id == id){
+			printf("Found %s, with id %d\n", node->name, node->id);
+			return node->data;
+		}
+		node = node->next;
+	}
+	return NULL;
+}
+
 void jdata_free(struct Jdata* data){
 	struct Jdata* node = data;
 	while(node != NULL){
