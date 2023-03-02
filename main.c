@@ -76,9 +76,10 @@ struct Jdata* load_data(int target){
 		data = add_data(data, JFONT, ID_PLAY_2, CENTER, CENTER, font, "2");
 		data = add_data(data, JFONT, ID_PLAY_1, CENTER, CENTER, font, "1");
 		data = add_data(data, JFONT, ID_PLAY_GO, CENTER, CENTER, font, "GO!");
+		data = add_data(data, JFONT, ID_PLAY_SCORE, 0, 0, font, "SCORE: 0");
 	}
 	
-	//data_test(data);
+	data_test(data);
 
 	return data;
 }

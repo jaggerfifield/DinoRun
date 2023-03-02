@@ -19,14 +19,14 @@ void data_test(struct Jdata* data){
 			struct Jimage* temp = node->data;
 			printf("JIMAGE)\n");
 			printf("\tPATH: %s\n", temp->path);
-			printf("\tRECT: %d\n", &temp->rect == NULL);
+			printf("\tRECT: %p\n", &temp->rect);
 			printf("\t IMG: %p\n", temp->img);
 		}else if(node->type == JFONT){
 			struct Jfont* temp = node->data;
 			printf("JFONT)\n");
 			printf("\tSIZE: %d\n", temp->size);
-			printf("\tRect: %d\n", &temp->rect == NULL);
-			printf("\tCOLR: %p\n", temp->color);
+			printf("\tRect: %p\n", &temp->rect);
+			printf("\tCOLR: %p\n", &temp->color);
 			printf("\tIMG : %p\n", temp->img);
 			printf("\tTEXT: %s\n", temp->text);
 			printf("\tPATH: %s\n", temp->path);
@@ -38,8 +38,8 @@ void data_test(struct Jdata* data){
 void font_test(struct Jfont* node){
 	printf("JFONT\n");
 	printf("\tSIZE: %d\n", node->size);
-	printf("\tRect: %d\n", &node->rect == NULL);
-	printf("\tCOLR: %p\n", node->color);
+	printf("\tRect: %p\n", &node->rect);
+	printf("\tCOLR: %p\n", &node->color);
 	printf("\tIMG : %p\n", node->img);
 	printf("\tTEXT: %s\n", node->text);
 	printf("\tPATH: %s\n", node->path);

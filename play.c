@@ -7,6 +7,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "data_test.h"
 
@@ -17,6 +18,7 @@
 
 static int state;
 static int timer = 3000;
+bool colKey = false;
 
 static void update(SDL_Window*, struct Jdata*);
 
@@ -41,12 +43,10 @@ int play_state(SDL_Window* window, struct Jdata* data){
 }
 
 static void update(SDL_Window* window, struct Jdata* data){
-	struct Jdata* node = data;
-
 	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
 
 
-	if(timer >= 0){
+	if(timer >= -100){
 		struct Jfont* temp = NULL;
 
 		if(timer == 3000)
@@ -69,7 +69,17 @@ static void update(SDL_Window* window, struct Jdata* data){
 		timer = timer - 1;
 	}else{
 		// Here is the dino run loop (after the countdown)
-		int x;
+		struct Jfont* score = data->tail->data;
+		struct Jimage* bg = data->data;
+		struct Jimage* dino = find_node(data, ID_PLAY_PLAYER);
+
+		if(!colKey)
+			color_key(dino);
+
+		// Display the player and score
+		SDL_BlitSurface(bg->img, NULL, win_surface, &bg->rect);
+		SDL_BlitSurface(score->img, NULL, win_surface, &score->rect);
+		SDL_BlitSurface(dino->img, NULL, win_surface, &dino->rect);
 	}
 	
 	SDL_UpdateWindowSurface(window);
