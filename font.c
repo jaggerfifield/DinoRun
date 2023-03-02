@@ -31,6 +31,7 @@ struct Jfont* make_font(int x, int y, int s, SDL_Color col, const char* path, ch
 	font->color = col;
 	font->text = string;
 	font->path = path;
+	font->fnt = TTF_OpenFont(path, s);
 
 	font->img = NULL;
 	font->img = render_font(font);
@@ -62,8 +63,10 @@ SDL_Surface* render_font(struct Jfont* font){
 		SDL_FreeSurface(font->img);
 		font->img = NULL;
 	}
-	TTF_Font* fnt = TTF_OpenFont(font->path, font->size);
-	return TTF_RenderText_Solid(fnt, font->text, font->color);
+
+	//TTF_Font* fnt = TTF_OpenFont(font->path, font->size);
+
+	return TTF_RenderText_Solid(font->fnt, font->text, font->color);
 }
 
 void font_free(struct Jfont* font){

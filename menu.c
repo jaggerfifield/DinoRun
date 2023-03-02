@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "data_test.h"
 #include "image.h"
 #include "font.h"
 #include "jdata.h"
@@ -44,7 +45,7 @@ int menu_state(SDL_Window* window, struct Jdata* data){
 
 		update(window, data, location, update_flag);
 	}
-	
+
 	free(update_flag);
 
 	return state;
@@ -103,7 +104,10 @@ static void update(SDL_Window* window, struct Jdata* data, int location, bool* u
 					temp->color = black;
 					temp->img = render_font(node->data);
 				}
-			
+				if(temp->img == NULL){
+					printf("SDL_Error: %s\n", SDL_GetError());
+					font_test(temp);
+				}
 				SDL_BlitSurface(temp->img, NULL, win_surface, &temp->rect);
 		
 			}else if(node->type == JIMAGE){
