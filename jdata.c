@@ -56,7 +56,7 @@ void* find_node(struct Jdata* data, int id){
 
 	while(node != NULL){
 		if(node->id == id){
-			printf("Found %s, with id %d\n", node->name, node->id);
+			//printf("Found %s, with id %d\n", node->name, node->id);
 			return node->data;
 		}
 		node = node->next;

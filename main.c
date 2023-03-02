@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "data_test.h"
+
 #include "image.h"
 #include "font.h"
 #include "jdata.h"
@@ -73,7 +75,10 @@ struct Jdata* load_data(int target){
 		data = add_data(data, JFONT, ID_PLAY_3, CENTER, CENTER, font, "3");
 		data = add_data(data, JFONT, ID_PLAY_2, CENTER, CENTER, font, "2");
 		data = add_data(data, JFONT, ID_PLAY_1, CENTER, CENTER, font, "1");
+		data = add_data(data, JFONT, ID_PLAY_GO, CENTER, CENTER, font, "GO!");
 	}
+	
+	//data_test(data);
 
 	return data;
 }

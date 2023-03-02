@@ -21,7 +21,7 @@ DEF := -D$(OS) -DWINDOW_WIDTH=1920/2 -DWINDOW_HEIGHT=1080/2
 
 NAME := game
 
-DEP := play.o menu.o jdata.o font.o image.o main.o
+DEP := play.o menu.o jdata.o font.o image.o data_test.o main.o
 
 all : $(RESO) project $(DEP)
 	@echo =====Empty build folder=====
@@ -61,6 +61,11 @@ image.o : image.c
 	@echo =====Compile image.c=====
 	gcc $(IPATH) $(DEF) -Wall -g -c image.c
 	@echo
+
+data_test.o : data_test.c
+	@echo ====Compile data_test.c=====
+	gcc $(IPATH) $(DEF) -Wall -g -c data_test.c
+	@echo 
 
 main.o : main.c
 	@echo =====Compie main.c=====
