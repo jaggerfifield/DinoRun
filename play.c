@@ -7,6 +7,7 @@
 #endif
 
 #include <stdio.h>
+#include <time.h>
 #include <stdbool.h>
 
 #include "data_test.h"
@@ -16,17 +17,28 @@
 #include "jdata.h"
 #include "image.h"
 
+#define OBJ_COUNT 4
+
 static int state;
 static int timer = 3000;
-bool colKey = false;
+int obj_count = 0;
 
 int direction = 0;
 
-static void update(SDL_Window*, struct Jdata*);
+static struct Jdata* update(SDL_Window*, struct Jdata*, struct Jdata*);
 static void handle_keys(SDL_Event);
+static struct Jdata* object_handler(struct Jdata*, SDL_Surface*);
 
 int play_state(SDL_Window* window, struct Jdata* data){
 	state = PLAY;
+	
+	struct Jdata* objects = init("Objects", JIMAGE, -1, NULL, NULL);
+
+	// Apply a seed for random
+	time_t t;
+	srand((unsigned) time(&t));
+
+	color_key(find_node(data, ID_PLAY_PLAYER));
 
 	SDL_Event e;
 
@@ -39,14 +51,15 @@ int play_state(SDL_Window* window, struct Jdata* data){
 			}
 		}
 
-		update(window, data);
+		objects = update(window, data, objects);
 	}
 	return state;
 
 }
 
-static void update(SDL_Window* window, struct Jdata* data){
+static struct Jdata* update(SDL_Window* window, struct Jdata* data, struct Jdata* objects){
 	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
+
 
 	if(timer >= -200){
 		struct Jfont* temp = NULL;
@@ -77,9 +90,8 @@ static void update(SDL_Window* window, struct Jdata* data){
 
 		int gravity = 10;
 
-		if(!colKey)
-			color_key(dino);
-		
+
+		// Apply jump physics (up/down movement)
 		if(direction == 0){
 			if(dino->rect.y < WINDOW_HEIGHT - dino->rect.h)
 				dino->rect.y = dino->rect.y + gravity;
@@ -89,15 +101,44 @@ static void update(SDL_Window* window, struct Jdata* data){
 			direction = direction - 1;
 		}
 
-		// Display the player and score
+		// Blit the player and score in order
 		SDL_BlitSurface(bg->img, NULL, win_surface, &bg->rect);
+
+		// Update object position and generate new objects
+		objects = object_handler(objects, win_surface);
+		
+
 		SDL_BlitSurface(score->img, NULL, win_surface, &score->rect);
 		SDL_BlitSurface(dino->img, NULL, win_surface, &dino->rect);
 	}
 	
 	SDL_UpdateWindowSurface(window);
+	return objects;
 }
 
+static struct Jdata* object_handler(struct Jdata* objects, SDL_Surface* win_surface){
+	int num = rand() % 5;
+	
+	if(obj_count < OBJ_COUNT){
+		// 0.25 chance to generate different types of objects . . .
+		if(num == 0)
+			objects = add_data(objects, JIMAGE, obj_count, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
+		else if(num == 1)
+			printf("Tested!\n");
+		obj_count += 1;
+	}
+
+	// Move and blit objects.
+	for(int i = 0; i < OBJ_COUNT; i++){
+		struct Jimage* obj = find_node(objects, i);
+		if(obj != NULL){
+			obj->rect.y = WINDOW_HEIGHT - obj->rect.h;
+			obj->rect.x = obj->rect.x - 10;
+			SDL_BlitSurface(obj->img, NULL, win_surface, &obj->rect);
+		}
+	}
+	return objects;
+}
 
 static void handle_keys(SDL_Event e){
 	int key = e.key.keysym.sym;
