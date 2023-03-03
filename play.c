@@ -20,7 +20,10 @@ static int state;
 static int timer = 3000;
 bool colKey = false;
 
+int direction = 0;
+
 static void update(SDL_Window*, struct Jdata*);
+static void handle_keys(SDL_Event);
 
 int play_state(SDL_Window* window, struct Jdata* data){
 	state = PLAY;
@@ -32,7 +35,7 @@ int play_state(SDL_Window* window, struct Jdata* data){
 			if(e.type == SDL_QUIT){
 				state = EXIT;
 			}else if(e.type == SDL_KEYDOWN){
-				//handle_keys();
+				handle_keys(e);
 			}
 		}
 
@@ -45,8 +48,7 @@ int play_state(SDL_Window* window, struct Jdata* data){
 static void update(SDL_Window* window, struct Jdata* data){
 	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
 
-
-	if(timer >= -100){
+	if(timer >= -200){
 		struct Jfont* temp = NULL;
 
 		if(timer == 3000)
@@ -73,8 +75,19 @@ static void update(SDL_Window* window, struct Jdata* data){
 		struct Jimage* bg = data->data;
 		struct Jimage* dino = find_node(data, ID_PLAY_PLAYER);
 
+		int gravity = 10;
+
 		if(!colKey)
 			color_key(dino);
+		
+		if(direction == 0){
+			if(dino->rect.y < WINDOW_HEIGHT - dino->rect.h)
+				dino->rect.y = dino->rect.y + gravity;
+		}else{
+			if(dino->rect.y > 100)
+				dino->rect.y = dino->rect.y - (gravity * (direction/10));
+			direction = direction - 1;
+		}
 
 		// Display the player and score
 		SDL_BlitSurface(bg->img, NULL, win_surface, &bg->rect);
@@ -85,3 +98,10 @@ static void update(SDL_Window* window, struct Jdata* data){
 	SDL_UpdateWindowSurface(window);
 }
 
+
+static void handle_keys(SDL_Event e){
+	int key = e.key.keysym.sym;
+	if(key == SDLK_UP && direction == 0){
+		direction = 100;
+	}
+}
