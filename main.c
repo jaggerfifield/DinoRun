@@ -15,6 +15,7 @@
 #include "font.h"
 #include "jdata.h"
 
+#include "play.h"
 #include "menu.h"
 #include "main.h"
 
