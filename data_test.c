@@ -44,3 +44,11 @@ void font_test(struct Jfont* node){
 	printf("\tTEXT: %s\n", node->text);
 	printf("\tPATH: %s\n", node->path);
 }
+
+void image_test(struct Jimage* node){
+	printf("JIMAGE)\n");
+	printf("\tPATH: %s\n", node->path);
+	printf("\tRECT: %p\n", &node->rect);
+	printf("\t IMG: %p\n", node->img);
+
+}

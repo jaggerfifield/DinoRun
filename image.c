@@ -30,7 +30,6 @@ struct Jimage* make_image(int x, int y, const char* path){
 	image->path = path;
 	image->img = load_image(path);
 
-	// Segmentaion fault
 	rect.h = image->img->h;
 	rect.w = image->img->w;
 
@@ -45,7 +44,7 @@ void color_key(struct Jimage* image){
 }
 
 SDL_Surface* load_image(const char* path){
-	return SDL_LoadBMP("Assets/bg_fill.bmp");
+	return SDL_LoadBMP(path);
 }
 
 void image_free(struct Jimage* image){

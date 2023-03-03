@@ -31,6 +31,8 @@ struct Jfont* make_font(int x, int y, int s, SDL_Color col, const char* path, ch
 	font->color = col;
 	font->text = string;
 	font->path = path;
+
+	// Open the file here once
 	font->fnt = TTF_OpenFont(path, s);
 
 	font->img = NULL;

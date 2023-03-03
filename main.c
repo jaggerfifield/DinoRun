@@ -71,7 +71,7 @@ struct Jdata* load_data(int target){
 	} else if(target == LPLAY){
 		struct Jimage* bg = make_image(0,0, "Assets/bg_fill.bmp");
 		data = init("play", JIMAGE, ID_PLAY_BACKGROUND, bg, NULL);
-		data = add_data(data, JIMAGE, ID_PLAY_PLAYER, 0, 0, "Assets/dino.bmp", NULL);
+		data = add_data(data, JIMAGE, ID_PLAY_PLAYER, 25, 100, "Assets/dino.bmp", NULL);
 		data = add_data(data, JFONT, ID_PLAY_3, CENTER, CENTER, font, "3");
 		data = add_data(data, JFONT, ID_PLAY_2, CENTER, CENTER, font, "2");
 		data = add_data(data, JFONT, ID_PLAY_1, CENTER, CENTER, font, "1");
