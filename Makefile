@@ -17,7 +17,7 @@ else
 	LPATH :=
 endif
 
-DEF := -D$(OS) -DWINDOW_WIDTH=1920/2 -DWINDOW_HEIGHT=1080/2
+DEF := -D$(OS)
 
 NAME := game
 
