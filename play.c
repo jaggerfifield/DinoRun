@@ -88,7 +88,7 @@ static struct Jdata* update(SDL_Window* window, struct Jdata* data, struct Jdata
 		struct Jimage* bg = data->data;
 		struct Jimage* dino = find_node(data, ID_PLAY_PLAYER);
 
-		int gravity = 10;
+		int gravity = 3;
 
 
 		// Apply jump physics (up/down movement)
@@ -124,7 +124,9 @@ static struct Jdata* object_handler(struct Jdata* objects, SDL_Surface* win_surf
 		if(num == 0)
 			objects = add_data(objects, JIMAGE, obj_count, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
 		else if(num == 1)
-			printf("Tested!\n");
+			objects = add_data(objects, JIMAGE, obj_count, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
+		else
+			obj_count -= 1;
 		obj_count += 1;
 	}
 
@@ -132,9 +134,16 @@ static struct Jdata* object_handler(struct Jdata* objects, SDL_Surface* win_surf
 	for(int i = 0; i < OBJ_COUNT; i++){
 		struct Jimage* obj = find_node(objects, i);
 		if(obj != NULL){
+			SDL_Rect pos;
 			obj->rect.y = WINDOW_HEIGHT - obj->rect.h;
-			obj->rect.x = obj->rect.x - 10;
-			SDL_BlitSurface(obj->img, NULL, win_surface, &obj->rect);
+			obj->rect.x = obj->rect.x - 2;
+
+			if(obj->rect.x < -obj->rect.w){
+				obj->rect.x = WINDOW_WIDTH;
+			}
+
+			pos = obj->rect;
+			SDL_BlitSurface(obj->img, NULL, win_surface, &pos);
 		}
 	}
 	return objects;

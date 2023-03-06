@@ -33,8 +33,8 @@ all : $(RESO) project $(DEP)
 	@echo
 	@echo =====Copy Assets to folder=====
 	cp -r Assets bin/
-	cp -r SDL2.dll bin/
-	cp -r SDL2_ttf.dll bin/
+	#cp -r SDL2.dll bin/
+	#cp -r SDL2_ttf.dll bin/
 	@echo
 
 play.o : play.c
