@@ -87,6 +87,7 @@ static void update(SDL_Window* window, struct Jdata* data){
 
 		int gravity = 3;
 
+		// TODO Update score count here.
 		score->text = "SCORE: -1";
 		score->img = render_font(score);
 
@@ -100,7 +101,7 @@ static void update(SDL_Window* window, struct Jdata* data){
 			direction = direction - 1;
 		}
 
-		// Blit the player and score in order
+		// Blit the surfaces in order: bg, objects, score, player
 		SDL_BlitSurface(bg->img, NULL, win_surface, &bg->rect);
 
 		// Update object position and generate new objects
