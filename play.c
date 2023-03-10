@@ -19,6 +19,7 @@
 
 static int state;
 static int timer = 3000;
+int score_var = 0;
 
 int active[4] = {0, 0, 0 ,0};
 
@@ -27,6 +28,7 @@ int direction = 0;
 static void update(SDL_Window*, struct Jdata*);
 static void handle_keys(SDL_Event);
 static void object_handler(struct Jdata*, SDL_Surface*);
+static bool check_collision(SDL_Rect, SDL_Rect);
 
 int play_state(SDL_Window* window, struct Jdata* data){
 	state = PLAY;
@@ -87,8 +89,11 @@ static void update(SDL_Window* window, struct Jdata* data){
 
 		int gravity = 3;
 
-		// TODO Update score count here.
-		score->text = "SCORE: -1";
+		// Update score count here.
+		score_var += 1;
+		char str[64];
+		sprintf(str, "SCORE: %d", (int)(score_var/100));
+		score->text = str;
 		score->img = render_font(score);
 
 		// Apply jump physics (up/down movement)
@@ -130,6 +135,13 @@ static void object_handler(struct Jdata* data, SDL_Surface* win_surface){
 			obj->rect.y = WINDOW_HEIGHT - obj->rect.h;
 			obj->rect.x = obj->rect.x - 2;
 
+			SDL_Rect player = ((struct Jimage*)find_node(data, ID_PLAY_PLAYER) )->rect;
+			
+			// Detect collision and end play state if true
+			// TODO cleanup data and show a game over screen?
+			if(check_collision(obj->rect, player))
+				state = MENU;
+
 			if(obj->rect.x < -obj->rect.w){
 				obj->rect.x = WINDOW_WIDTH;
 				active[i] = 0;
@@ -139,6 +151,18 @@ static void object_handler(struct Jdata* data, SDL_Surface* win_surface){
 			SDL_BlitSurface(obj->img, NULL, win_surface, &pos);
 		}
 	}
+}
+
+static bool check_collision(SDL_Rect a, SDL_Rect b){
+	if(a.y + a.h <= b.y)
+		return false;
+	if(a.y >= b.y + b.h)
+		return false;
+	if(a.x + a.w <= b.x)
+		return false;
+	if(a.x >= b.x + b.w)
+		return false;
+	return true;
 }
 
 static void handle_keys(SDL_Event e){
