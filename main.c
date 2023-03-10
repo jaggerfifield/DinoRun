@@ -82,6 +82,8 @@ struct Jdata* load_data(int target){
 		data = add_data(data, JIMAGE, ID_PLAY_OBJECT2, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
 		data = add_data(data, JIMAGE, ID_PLAY_OBJECT3, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
 		data = add_data(data, JIMAGE, ID_PLAY_OBJECT4, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
+		
+		data = add_data(data, JFONT, ID_DEBUG_FPS, WINDOW_WIDTH, 0, font, "FPS: xxx");
 	}
 	
 	data_test(data);
