@@ -78,6 +78,10 @@ struct Jdata* load_data(int target){
 		data = add_data(data, JFONT, ID_PLAY_1, CENTER, CENTER, font, "1");
 		data = add_data(data, JFONT, ID_PLAY_GO, CENTER, CENTER, font, "GO!");
 		data = add_data(data, JFONT, ID_PLAY_SCORE, 0, 0, font, "SCORE: 0");
+		data = add_data(data, JIMAGE, ID_PLAY_OBJECT, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
+		data = add_data(data, JIMAGE, ID_PLAY_OBJECT2, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
+		data = add_data(data, JIMAGE, ID_PLAY_OBJECT3, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
+		data = add_data(data, JIMAGE, ID_PLAY_OBJECT4, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
 	}
 	
 	data_test(data);

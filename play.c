@@ -17,23 +17,20 @@
 #include "jdata.h"
 #include "image.h"
 
-#define OBJ_COUNT 4
-
 static int state;
 static int timer = 3000;
-int obj_count = 0;
+
+int active[4] = {0, 0, 0 ,0};
 
 int direction = 0;
 
-static struct Jdata* update(SDL_Window*, struct Jdata*, struct Jdata*);
+static void update(SDL_Window*, struct Jdata*);
 static void handle_keys(SDL_Event);
-static struct Jdata* object_handler(struct Jdata*, SDL_Surface*);
+static void object_handler(struct Jdata*, SDL_Surface*);
 
 int play_state(SDL_Window* window, struct Jdata* data){
 	state = PLAY;
 	
-	struct Jdata* objects = init("Objects", JIMAGE, -1, NULL, NULL);
-
 	// Apply a seed for random
 	time_t t;
 	srand((unsigned) time(&t));
@@ -51,13 +48,13 @@ int play_state(SDL_Window* window, struct Jdata* data){
 			}
 		}
 
-		objects = update(window, data, objects);
+		update(window, data);
 	}
 	return state;
 
 }
 
-static struct Jdata* update(SDL_Window* window, struct Jdata* data, struct Jdata* objects){
+static void update(SDL_Window* window, struct Jdata* data){
 	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
 
 
@@ -84,12 +81,14 @@ static struct Jdata* update(SDL_Window* window, struct Jdata* data, struct Jdata
 		timer = timer - 1;
 	}else{
 		// Here is the dino run loop (after the countdown)
-		struct Jfont* score = data->tail->data;
+		struct Jfont* score = find_node(data, ID_PLAY_SCORE);
 		struct Jimage* bg = data->data;
 		struct Jimage* dino = find_node(data, ID_PLAY_PLAYER);
 
 		int gravity = 3;
 
+		score->text = "SCORE: -1";
+		score->img = render_font(score);
 
 		// Apply jump physics (up/down movement)
 		if(direction == 0){
@@ -105,7 +104,7 @@ static struct Jdata* update(SDL_Window* window, struct Jdata* data, struct Jdata
 		SDL_BlitSurface(bg->img, NULL, win_surface, &bg->rect);
 
 		// Update object position and generate new objects
-		objects = object_handler(objects, win_surface);
+		object_handler(data, win_surface);
 		
 
 		SDL_BlitSurface(score->img, NULL, win_surface, &score->rect);
@@ -113,40 +112,32 @@ static struct Jdata* update(SDL_Window* window, struct Jdata* data, struct Jdata
 	}
 	
 	SDL_UpdateWindowSurface(window);
-	return objects;
 }
 
-static struct Jdata* object_handler(struct Jdata* objects, SDL_Surface* win_surface){
-	int num = rand() % 5;
-	
-	if(obj_count < OBJ_COUNT){
-		// 0.25 chance to generate different types of objects . . .
-		if(num == 0)
-			objects = add_data(objects, JIMAGE, obj_count, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
-		else if(num == 1)
-			objects = add_data(objects, JIMAGE, obj_count, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
-		else
-			obj_count -= 1;
-		obj_count += 1;
-	}
+static void object_handler(struct Jdata* data, SDL_Surface* win_surface){
+	int num = rand() % 128;
+
+	int difficulity = 2;
+	if(num < difficulity)
+		active[num] = 1;
 
 	// Move and blit objects.
-	for(int i = 0; i < OBJ_COUNT; i++){
-		struct Jimage* obj = find_node(objects, i);
-		if(obj != NULL){
+	for(int i = 0; i < 4; i++){
+		struct Jimage* obj = find_node(data, ID_PLAY_OBJECT + i);
+		if(obj != NULL && active[i]){
 			SDL_Rect pos;
 			obj->rect.y = WINDOW_HEIGHT - obj->rect.h;
 			obj->rect.x = obj->rect.x - 2;
 
 			if(obj->rect.x < -obj->rect.w){
 				obj->rect.x = WINDOW_WIDTH;
+				active[i] = 0;
 			}
 
 			pos = obj->rect;
 			SDL_BlitSurface(obj->img, NULL, win_surface, &pos);
 		}
 	}
-	return objects;
 }
 
 static void handle_keys(SDL_Event e){
