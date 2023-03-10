@@ -12,10 +12,13 @@
 
 #include "data_test.h"
 
+#include "debug.h"
 #include "main.h"
 #include "font.h"
 #include "jdata.h"
 #include "image.h"
+
+bool do_debug = false;
 
 static int state;
 static int timer = 3000;
@@ -116,7 +119,8 @@ static void update(SDL_Window* window, struct Jdata* data){
 		SDL_BlitSurface(score->img, NULL, win_surface, &score->rect);
 		SDL_BlitSurface(dino->img, NULL, win_surface, &dino->rect);
 	}
-	
+	if(do_debug)
+		debug(data, win_surface);
 	SDL_UpdateWindowSurface(window);
 }
 
@@ -140,7 +144,7 @@ static void object_handler(struct Jdata* data, SDL_Surface* win_surface){
 			// Detect collision and end play state if true
 			// TODO cleanup data and show a game over screen?
 			if(check_collision(obj->rect, player))
-				state = MENU;
+				state = PLAY;
 
 			if(obj->rect.x < -obj->rect.w){
 				obj->rect.x = WINDOW_WIDTH;
@@ -169,5 +173,8 @@ static void handle_keys(SDL_Event e){
 	int key = e.key.keysym.sym;
 	if(key == SDLK_UP && direction == 0){
 		direction = 100;
+	}else if(key == SDLK_F3 || key == SDLK_e){
+		printf("Toggle debug!\n");
+		do_debug = !do_debug;
 	}
 }

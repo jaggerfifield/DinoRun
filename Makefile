@@ -21,7 +21,7 @@ DEF := -D$(OS)
 
 NAME := game
 
-DEP := play.o menu.o jdata.o font.o image.o data_test.o main.o
+DEP := play.o menu.o jdata.o font.o image.o data_test.o debug.o main.o
 
 all : $(RESO) project $(DEP)
 	@echo =====Empty build folder=====
@@ -35,6 +35,11 @@ all : $(RESO) project $(DEP)
 	cp -r Assets bin/
 	#cp -r SDL2.dll bin/
 	#cp -r SDL2_ttf.dll bin/
+	@echo
+
+debug.o : debug.c
+	@echo =====Compile debug.c=====
+	gcc $(IPATH) $(DEF) -Wall -g -c debug.c
 	@echo
 
 play.o : play.c
