@@ -15,64 +15,35 @@
 #include "font.h"
 #include "main.h"
 
-struct Jdata* init(int size){
-	// Reserve space for ''size'' elements (how many chuncks are we holding)
-	struct Jdata* data_node = malloc(size * sizeof(struct Jdata));
+struct Jdata* init(char* name, int type, int id, void* data, void* next){
+	struct Jdata* data_node = malloc(sizeof(struct Jdata));
 
-	// ID must start at -1 since we increase id by one for every element (first element is -1 + 1)
-	data_node->id   = -1;
-	data_node->size = size;
-	data_node->name = NULL;
-	data_node->data = NULL;
-	data_node->next = NULL;
-	data_node->type = -1;
+	data_node->name = name;
+	data_node->type = type;
+	data_node->id   = id;
+	data_node->data = data;
+	data_node->next = next;
 
 	// Set the tail to the node, since there are no other nodes.
 	data_node->tail = data_node;
-	
+
 	return data_node;
 }
 
-struct Jdata* add_data(struct Jdata* node, int type, char* name, int id_, int x, int y, const char* path, char* ext){
+struct Jdata* add_data(struct Jdata* node, int type, int id, int x, int y, const char* path, char* ext){
 	struct Jdata* edit = node->tail;
-	int id = edit->id + 1;
-
-	if(id_ != id)
-		printf("WARN!\n");
 
 	if(type == JIMAGE){
 		//JIMAGE type
 		struct Jimage* temp = make_image(x, y, path);
-
-		// Create and fill the data node
-		// TODO make this a function
-		struct Jdata* new_node = (node + (id * sizeof(struct Jdata)));
-		new_node->id = id;
-		new_node->type = type;
-		new_node->size = edit->size;
-		new_node->name = name;
-		new_node->data = temp;
-		new_node->next = NULL;
-
-		// Append the new node to our data
+		struct Jdata* new_node = init(edit->name, type, id, temp, NULL);
 		edit->next = new_node;
 		node->tail = new_node;
 	}else if(type == JFONT){
 		//JFONT type
 		SDL_Color color = {0, 0, 0};
 		struct Jfont* temp = make_font(x, y, 40, color, path, ext);
-
-		// Create and fill the data node
-		// TODO make this a function
-		struct Jdata* new_node = (node + (id * sizeof(struct Jdata)));
-		new_node->id = id;
-		new_node->type = type;
-		new_node->size = edit->size;
-		new_node->name = name;
-		new_node->data = temp;
-		new_node->next = NULL;
-
-		// Append new_node to our data
+		struct Jdata* new_node = init(edit->name, type, id, temp, NULL);
 		edit->next = new_node;
 		node->tail = new_node;
 	}
@@ -83,20 +54,14 @@ struct Jdata* add_data(struct Jdata* node, int type, char* name, int id_, int x,
 void* find_node(struct Jdata* data, int id){
 	struct Jdata* node = data;
 
-	// Calculate the memory location
-	int location = sizeof(struct Jdata) * id;
-
-	// Old search is slow, we know the memory size so dont need to search
-	//while(node != NULL){
-	//	if(node->id == id){
-	//		//printf("Found %s, with id %d\n", node->name, node->id);
-	//		return node->data;
-	//	}
-	//	node = node->next;
-	//}
-	printf("Attempting to find ID: %d\n", id);
-	printf("WE are here: %p\n", (node + location));
-	return (node + location)->data;
+	while(node != NULL){
+		if(node->id == id){
+			//printf("Found %s, with id %d\n", node->name, node->id);
+			return node->data;
+		}
+		node = node->next;
+	}
+	return NULL;
 }
 
 void jdata_free(struct Jdata* data){
