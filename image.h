@@ -7,8 +7,6 @@
 #endif
 
 struct Jimage{
-	int x;
-	int y;
 	const char* path;
 	SDL_Rect rect;
 	SDL_Surface* img;

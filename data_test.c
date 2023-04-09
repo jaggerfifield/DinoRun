@@ -8,21 +8,9 @@
 void data_test(struct Jdata* data){
 	struct Jdata* node = data;
 
-	printf("SIZE OF JDATA: %lu\n", sizeof(struct Jdata));
-	printf("\tSIZE OF int: %lu\n", sizeof(int));
-	printf("\tSIZE OF char*: %lu\n", sizeof(char*));
-	printf("\tSIZE OF void*: %lu\n", sizeof(void*));
-	printf("\tSIZE OF void*: %lu\n", sizeof(void*));
-	printf("\tSIZE OF struct Jdata*: %lu\n", sizeof(struct Jdata*));
-	printf("\tSIZE OF int: %lu\n", sizeof(int));
-	
-	printf("SIZE OF JIMAGE:%lu\n", sizeof(struct Jimage));
-	printf("SIZE OF JFONT: %lu\n", sizeof(struct Jfont));
-	
 	while(node != NULL){
-		printf("NODE ADDR: %p\n", &node);
-		printf("NODE ID  : %p (%d)\n", &node->id, node->id);
-		printf("NODE NAME: %p (%s)\n", &node->name, node->name);
+		printf("NODE ID  : %d\n", node->id);
+		printf("NODE NAME: %s\n", node->name);
 		printf("NODE DATA: %p\n", node->data);
 		printf("NODE NEXT: %p\n", node->next);
 		printf("NODE TAIL: %p\n", node->tail);
@@ -61,10 +49,6 @@ void image_test(struct Jimage* node){
 	printf("JIMAGE)\n");
 	printf("\tPATH: %s\n", node->path);
 	printf("\tRECT: %p\n", &node->rect);
-	printf("\t\tX: %ls\n", &node->rect.x);
-	printf("\t\tY: %ls\n", &node->rect.y);
-	printf("\t\tH: %ls\n", &node->rect.h);
-	printf("\t\tW: %ls\n", &node->rect.w);
 	printf("\t IMG: %p\n", node->img);
 
 }

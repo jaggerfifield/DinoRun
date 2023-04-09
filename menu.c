@@ -91,8 +91,7 @@ static void update(SDL_Window* window, struct Jdata* data, int location, bool* u
 		while(node != NULL){
 			if(node->type == JFONT){
 				struct Jfont* temp = node->data;
-				printf("\n=====");
-				font_test(temp);
+			
 				if(node->id == location + 1){
 					// Set the location to red
 					SDL_Color red = {255, 0, 0};
@@ -114,9 +113,7 @@ static void update(SDL_Window* window, struct Jdata* data, int location, bool* u
 			}else if(node->type == JIMAGE){
 				// render the bg
 				struct Jimage* temp = node->data;
-
 				SDL_BlitSurface(temp->img, NULL, win_surface, &temp->rect);
-				printf("TEST\n");
 			}
 
 			node = node->next;

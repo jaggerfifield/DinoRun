@@ -52,8 +52,8 @@ struct Jfont* make_font(int x, int y, int s, SDL_Color col, const char* path, ch
 	else
 		rect.y = y;
 	// This is segmentaion fault
-	rect.w = font->img->w;
-	rect.h = font->img->h;
+	//rect.w = font->img->w;
+	//rect.h = font->img->h;
 
 	font->rect = rect;
 	
