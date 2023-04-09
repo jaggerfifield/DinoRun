@@ -24,12 +24,11 @@ struct Jimage* make_image(int x, int y, const char* path){
 	struct Jimage* image = malloc(sizeof(struct Jimage));
 	SDL_Rect rect;
 
-	rect.x = x;
-	rect.y = y;
-
 	image->path = path;
 	image->img = load_image(path);
 
+	rect.x = x;
+	rect.y = y;
 	rect.h = image->img->h;
 	rect.w = image->img->w;
 
@@ -44,6 +43,7 @@ void color_key(struct Jimage* image){
 }
 
 SDL_Surface* load_image(const char* path){
+	//printf("Loading image from path: %s\n", path);
 	return SDL_LoadBMP(path);
 }
 

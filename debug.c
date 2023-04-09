@@ -16,7 +16,7 @@
 void debug(void*, SDL_Surface*);
 
 void debug(void* data, SDL_Surface* win_surface){
-	struct Jfont* fps = find_node(data, ID_DEBUG_FPS);
+	struct Jfont* fps = find_node(data, ID_PLAY_DEBUG);
 
 	printf("WIDTH is %d - %d\n", WINDOW_WIDTH, fps->rect.w);
 
