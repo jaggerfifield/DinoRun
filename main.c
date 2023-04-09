@@ -64,26 +64,28 @@ struct Jdata* load_data(int target){
 
 	struct Jdata* data;
 	if(target == LMENU){
-		struct Jimage* bg = make_image(0,0, "Assets/bg_fill.bmp");
-		data = init("menu", JIMAGE, ID_MENU_BACKGROUND, bg, NULL);
-		data = add_data(data, JFONT, ID_MENU_PLAY, CENTER, 0, font, "Play");
-		data = add_data(data, JFONT, ID_MENU_STORY, CENTER, 100, font, "Story");
-		data = add_data(data, JFONT, ID_MENU_EXIT, CENTER, 200, font, "Exit");
+		// Init for 4 elements
+		data = init(4);
+
+		add_data(data, JIMAGE, "background", ID_MENU_BACKGROUND, 0, 0, "Assets/bg_fill.bmp", NULL);
+		add_data(data, JFONT, "play_text", ID_MENU_PLAY, CENTER, 0, font, "Play");
+		add_data(data, JFONT, "story_text", ID_MENU_STORY, CENTER, 100, font, "Story");
+		add_data(data, JFONT, "exit_text", ID_MENU_EXIT, CENTER, 200, font, "Exit");
 	} else if(target == LPLAY){
 		struct Jimage* bg = make_image(0,0, "Assets/bg_fill.bmp");
-		data = init("play", JIMAGE, ID_PLAY_BACKGROUND, bg, NULL);
-		data = add_data(data, JIMAGE, ID_PLAY_PLAYER, 25, 100, "Assets/dino.bmp", NULL);
-		data = add_data(data, JFONT, ID_PLAY_3, CENTER, CENTER, font, "3");
-		data = add_data(data, JFONT, ID_PLAY_2, CENTER, CENTER, font, "2");
-		data = add_data(data, JFONT, ID_PLAY_1, CENTER, CENTER, font, "1");
-		data = add_data(data, JFONT, ID_PLAY_GO, CENTER, CENTER, font, "GO!");
-		data = add_data(data, JFONT, ID_PLAY_SCORE, 0, 0, font, "SCORE: 0");
-		data = add_data(data, JIMAGE, ID_PLAY_OBJECT, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
-		data = add_data(data, JIMAGE, ID_PLAY_OBJECT2, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
-		data = add_data(data, JIMAGE, ID_PLAY_OBJECT3, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
-		data = add_data(data, JIMAGE, ID_PLAY_OBJECT4, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
+	//	data = init("play", JIMAGE, ID_PLAY_BACKGROUND, bg, NULL);
+	//	data = add_data(data, JIMAGE, ID_PLAY_PLAYER, 25, 100, "Assets/dino.bmp", NULL);
+	//	data = add_data(data, JFONT, ID_PLAY_3, CENTER, CENTER, font, "3");
+	//	data = add_data(data, JFONT, ID_PLAY_2, CENTER, CENTER, font, "2");
+	//	data = add_data(data, JFONT, ID_PLAY_1, CENTER, CENTER, font, "1");
+	//	data = add_data(data, JFONT, ID_PLAY_GO, CENTER, CENTER, font, "GO!");
+	//	data = add_data(data, JFONT, ID_PLAY_SCORE, 0, 0, font, "SCORE: 0");
+	//	data = add_data(data, JIMAGE, ID_PLAY_OBJECT, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
+	//	data = add_data(data, JIMAGE, ID_PLAY_OBJECT2, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
+	//	data = add_data(data, JIMAGE, ID_PLAY_OBJECT3, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
+	//	data = add_data(data, JIMAGE, ID_PLAY_OBJECT4, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
 		
-		data = add_data(data, JFONT, ID_DEBUG_FPS, WINDOW_WIDTH, 0, font, "FPS: xxx");
+	//	data = add_data(data, JFONT, ID_PLAY_DEBUG, WINDOW_WIDTH, 0, font, "FPS: xxx\ntest");
 	}
 	
 	data_test(data);
