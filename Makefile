@@ -7,6 +7,9 @@ ifeq ($(OS), Windows_NT)
 	IPATH := -I.\SDL\include
 	LPATH := -L.\SDL\lib
 
+	COPY1 := cp -r SDL/SDL2.dll bin/
+	COPY2 := cp -r SDL/SDL2_ttf.dll bin/
+
 else
 	OS := NIX
 
@@ -33,8 +36,8 @@ all : $(RESO) project $(DEP)
 	@echo
 	@echo =====Copy Assets to folder=====
 	cp -r Assets bin/
-	#cp -r SDL2.dll bin/
-	#cp -r SDL2_ttf.dll bin/
+	$(COPY1)
+	$(COPY2)
 	@echo
 
 play.o : play.c

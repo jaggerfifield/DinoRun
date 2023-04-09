@@ -29,10 +29,15 @@ static void update(SDL_Window*, struct Jdata*);
 static void handle_keys(SDL_Event);
 static void object_handler(struct Jdata*, SDL_Surface*);
 static bool check_collision(SDL_Rect, SDL_Rect);
+int time_left(int);
+
 
 int play_state(SDL_Window* window, struct Jdata* data){
 	state = PLAY;
+	score_var = 0;
 	
+	int next_time = SDL_GetTicks() + 5;
+
 	// Apply a seed for random
 	time_t t;
 	srand((unsigned) time(&t));
@@ -50,7 +55,10 @@ int play_state(SDL_Window* window, struct Jdata* data){
 			}
 		}
 
-		update(window, data);
+		if(SDL_GetTicks() > next_time){
+			update(window, data);
+			next_time = next_time + 5;
+		}
 	}
 	return state;
 
@@ -80,30 +88,31 @@ static void update(SDL_Window* window, struct Jdata* data){
 			// Blit the countdown
 			SDL_BlitSurface(temp->img, NULL, win_surface, &temp->rect);
 		}
-		timer = timer - 1;
+		timer = timer - 500;
 	}else{
 		// Here is the dino run loop (after the countdown)
 		struct Jfont* score = find_node(data, ID_PLAY_SCORE);
 		struct Jimage* bg = data->data;
 		struct Jimage* dino = find_node(data, ID_PLAY_PLAYER);
 
-		int gravity = 3;
+		int gravity = 4;
 
 		// Update score count here.
 		score_var += 1;
 		char str[64];
-		sprintf(str, "SCORE: %d", (int)(score_var/100));
+		sprintf(str, "SCORE: %d", (int)(score_var/10));
 		score->text = str;
 		score->img = render_font(score);
 
 		// Apply jump physics (up/down movement)
 		if(direction == 0){
 			if(dino->rect.y < WINDOW_HEIGHT - dino->rect.h)
-				dino->rect.y = dino->rect.y + gravity;
+				dino->rect.y = dino->rect.y + (gravity);
 		}else{
 			if(dino->rect.y > 100)
-				dino->rect.y = dino->rect.y - (gravity * (direction/10));
-			direction = direction - 1;
+				dino->rect.y = dino->rect.y - (gravity * 2);
+			else
+				direction = 0;
 		}
 
 		// Blit the surfaces in order: bg, objects, score, player
@@ -133,7 +142,7 @@ static void object_handler(struct Jdata* data, SDL_Surface* win_surface){
 		if(obj != NULL && active[i]){
 			SDL_Rect pos;
 			obj->rect.y = WINDOW_HEIGHT - obj->rect.h;
-			obj->rect.x = obj->rect.x - 2;
+			obj->rect.x = obj->rect.x - 6;
 
 			SDL_Rect player = ((struct Jimage*)find_node(data, ID_PLAY_PLAYER) )->rect;
 			
@@ -168,6 +177,6 @@ static bool check_collision(SDL_Rect a, SDL_Rect b){
 static void handle_keys(SDL_Event e){
 	int key = e.key.keysym.sym;
 	if(key == SDLK_UP && direction == 0){
-		direction = 100;
+		direction = 1;
 	}
 }
