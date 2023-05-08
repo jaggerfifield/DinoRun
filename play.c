@@ -20,8 +20,10 @@
 static int state;
 static int timer = 3000;
 int score_var = 0;
+int hiscore_var = 0;
 
 int active[4] = {0, 0, 0 ,0};
+int distance = 0;
 
 int direction = 0;
 
@@ -43,6 +45,7 @@ int play_state(SDL_Window* window, struct Jdata* data){
 	srand((unsigned) time(&t));
 
 	color_key(find_node(data, ID_PLAY_PLAYER));
+	color_key(find_node(data, ID_PLAY_OBJECT2));
 
 	SDL_Event e;
 
@@ -92,6 +95,7 @@ static void update(SDL_Window* window, struct Jdata* data){
 	}else{
 		// Here is the dino run loop (after the countdown)
 		struct Jfont* score = find_node(data, ID_PLAY_SCORE);
+		struct Jfont* hiscore = find_node(data, ID_PLAY_HISCORE);
 		struct Jimage* bg = data->data;
 		struct Jimage* dino = find_node(data, ID_PLAY_PLAYER);
 
@@ -103,6 +107,15 @@ static void update(SDL_Window* window, struct Jdata* data){
 		sprintf(str, "SCORE: %d", (int)(score_var/10));
 		score->text = str;
 		score->img = render_font(score);
+
+		// Update HiScore here
+		if(score_var > hiscore_var){
+			char str[64];
+			sprintf(str, "High Score: %d", (int)(score_var/10));
+			hiscore->text = str;
+			hiscore->img = render_font(hiscore);
+			hiscore->rect.x = WINDOW_WIDTH - hiscore->img->w;
+		}
 
 		// Apply jump physics (up/down movement)
 		if(direction == 0){
@@ -123,6 +136,7 @@ static void update(SDL_Window* window, struct Jdata* data){
 		
 
 		SDL_BlitSurface(score->img, NULL, win_surface, &score->rect);
+		SDL_BlitSurface(hiscore->img, NULL, win_surface, &hiscore->rect);
 		SDL_BlitSurface(dino->img, NULL, win_surface, &dino->rect);
 	}
 	
@@ -132,9 +146,15 @@ static void update(SDL_Window* window, struct Jdata* data){
 static void object_handler(struct Jdata* data, SDL_Surface* win_surface){
 	int num = rand() % 128;
 
+	if(distance != 0){
+		distance = distance - 1;
+	}
+
 	int difficulity = 2;
-	if(num < difficulity)
+	if(num < difficulity && ( (distance == 0) || (distance > 80) ) ){
 		active[num] = 1;
+		distance = 100;
+	}
 
 	// Move and blit objects.
 	for(int i = 0; i < 4; i++){
