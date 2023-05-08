@@ -27,15 +27,14 @@ struct Jdata* load_data(int);
 int main(int argc, char* argv[]){
 	// Create a SDL window
 	SDL_Window* window = NULL;
-
 	window = init_window();
 
-	// The main window loop.
+	// The main loop.
 	handler(window);
 
+	// Cleanup
 	SDL_DestroyWindow(window);
 	window = NULL;
-
 	SDL_Quit();
 	return 0;
 }
@@ -70,7 +69,7 @@ struct Jdata* load_data(int target){
 		data = add_data(data, JFONT, ID_MENU_STORY, CENTER, 100, font, "Story");
 		data = add_data(data, JFONT, ID_MENU_EXIT, CENTER, 200, font, "Exit");
 	} else if(target == LPLAY){
-		struct Jimage* bg = make_image(0,0, "Assets/bg_fill.bmp");
+		struct Jimage* bg = make_image(0,0, "Assets/bg.bmp");
 		data = init("play", JIMAGE, ID_PLAY_BACKGROUND, bg, NULL);
 		data = add_data(data, JIMAGE, ID_PLAY_PLAYER, 25, 100, "Assets/dino.bmp", NULL);
 		data = add_data(data, JFONT, ID_PLAY_3, CENTER, CENTER, font, "3");
@@ -78,9 +77,10 @@ struct Jdata* load_data(int target){
 		data = add_data(data, JFONT, ID_PLAY_1, CENTER, CENTER, font, "1");
 		data = add_data(data, JFONT, ID_PLAY_GO, CENTER, CENTER, font, "GO!");
 		data = add_data(data, JFONT, ID_PLAY_SCORE, 0, 0, font, "SCORE: 0");
+		data = add_data(data, JFONT, ID_PLAY_HISCORE, 0, 0, font, "High Score: 0");
 		data = add_data(data, JIMAGE, ID_PLAY_OBJECT, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
-		data = add_data(data, JIMAGE, ID_PLAY_OBJECT2, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
-		data = add_data(data, JIMAGE, ID_PLAY_OBJECT3, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
+		data = add_data(data, JIMAGE, ID_PLAY_OBJECT2, WINDOW_WIDTH, 0, "Assets/ball.bmp", NULL);
+		data = add_data(data, JIMAGE, ID_PLAY_OBJECT3, WINDOW_WIDTH, 0, "Assets/OBJ3.bmp", NULL);
 		data = add_data(data, JIMAGE, ID_PLAY_OBJECT4, WINDOW_WIDTH, 0, "Assets/dino.bmp", NULL);
 	}
 	
