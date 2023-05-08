@@ -22,10 +22,10 @@ static int timer = 3000;
 int score_var = 0;
 int hiscore_var = 0;
 
+bool up = false;
+bool down = true;
 int active[4] = {0, 0, 0 ,0};
 int distance = 0;
-
-int direction = 0;
 
 static void update(SDL_Window*, struct Jdata*);
 static void handle_keys(SDL_Event);
@@ -118,15 +118,20 @@ static void update(SDL_Window* window, struct Jdata* data){
 		}
 
 		// Apply jump physics (up/down movement)
-		if(direction == 0){
-			if(dino->rect.y < WINDOW_HEIGHT - dino->rect.h)
-				dino->rect.y = dino->rect.y + (gravity);
-		}else{
-			if(dino->rect.y > 100)
-				dino->rect.y = dino->rect.y - (gravity * 2);
-			else
-				direction = 0;
+
+		// Move dino up
+		if(!down && up && dino->rect.y > WINDOW_HEIGHT - dino->rect.h * 4)
+			dino->rect.y = dino->rect.y - (gravity * 2);
+		else{
+			down = true;
+			up = false;
 		}
+
+		// Move dino back down
+		if(dino->rect.y < WINDOW_HEIGHT - dino->rect.h && down)
+			dino->rect.y = dino->rect.y + (gravity);
+		else
+			down = false;
 
 		// Blit the surfaces in order: bg, objects, score, player
 		SDL_BlitSurface(bg->img, NULL, win_surface, &bg->rect);
@@ -151,9 +156,9 @@ static void object_handler(struct Jdata* data, SDL_Surface* win_surface){
 	}
 
 	int difficulity = 2;
-	if(num < difficulity && ( (distance == 0) || (distance > 80) ) ){
+	if(num < difficulity && ( (distance == 0) || (distance > 90) ) ){
 		active[num] = 1;
-		distance = 100;
+		distance = 120;
 	}
 
 	// Move and blit objects.
@@ -196,7 +201,7 @@ static bool check_collision(SDL_Rect a, SDL_Rect b){
 
 static void handle_keys(SDL_Event e){
 	int key = e.key.keysym.sym;
-	if(key == SDLK_UP && direction == 0){
-		direction = 1;
+	if(key == SDLK_UP){
+		up = true;
 	}
 }
