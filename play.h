@@ -1,1 +1,1 @@
-int play_state(SDL_Window*, struct Jdata*);
+int play_state(SDL_Window*);

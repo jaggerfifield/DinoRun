@@ -9,20 +9,19 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#include "data_test.h"
-#include "image.h"
-#include "font.h"
 #include "jdata.h"
 #include "main.h"
 
 #define MENU_SIZE 3
 
-static int state;
+int state;
 
-int handle_keys(SDL_Event, int, bool*);
-static void update(SDL_Window*, struct Jdata*, int, bool*);
+int handle_keys(SDL_Event, int);
 
-int menu_state(SDL_Window* window, struct Jdata* data){
+void* load_data(void);
+void update(SDL_Window*, struct Jdata**, int);
+
+int menu_state(SDL_Window* window){
 	state = MENU;
 
 	bool quit = false;
@@ -30,8 +29,13 @@ int menu_state(SDL_Window* window, struct Jdata* data){
 	SDL_Event e;
 
 	int location = 0;
-	bool* update_flag = malloc(sizeof(bool*));
-	*update_flag = true;
+
+	//struct Jdata* data = load_data();
+	struct Jdata* DTA[4];
+	DTA[0] = init(ID_MENU_BACKGROUND, JIMAGE, 0, 0, "Menu Background", "Assets/bg_fill.bmp", NULL, 0, 0, 0);
+	DTA[1] = init(ID_MENU_PLAY, JFONT, CENTER, 0, "Play text", "Assets/font.ttf", "Play", 0, 0, 0);
+	DTA[2] = init(ID_MENU_STORY, JFONT, CENTER, 100, "Stroy text", "Assets/font.ttf", "Story", 0, 0, 0);
+	DTA[3] = init(ID_MENU_EXIT, JFONT, CENTER, 200, "Exit text", "Assets/font.ttf", "Exit", 0, 0, 0);
 
 	while(!quit && (state == MENU)){
 		while(SDL_PollEvent(&e) != 0){
@@ -39,22 +43,19 @@ int menu_state(SDL_Window* window, struct Jdata* data){
 				quit = true;
 				state = EXIT;
 			}else if(e.type == SDL_KEYDOWN){
-				location = handle_keys(e, location, update_flag);
+				location = handle_keys(e, location);
 			}
 		}
 
-		update(window, data, location, update_flag);
+		update(window, DTA, location);
 	}
-
-	free(update_flag);
 
 	return state;
 }
 
-int handle_keys(SDL_Event e, int location, bool* update_flag){
+int handle_keys(SDL_Event e, int location){
 	int key = e.key.keysym.sym;
 	if(key == SDLK_UP){
-		*update_flag = true;
 		location -= 1;
 
 		// Check for wrap-around
@@ -62,13 +63,11 @@ int handle_keys(SDL_Event e, int location, bool* update_flag){
 			location = 2;
 
 	}else if(key == SDLK_DOWN){
-		*update_flag = true;
 		location += 1;
 
 		if(location > (MENU_SIZE - 1) )
 			location = 0;
 	}else if(key == SDLK_RETURN){
-		*update_flag = true;
 		if(location == 0)
 			state = PLAY;
 		else if(location == 1)
@@ -80,47 +79,35 @@ int handle_keys(SDL_Event e, int location, bool* update_flag){
 	return location;
 }
 
-static void update(SDL_Window* window, struct Jdata* data, int location, bool* update_flag){
-	// Update the selected font
-	struct Jdata* node = data;
+void update(SDL_Window* window, struct Jdata** data, int location){
 	
 	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
 
-	if(*update_flag){
-		*update_flag = false;
-		while(node != NULL){
-			if(node->type == JFONT){
-				struct Jfont* temp = node->data;
-			
-				if(node->id == location + 1){
-					// Set the location to red
-					SDL_Color red = {255, 0, 0};
-					temp->color = red;
-					temp->img = render_font(node->data);
-			
-				}else{
-					// Set the rest to black
-					SDL_Color black = {0, 0, 0};
-					temp->color = black;
-					temp->img = render_font(node->data);
-				}
-				if(temp->img == NULL){
-					printf("SDL_Error: %s\n", SDL_GetError());
-					font_test(temp);
-				}
-				SDL_BlitSurface(temp->img, NULL, win_surface, &temp->rect);
-		
-			}else if(node->type == JIMAGE){
-				// render the bg
-				struct Jimage* temp = node->data;
-				SDL_BlitSurface(temp->img, NULL, win_surface, &temp->rect);
-			}
+	// TODO: dynamic data length (pass size in update)
+	// for(int i = 0; i < size; i++){
+	
+	for(int i = 0; i < 4; i++){
+		struct Jdata* node = data[i];
 
-			node = node->next;
+		SDL_Rect loc;
+		loc.x = node->x;
+		loc.y = node->y;
+		
+		if(node->type == JIMAGE){
+			;
+		}else if(node->type == JFONT){
+			if(location == node->id - 1){
+				set_col(node, 255, 0 , 0);
+				render(node);
+			}else{
+				set_col(node, 0, 0, 0);
+				render(node);
+			}
 		}
 
-		SDL_UpdateWindowSurface(window);
+		SDL_BlitSurface(node->data, NULL, win_surface, &loc);
 	}
-}
 
+	SDL_UpdateWindowSurface(window);
+}
 
