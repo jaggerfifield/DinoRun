@@ -58,6 +58,11 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 }
 
 void render(struct Jdata* node){
+	if(node->data != NULL){
+		SDL_FreeSurface(node->data);
+		node->data = NULL;
+	}
+
 	if(node->type == JIMAGE){
 	node->data = SDL_LoadBMP(node->path);
 	// TODO: animation frames here?
@@ -67,6 +72,8 @@ void render(struct Jdata* node){
 
 		node->data = TTF_RenderText_Solid(node->fnt, node->string, node->col);
 	}
+
+	assert(node->data != NULL);
 }
 
 void set_col(struct Jdata* node, short int r, short int g, short int b){

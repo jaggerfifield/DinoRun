@@ -69,8 +69,12 @@ int play_state(SDL_Window* window, struct Jdata* data){
 			next_time = next_time + 5;
 		}
 	}
-	return state;
+	
+	for(int i = 0; i < 12; i++){
+		jdata_free(DTA[i]);
+	}
 
+	return state;
 }
 
 static void update(SDL_Window* window, struct Jdata** data){
