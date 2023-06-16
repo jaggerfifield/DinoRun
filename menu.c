@@ -50,6 +50,11 @@ int menu_state(SDL_Window* window){
 		update(window, DTA, location);
 	}
 
+	jdata_free(DTA[0]);
+	jdata_free(DTA[1]);
+	jdata_free(DTA[2]);
+	jdata_free(DTA[3]);
+
 	return state;
 }
 
