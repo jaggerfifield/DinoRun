@@ -50,4 +50,5 @@ struct Jdata{
 struct Jdata* init(int, int, int, int, char*, char*, char*, short int, short int, short int);
 void render(struct Jdata*);
 void set_col(struct Jdata*, short int, short int, short int);
+SDL_Rect get_rect(struct Jdata*);
 void jdata_free(struct Jdata*);
