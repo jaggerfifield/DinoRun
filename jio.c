@@ -75,6 +75,7 @@ void init_files(void){
 	fclose(access("Assets/score", "a+"));
 }
 
+#ifdef WIN
 int colorize(){
     // Set output mode to handle virtual terminal sequences
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -97,3 +98,4 @@ int colorize(){
 
     return 0;
 }
+#endif
