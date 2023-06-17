@@ -12,6 +12,7 @@
 
 #include "main.h"
 #include "jdata.h"
+#include "jio.h"
 
 static int state;
 static int timer = 3000;
@@ -27,12 +28,17 @@ static void update(SDL_Window*, struct Jdata**);
 static void handle_keys(SDL_Event);
 static void object_handler(struct Jdata**, SDL_Surface*);
 static bool check_collision(SDL_Rect, SDL_Rect);
+void read_score(void);
+void write_score(void);
+
 int time_left(int);
 
 int play_state(SDL_Window* window, struct Jdata* data){
 	state = PLAY;
 	score_var = 0;
 	
+	read_score();
+
 	struct Jdata* DTA[12];
 	DTA[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play background", "Assets/bg_fill.bmp", NULL, 0, 0, 0);
 	DTA[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/dino.bmp", NULL, 0, 0, 0);
@@ -123,13 +129,12 @@ static void update(SDL_Window* window, struct Jdata** data){
 		render(score);
 
 		// Update HiScore here
-		if(score_var > hiscore_var){
-			char str[64];
-			sprintf(str, "High Score: %d", (int)(score_var/10));
-			hiscore->string = str;
-			render(hiscore);
-			hiscore->x = WINDOW_WIDTH - hiscore->data->w;
-		}
+		if(score_var > hiscore_var)
+			hiscore_var = score_var;
+		sprintf(str, "High Score: %d", (int)(hiscore_var/10));
+		hiscore->string = str;
+		render(hiscore);
+		hiscore->x = WINDOW_WIDTH - hiscore->data->w;
 
 		// Apply jump physics (up/down movement)
 
@@ -218,8 +223,13 @@ static void object_handler(struct Jdata** data, SDL_Surface* win_surface){
 
 			// Detect collision and end play state if true
 			// TODO cleanup data and show a game over screen?
-			if(check_collision(object_rect, player_rect))
+			if(check_collision(object_rect, player_rect)){
+				if(score_var >= hiscore_var){
+					printf("Score vs HI: %d : %d\n", score_var, hiscore_var);
+					write_score();
+				}
 				state = MENU;
+			}
 
 			if(obj->x < -obj->data->w){
 				obj->x = WINDOW_WIDTH;
@@ -241,6 +251,29 @@ static bool check_collision(SDL_Rect a, SDL_Rect b){
 	if(a.x >= b.x + b.w)
 		return false;
 	return true;
+}
+
+void read_score(){
+	char value[5] = "0000\0";
+	FILE* f = access("score", "r");
+	read(f, value, 4);
+	fclose(f);
+	sscanf(value, "%d", &hiscore_var);
+	
+	char msg[64];
+	sprintf(msg, "Read score to be: %d\n", hiscore_var);
+	debug(msg);
+}
+
+void write_score(){
+	FILE* f = access("score", "w");
+	char content[64];
+	
+	printf("NEW SCORE: %d\n", (int)score_var/10);
+
+	sprintf(content, "%d\n", score_var);
+	write(f, content);
+	fclose(f);
 }
 
 static void handle_keys(SDL_Event e){
