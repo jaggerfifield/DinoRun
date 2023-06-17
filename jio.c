@@ -29,6 +29,7 @@ void debug(char* output){
 	printf(message);
 }
 
+#ifdef WIN
 int colorize(){
     // Set output mode to handle virtual terminal sequences
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -51,3 +52,4 @@ int colorize(){
 
     return 0;
 }
+#endif
