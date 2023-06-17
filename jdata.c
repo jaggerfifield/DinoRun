@@ -76,6 +76,16 @@ void render(struct Jdata* node){
 	assert(node->data != NULL);
 }
 
+SDL_Rect get_rect(struct Jdata* node){
+	SDL_Rect rect;
+	rect.x = node->x;
+	rect.y = node->y;
+	assert(node->data != NULL);
+	rect.h = node->data->h;
+	rect.w = node->data->w;
+	return rect;
+}
+
 void set_col(struct Jdata* node, short int r, short int g, short int b){
 	node->r = r;
 	node->g = g;

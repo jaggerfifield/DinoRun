@@ -152,22 +152,10 @@ static void update(SDL_Window* window, struct Jdata** data){
 		else
 			down = false;
 
-		// Generate rects
-		SDL_Rect bg_rect;
-		bg_rect.x = bg->x;
-		bg_rect.y = bg->y;
-		
-		SDL_Rect score_rect;
-		score_rect.x = score->x;
-		score_rect.y = score->y;
-		
-		SDL_Rect hiscore_rect;
-		hiscore_rect.x = hiscore->x;
-		hiscore_rect.y = hiscore->y;
-		
-		SDL_Rect dino_rect;
-		dino_rect.x = dino->x;
-		dino_rect.y = dino->y;
+		SDL_Rect bg_rect = get_rect(bg);
+		SDL_Rect score_rect = get_rect(score);
+		SDL_Rect hiscore_rect = get_rect(hiscore);
+		SDL_Rect dino_rect = get_rect(dino);
 
 		// Blit the surfaces in order: bg, objects, score, player
 		SDL_BlitSurface(bg->data, NULL, win_surface, &bg_rect);
@@ -175,9 +163,9 @@ static void update(SDL_Window* window, struct Jdata** data){
 		// Update object position and generate new objects
 		object_handler(data, win_surface);		
 
-		SDL_BlitSurface(score->data, NULL, win_surface, &score_rect);
+		SDL_BlitSurface(score->data,   NULL, win_surface, &score_rect);
 		SDL_BlitSurface(hiscore->data, NULL, win_surface, &hiscore_rect);
-		SDL_BlitSurface(dino->data, NULL, win_surface, &dino_rect);
+		SDL_BlitSurface(dino->data,    NULL, win_surface, &dino_rect);
 		
 	}
 	
@@ -222,12 +210,10 @@ static void object_handler(struct Jdata** data, SDL_Surface* win_surface){
 			object_rect.w = obj->data->w;
 
 			// Detect collision and end play state if true
-			// TODO cleanup data and show a game over screen?
+			// TODO show a game over screen?
 			if(check_collision(object_rect, player_rect)){
-				if(score_var >= hiscore_var){
-					printf("Score vs HI: %d : %d\n", score_var, hiscore_var);
+				if(score_var >= hiscore_var)
 					write_score();
-				}
 				state = MENU;
 			}
 
@@ -261,7 +247,7 @@ void read_score(){
 	sscanf(value, "%d", &hiscore_var);
 	
 	char msg[64];
-	sprintf(msg, "Read score to be: %d\n", hiscore_var);
+	sprintf(msg, "Read score to be: %d", hiscore_var);
 	debug(msg);
 }
 
@@ -269,11 +255,12 @@ void write_score(){
 	FILE* f = access("score", "w");
 	char content[64];
 	
-	printf("NEW SCORE: %d\n", (int)score_var/10);
-
 	sprintf(content, "%d\n", score_var);
 	write(f, content);
 	fclose(f);
+
+	sprintf(content, "Recording new hiscore: %d", score_var);
+	debug(content);
 }
 
 static void handle_keys(SDL_Event e){

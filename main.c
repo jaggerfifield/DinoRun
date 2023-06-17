@@ -39,9 +39,12 @@ int main(int argc, char* argv[]){
 	window = init_window();
 
 	if(TTF_Init() < 0){
-		printf("TTF could not init!\n");
+		error("TTF could not init!\n");
 		return -1;
 	}
+
+	if(window == NULL)
+		return -1;
 
 	// The main loop.
 	handler(window);
@@ -59,14 +62,18 @@ SDL_Window* init_window(){
 
 
 	if(SDL_Init(SDL_INIT_VIDEO) < 0){
-		printf("SDL could not init! SDL_Error: %s\n", SDL_GetError());
+		char msg[64];
+		sprintf(msg, "SDL could not init! SDL_Error: %s\n", SDL_GetError());
+		error(msg);
 		return NULL;
 	}
 
 	window = SDL_CreateWindow("DinoRun", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
 
 	if(window == NULL){
-		printf("SDL could not create window! SDL Error: %s\n", SDL_GetError());
+		char msg[64];
+		sprintf(msg, "SDL could not create window! SDL Error: %s\n", SDL_GetError());
+		error(msg);
 		return NULL;
 	}
 
@@ -83,15 +90,15 @@ void handler(SDL_Window* window){
 		}else if(state == PLAY){
 			state = play_state(window);
 		}else if(state == STORY){
-			printf("STORY is not finished\n");
+			warn("STORY is not finished");
 			state = MENU;
 			//story_state(window, e);
 		}else if(state == EXIT){
-			printf("Exit state!");
+			info("Exit state!");
 			return;
 		
 		}else{
-			printf("Unknown state! Going to menu!\n");
+			error("Unknown state! Going to menu!");
 			state = MENU;
 		}
 	}
