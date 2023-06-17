@@ -27,6 +27,8 @@ int main(int argc, char* argv[]){
 	colorize();
 	#endif
 
+	init_files();
+
 	info("Start program!");
 	warn("Test!");
 	error("Oh no!");
