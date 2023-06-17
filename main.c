@@ -10,6 +10,7 @@
 #include <stdbool.h>
 
 #include "jdata.h"
+#include "jio.h"
 #include "play.h"
 #include "menu.h"
 #include "main.h"
@@ -20,6 +21,17 @@ void handler(SDL_Window*);
 struct Jdata* load_data(int);
 
 int main(int argc, char* argv[]){
+	
+	// Enable color in terminal for windows
+	#ifdef WIN
+	colorize();
+	#endif
+
+	info("Start program!");
+	warn("Test!");
+	error("Oh no!");
+	debug("Its ok, this is just a test.");
+
 	// Create a SDL window
 	SDL_Window* window = NULL;
 	window = init_window();
