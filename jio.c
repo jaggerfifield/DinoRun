@@ -72,7 +72,7 @@ void read(FILE* file, void* dst, size_t size){
 
 void init_files(void){
 	fclose(access("log.txt", "w+"));
-	fclose(access("Assets/score", "a+"));
+	fclose(access("score", "a+"));
 }
 
 #ifdef WIN
