@@ -35,11 +35,13 @@ struct Jdata{
 	// For font types
 	// string - the font string to render
 	// text_bg - true/false to render background
+	// text_size - size of the text
 	// fnt - loaded font package from path
 	// fgColour - foreground text colour
 	// bgColour - background text colour
 	char* string;
 	bool text_bg;
+	unsigned short int text_size;
 	TTF_Font* fnt;
 	SDL_Color fgColour;
 	SDL_Color bgColour;
@@ -51,6 +53,7 @@ void render(struct Jdata*);
 void set_text_bg(struct Jdata*);
 void set_fgColour(struct Jdata*, short int, short int, short int);
 void set_bgColour(struct Jdata*, short int, short int, short int);
+void set_text_size(struct Jdata*, unsigned short int);
 
 SDL_Rect get_rect(struct Jdata*);
 

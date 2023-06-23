@@ -26,7 +26,9 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 	data_node-> name = name;
 	data_node->path = path;
 	data_node->string = string;
+
 	data_node->text_bg = false;
+	data_node->text_size = 40;
 
 	if(type == JIMAGE){
 		// Render the image
@@ -37,7 +39,7 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 
 	}else if(type == JFONT){
 		// Load font .ttf
-		data_node->fnt = TTF_OpenFont(path, 40); // TODO: FONT size
+		data_node->fnt = TTF_OpenFont(path, data_node->text_size);
 
 		// Make font color black
 		SDL_Color colour = {0, 0, 0};
@@ -106,6 +108,15 @@ void set_bgColour(struct Jdata* node, short int r, short int g, short int b){
 
 void set_text_bg(struct Jdata* node){
 	node->text_bg = !node->text_bg;
+}
+
+void set_text_size(struct Jdata* node, unsigned short int size){
+	node->text_size = size;
+	
+	if(node->fnt != NULL)
+		TTF_CloseFont(node->fnt);
+	
+	TTF_OpenFont(node->path, node->text_size);
 }
 
 void jdata_free(struct Jdata* node){
