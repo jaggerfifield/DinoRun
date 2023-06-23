@@ -67,6 +67,7 @@ int play_state(SDL_Window* window, struct Jdata* data){
 	// Enable background render on debug layer
 	set_text_bg(DTA[12]);
 	set_bgColour(DTA[12], 190, 190, 190);
+	set_text_size(DTA[12], 10);
 
 	int next_time = SDL_GetTicks() + 5;
 
