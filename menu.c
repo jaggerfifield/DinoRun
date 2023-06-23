@@ -11,6 +11,7 @@
 
 #include "jdata.h"
 #include "main.h"
+#include "jio.h"
 
 #define MENU_SIZE 3
 
@@ -30,12 +31,13 @@ int menu_state(SDL_Window* window){
 
 	int location = 0;
 
-	//struct Jdata* data = load_data();
 	struct Jdata* DTA[4];
-	DTA[0] = init(ID_MENU_BACKGROUND, JIMAGE, 0, 0, "Menu Background", "Assets/bg_fill.bmp", NULL, 0, 0, 0);
-	DTA[1] = init(ID_MENU_PLAY, JFONT, CENTER, 0, "Play text", "Assets/font.ttf", "Play", 0, 0, 0);
-	DTA[2] = init(ID_MENU_STORY, JFONT, CENTER, 100, "Stroy text", "Assets/font.ttf", "Story", 0, 0, 0);
-	DTA[3] = init(ID_MENU_EXIT, JFONT, CENTER, 200, "Exit text", "Assets/font.ttf", "Exit", 0, 0, 0);
+	DTA[0] = init(ID_MENU_BACKGROUND, JIMAGE, 0, 0, "Menu Background", "Assets/bg_fill.bmp", NULL);
+	DTA[1] = init(ID_MENU_PLAY, JFONT, CENTER, 0, "Play text", "Assets/font.ttf", "Play");
+	DTA[2] = init(ID_MENU_STORY, JFONT, CENTER, 100, "Stroy text", "Assets/font.ttf", "Story");
+	DTA[3] = init(ID_MENU_EXIT, JFONT, CENTER, 200, "Exit text", "Assets/font.ttf", "Exit");
+
+	info("Done loading data!");
 
 	while(!quit && (state == MENU)){
 		while(SDL_PollEvent(&e) != 0){
@@ -98,14 +100,12 @@ void update(SDL_Window* window, struct Jdata** data, int location){
 		loc.x = node->x;
 		loc.y = node->y;
 		
-		if(node->type == JIMAGE){
-			;
-		}else if(node->type == JFONT){
+		if(node->type == JFONT){
 			if(location == node->id - 1){
-				set_col(node, 255, 0 , 0);
+				set_fgColour(node, 255, 0 , 0);
 				render(node);
 			}else{
-				set_col(node, 0, 0, 0);
+				set_fgColour(node, 0, 0, 0);
 				render(node);
 			}
 		}

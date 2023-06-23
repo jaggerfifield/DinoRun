@@ -9,14 +9,14 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <assert.h>
 
 #include "jdata.h"
 #include "main.h"
+#include "jio.h"
 
-void set_col(struct Jdata*, short int, short int, short int);
-
-struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char* string, short int r, short int g, short int b){
+struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char* string){
 	struct Jdata* data_node = malloc(sizeof(struct Jdata));
 
 	data_node->id = id;
@@ -26,26 +26,31 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 	data_node-> name = name;
 	data_node->path = path;
 	data_node->string = string;
-	data_node->r = r;
-	data_node->g = g;
-	data_node->b = b;
+	data_node->text_bg = false;
 
 	if(type == JIMAGE){
 		// Render the image
 		data_node->data = SDL_LoadBMP(path);
-
+		
 		// Apply color key
 		SDL_SetColorKey(data_node->data, SDL_TRUE, SDL_MapRGB(data_node->data->format, 0, 0, 0));
+
 	}else if(type == JFONT){
 		// Load font .ttf
 		data_node->fnt = TTF_OpenFont(path, 40); // TODO: FONT size
 
-		// Make font color
-		SDL_Color col = {r, g, b};
-		data_node->col = col;
+		// Make font color black
+		SDL_Color colour = {0, 0, 0};
+		data_node->fgColour = colour;
+		
+		SDL_Color transparent = {0, 0, 0};
+		data_node->bgColour = transparent;
 
 		// Render font
-		data_node->data = TTF_RenderText_Solid(data_node->fnt, data_node->string, data_node->col);
+		if(data_node->text_bg)
+			data_node->data = TTF_RenderText_Shaded(data_node->fnt, data_node->string, data_node->fgColour, data_node->bgColour);
+		else
+			data_node->data = TTF_RenderText_Solid(data_node->fnt, data_node->string, data_node->fgColour);
 	}
 
 	// Apply centering
@@ -64,13 +69,16 @@ void render(struct Jdata* node){
 	}
 
 	if(node->type == JIMAGE){
-	node->data = SDL_LoadBMP(node->path);
-	// TODO: animation frames here?
+		node->data = SDL_LoadBMP(node->path);
+		// TODO: animation frames here?
 
 	}else if(node->type == JFONT){
 		assert(node->fnt != NULL);
-
-		node->data = TTF_RenderText_Solid(node->fnt, node->string, node->col);
+		
+		if(node->text_bg)
+			node->data = TTF_RenderText_Shaded(node->fnt, node->string, node->fgColour, node->bgColour);
+		else
+			node->data = TTF_RenderText_Solid(node->fnt, node->string, node->fgColour);
 	}
 
 	assert(node->data != NULL);
@@ -86,12 +94,18 @@ SDL_Rect get_rect(struct Jdata* node){
 	return rect;
 }
 
-void set_col(struct Jdata* node, short int r, short int g, short int b){
-	node->r = r;
-	node->g = g;
-	node->b = b;
-	SDL_Color col = {r, g, b};
-	node->col = col;
+void set_fgColour(struct Jdata* node, short int r, short int g, short int b){
+	SDL_Color colour = {r, g, b};
+	node->fgColour = colour;
+}
+
+void set_bgColour(struct Jdata* node, short int r, short int g, short int b){
+	SDL_Color colour = {r, g, b};
+	node->bgColour = colour;
+}
+
+void set_text_bg(struct Jdata* node){
+	node->text_bg = !node->text_bg;
 }
 
 void jdata_free(struct Jdata* node){

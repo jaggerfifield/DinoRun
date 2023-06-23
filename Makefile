@@ -24,7 +24,7 @@ DEF := -D$(OS)
 
 NAME := game
 
-DEP := play.o menu.o jdata.o jio.o main.o
+DEP := jtime.o play.o menu.o jdata.o jio.o main.o
 
 all : $(RESO) project $(DEP)
 	@echo =====Empty build folder=====
@@ -38,6 +38,11 @@ all : $(RESO) project $(DEP)
 	cp -r Assets bin/
 	$(COPY1)
 	$(COPY2)
+	@echo
+
+jtime.o : jtime.c
+	@echo =====Compile jtime.c=====
+	gcc $(IPATH) $(DEF) -Wall -g -c jtime.c
 	@echo
 
 play.o : play.c
