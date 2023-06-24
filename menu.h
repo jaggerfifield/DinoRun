@@ -1,1 +1,1 @@
-int menu_state(SDL_Window*);
+void menu_state(SDL_Window*);

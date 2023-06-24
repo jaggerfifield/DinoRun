@@ -1,24 +1,9 @@
-#ifdef WIN
-#include <SDL.h>
-#endif
 
-#ifdef NIX
-#include <SDL2/SDL.h>
-#endif
-
-#include <stdio.h>
-#include <stdbool.h>
-
-#include "jdata.h"
-#include "jio.h"
-#include "play.h"
-#include "menu.h"
 #include "main.h"
 
-SDL_Window* init_window(void);
-void destroy_media(SDL_Surface*);
-void handler(SDL_Window*);
-struct Jdata* load_data(int);
+char tmp[256];
+
+bool init_systems();
 
 int main(int argc, char* argv[]){
 	
@@ -27,27 +12,23 @@ int main(int argc, char* argv[]){
 	colorize();
 	#endif
 
+	info("Start program!");
+
+	if(!init_systems())
+		return 0;
+
+	// Create game files/logs
 	init_files();
 
-	info("Start program!");
-	warn("Test!");
-	error("Oh no!");
-	debug("Its ok, this is just a test.");
-
 	// Create a SDL window
-	SDL_Window* window = NULL;
-	window = init_window();
-
-	if(TTF_Init() < 0){
-		error("TTF could not init!\n");
-		return -1;
+	SDL_Window* window = SDL_CreateWindow("Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+	if(window == NULL){
+		sprintf(tmp, "SDL cond not create window! Error: %s", SDL_GetError());
+		error(tmp);
 	}
 
-	if(window == NULL)
-		return -1;
-
-	// The main loop.
-	handler(window);
+	// Enter the menu state's loop
+	menu_state(window);
 
 	// Cleanup
 	SDL_DestroyWindow(window);
@@ -56,51 +37,21 @@ int main(int argc, char* argv[]){
 	return 0;
 }
 
-SDL_Window* init_window(){
-	// Init SDL and create the window
-	SDL_Window* window = NULL;
-
+bool init_systems(){
+	bool success = 1;
 
 	if(SDL_Init(SDL_INIT_VIDEO) < 0){
-		char msg[64];
-		sprintf(msg, "SDL could not init! SDL_Error: %s\n", SDL_GetError());
-		error(msg);
-		return NULL;
+		success = 0;
+		sprintf(tmp, "SDL cound not init! Error: %s", SDL_GetError());
+		error(tmp);
 	}
-
-	window = SDL_CreateWindow("DinoRun", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
-
-	if(window == NULL){
-		char msg[64];
-		sprintf(msg, "SDL could not create window! SDL Error: %s\n", SDL_GetError());
-		error(msg);
-		return NULL;
-	}
-
-	return window;
-}
-
-void handler(SDL_Window* window){
-
-	int state = MENU;
 	
-	while(true){
-		if(state == MENU){
-			state = menu_state(window);
-		}else if(state == PLAY){
-			state = play_state(window);
-		}else if(state == STORY){
-			warn("STORY is not finished");
-			state = MENU;
-			//story_state(window, e);
-		}else if(state == EXIT){
-			info("Exit state!");
-			return;
-		
-		}else{
-			error("Unknown state! Going to menu!");
-			state = MENU;
-		}
+	if(TTF_Init() < 0){
+		success = 0;
+		sprintf(tmp, "TTF could not init! Error: %s", TTF_GetError());
+		error(tmp);
 	}
+
+	return success;
 }
 
