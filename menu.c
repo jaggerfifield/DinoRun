@@ -1,36 +1,22 @@
-#ifdef WIN
-#include <SDL.h>
-#endif
 
-#ifdef NIX
-#include <SDL2/SDL.h>
-#endif
-
-#include <stdio.h>
-#include <stdbool.h>
-
-#include "jdata.h"
 #include "main.h"
-#include "jio.h"
 
 #define MENU_SIZE 3
 
-int state;
-
-int handle_keys(SDL_Event, int);
-
+// Define functions
+void handle_keys(SDL_Event, bool*, int*);
 void* load_data(void);
-void update(SDL_Window*, struct Jdata**, int);
+void update(SDL_Window*, struct Jdata**, int*);
 
-int menu_state(SDL_Window* window){
-	state = MENU;
+void menu_state(SDL_Window* window){
 
+	// Declare variables
+	SDL_Event e;
+	int location = 0;
+	bool selected = false;
 	bool quit = false;
 
-	SDL_Event e;
-
-	int location = 0;
-
+	// Load assets
 	struct Jdata* DTA[4];
 	DTA[0] = init(ID_MENU_BACKGROUND, JIMAGE, 0, 0, "Menu Background", "Assets/bg_fill.bmp", NULL);
 	DTA[1] = init(ID_MENU_PLAY, JFONT, CENTER, 0, "Play text", "Assets/font.ttf", "Play");
@@ -39,54 +25,55 @@ int menu_state(SDL_Window* window){
 
 	info("Done loading data!");
 
-	while(!quit && (state == MENU)){
+	while(!quit){
 		while(SDL_PollEvent(&e) != 0){
-			if(e.type == SDL_QUIT){
+			if(e.type == SDL_QUIT)
 				quit = true;
-				state = EXIT;
-			}else if(e.type == SDL_KEYDOWN){
-				location = handle_keys(e, location);
+			else if(e.type == SDL_KEYDOWN)
+				handle_keys(e, &selected, &location);
+			if(selected){
+				selected = false;
+				if(location == 0)
+					play_state(window);
+				else if(location == 1)
+					warn("WIP");
+				else if(location == 2)
+					quit = true;
 			}
 		}
-
-		update(window, DTA, location);
+		update(window, DTA, &location);
 	}
 
 	jdata_free(DTA[0]);
 	jdata_free(DTA[1]);
 	jdata_free(DTA[2]);
 	jdata_free(DTA[3]);
-
-	return state;
+	
+	return;	
 }
 
-int handle_keys(SDL_Event e, int location){
+void handle_keys(SDL_Event e, bool* selected, int* location){
+	
 	int key = e.key.keysym.sym;
+	
 	if(key == SDLK_UP){
-		location -= 1;
+		*location -= 1;
 
 		// Check for wrap-around
-		if(location < 0)
-			location = 2;
+		if(*location < 0)
+			*location = 2;
 
 	}else if(key == SDLK_DOWN){
-		location += 1;
+		*location += 1;
 
-		if(location > (MENU_SIZE - 1) )
-			location = 0;
-	}else if(key == SDLK_RETURN){
-		if(location == 0)
-			state = PLAY;
-		else if(location == 1)
-			state = STORY;
-		else if(location == 2)
-			state = EXIT;
-	}
+		if(*location > (MENU_SIZE - 1) )
+			*location = 0;
+	}else if(key == SDLK_RETURN)
+		*selected = true;
 	
-	return location;
 }
 
-void update(SDL_Window* window, struct Jdata** data, int location){
+void update(SDL_Window* window, struct Jdata** data, int* location){
 	
 	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
 
@@ -96,12 +83,10 @@ void update(SDL_Window* window, struct Jdata** data, int location){
 	for(int i = 0; i < 4; i++){
 		struct Jdata* node = data[i];
 
-		SDL_Rect loc;
-		loc.x = node->x;
-		loc.y = node->y;
+		SDL_Rect temp_rect = get_rect(node);
 		
 		if(node->type == JFONT){
-			if(location == node->id - 1){
+			if(*location == node->id - 1){
 				set_fgColour(node, 255, 0 , 0);
 				render(node);
 			}else{
@@ -110,7 +95,7 @@ void update(SDL_Window* window, struct Jdata** data, int location){
 			}
 		}
 
-		SDL_BlitSurface(node->data, NULL, win_surface, &loc);
+		SDL_BlitSurface(node->data, NULL, win_surface, &temp_rect);
 	}
 
 	SDL_UpdateWindowSurface(window);

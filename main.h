@@ -1,5 +1,26 @@
+#ifdef WIN
+#include <SDL.h>
+#include <SDL_ttf.h>
+#endif
+
+#ifdef NIX
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#endif
+
+#include <stdio.h>
+#include <stdbool.h>
+#include <assert.h>
+
+#include "jio.h"
+#include "jdata.h"
+#include "play.h"
+#include "menu.h"
+#include "jtime.h"
+
 #define WINDOW_HEIGHT 1080/2
 #define WINDOW_WIDTH 1920/2
+
 enum Data {JIMAGE, JFONT};
 enum State {MENU, PLAY, PAUSE, STORY, EXIT};
 enum Position {CENTER = -1};
