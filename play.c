@@ -209,8 +209,11 @@ static void object_handler(struct Jdata** data, SDL_Surface* win_surface){
 		distance = distance - 1;
 	}
 
+	// The number of objects allowed on the screen is determined by difficulty (2 means 2 objects)
 	int difficulity = 2;
-	if(num < difficulity && ( (distance == 0) || (distance > 90) ) ){
+
+	// distance helps to prevent impossible jumps. (It counts down from 120 to 0 after a object is activated)
+	if(num < difficulity && ( (distance == 0) || (distance > 95) ) ){
 		active[num] = 1;
 		distance = 120;
 	}
@@ -270,9 +273,9 @@ static bool check_collision(SDL_Rect a, SDL_Rect b){
 }
 
 void read_score(){
-	char value[5] = "0000\0";
+	char value[9] = "00000000\0";
 	FILE* f = jaccess("score", "r");
-	jread(f, value, 4);
+	jread(f, value, 8);
 	fclose(f);
 	sscanf(value, "%d", &hiscore_var);
 	
