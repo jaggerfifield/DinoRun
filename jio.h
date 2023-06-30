@@ -4,7 +4,7 @@ void warn(char*);
 void error(char*);
 void debug(char*);
 
-char* read(FILE*, void*, size_t);
-void write(FILE*, char*);
-FILE* access(char*, char*);
+char* jread(FILE*, void*, size_t);
+void jwrite(FILE*, char*);
+FILE* jaccess(char*, char*);
 void init_files(void);
