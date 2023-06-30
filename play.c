@@ -1,19 +1,4 @@
-#ifdef WIN
-#include <SDL.h>
-#endif
-
-#ifdef NIX
-#include <SDL2/SDL.h>
-#endif
-
-#include <stdio.h>
-#include <time.h>
-#include <stdbool.h>
-
 #include "main.h"
-#include "jdata.h"
-#include "jio.h"
-#include "jtime.h"
 
 static int state;
 static int timer = 3000;
@@ -38,7 +23,7 @@ void write_score(void);
 
 int time_left(int);
 
-int play_state(SDL_Window* window, struct Jdata* data){
+int play_state(SDL_Window* window){
 	state = PLAY;
 	score_var = 0;
 	
@@ -286,8 +271,8 @@ static bool check_collision(SDL_Rect a, SDL_Rect b){
 
 void read_score(){
 	char value[5] = "0000\0";
-	FILE* f = access("score", "r");
-	read(f, value, 4);
+	FILE* f = jaccess("score", "r");
+	jread(f, value, 4);
 	fclose(f);
 	sscanf(value, "%d", &hiscore_var);
 	
@@ -297,11 +282,11 @@ void read_score(){
 }
 
 void write_score(){
-	FILE* f = access("score", "w");
+	FILE* f = jaccess("score", "w");
 	char content[64];
 	
 	sprintf(content, "%d\n", score_var);
-	write(f, content);
+	jwrite(f, content);
 	fclose(f);
 
 	sprintf(content, "Recording new hiscore: %d", score_var);

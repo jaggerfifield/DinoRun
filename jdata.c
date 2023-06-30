@@ -1,20 +1,4 @@
-#ifdef WIN
-#include <SDL.h>
-#endif
-
-#ifdef NIX
-#include <SDL2/SDL.h>
-#endif
-
-#include <stdlib.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <assert.h>
-
-#include "jdata.h"
 #include "main.h"
-#include "jio.h"
 
 struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char* string){
 	struct Jdata* data_node = malloc(sizeof(struct Jdata));

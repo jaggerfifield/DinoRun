@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <time.h>
 
 #include "jio.h"
 #include "jdata.h"

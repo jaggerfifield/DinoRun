@@ -8,9 +8,9 @@
 #endif
 
 void logger(char*);
-FILE* access(char*, char*);
-void write(FILE*, char*);
-void read(FILE*, void*, size_t);
+FILE* jaccess(char*, char*);
+void jwrite(FILE*, char*);
+void jread(FILE*, void*, size_t);
 void init_files(void);
 
 void info(char* output){
@@ -46,12 +46,12 @@ void debug(char* output){
 }
 
 void logger(char* message){
-	FILE* logs = access("log.txt", "a+");
-	write(logs, message);
+	FILE* logs = jaccess("log.txt", "a+");
+	jwrite(logs, message);
 	fclose(logs);
 }
 
-FILE* access(char* path, char* mode){
+FILE* jaccess(char* path, char* mode){
 	FILE* target = fopen(path, mode);
 
 	if(target == NULL){
@@ -62,17 +62,19 @@ FILE* access(char* path, char* mode){
 	return target;
 }
 
-void write(FILE* file, char* content){
+void jwrite(FILE* file, char* content){
 	fwrite(content, sizeof(char), strlen(content), file);
 }
 
-void read(FILE* file, void* dst, size_t size){
+void jread(FILE* file, void* dst, size_t size){
 	fread(dst, size, sizeof(char), file);
 }
 
 void init_files(void){
-	fclose(access("log.txt", "w+"));
-	fclose(access("score", "a+"));
+	fclose(jaccess("log.txt", "w+"));
+	info("Generate log!");
+
+	fclose(jaccess("score", "a+"));
 }
 
 #ifdef WIN
