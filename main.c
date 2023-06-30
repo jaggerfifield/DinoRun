@@ -40,15 +40,12 @@ int main(int argc, char* argv[]){
 bool init_systems(){
 	bool success = 1;
 
-	printf("Load SDL\n");
 	if(SDL_Init(SDL_INIT_VIDEO) < 0){
 		success = 0;
-		printf("Error: %s\n", SDL_GetError());
-		//sprintf(tmp, "SDL cound not init! Error: %s", SDL_GetError());
-		//error(tmp);
+		sprintf(tmp, "SDL cound not init! Error: %s", SDL_GetError());
+		error(tmp);
 	}
 	
-	printf("Load TTF\n");
 	if(TTF_Init() < 0){
 		success = 0;
 		sprintf(tmp, "TTF could not init! Error: %s", TTF_GetError());
