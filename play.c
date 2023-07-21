@@ -1,6 +1,5 @@
 #include "main.h"
 
-static int state;
 static int timer = 3000;
 int score_var = 0;
 int hiscore_var = 0;
@@ -9,6 +8,7 @@ bool debug_overlay = false;
 unsigned int frameCount = 0;
 struct Jtimer* fpsTimer;
 
+bool over = false;
 bool up = false;
 bool down = true;
 int active[4] = {0, 0, 0 ,0};
@@ -16,15 +16,14 @@ int distance = 0;
 
 static void update(SDL_Window*, struct Jdata**);
 static void handle_keys(SDL_Event);
-static void object_handler(struct Jdata**, SDL_Surface*);
+static void object_handler(struct Jdata**, SDL_Window*);
 static bool check_collision(SDL_Rect, SDL_Rect);
 void read_score(void);
 void write_score(void);
 
 int time_left(int);
 
-int play_state(SDL_Window* window){
-	state = PLAY;
+void play_state(SDL_Window* window){
 	score_var = 0;
 	
 	read_score();
@@ -66,11 +65,14 @@ int play_state(SDL_Window* window){
 	timer_start(fpsTimer);
 	frameCount = 0;
 
+	bool quit = false;
+	over = false;
+
 	// Play loop
-	while(state == PLAY){
+	while(!quit && !over){
 		while(SDL_PollEvent(&e)){
 			if(e.type == SDL_QUIT){
-				state = EXIT;
+				quit = true;
 			}else if(e.type == SDL_KEYDOWN){
 				handle_keys(e);
 			}
@@ -88,8 +90,9 @@ int play_state(SDL_Window* window){
 	}
 
 	timer_free(fpsTimer);
-
-	return state;
+	
+	if(!quit)
+		gameover_state(window);
 }
 
 static void update(SDL_Window* window, struct Jdata** data){
@@ -172,7 +175,7 @@ static void update(SDL_Window* window, struct Jdata** data){
 		SDL_BlitSurface(bg->data, NULL, win_surface, &bg_rect);
 
 		// Update object position and generate new objects
-		object_handler(data, win_surface);		
+		object_handler(data, window);		
 
 		SDL_BlitSurface(score->data,   NULL, win_surface, &score_rect);
 		SDL_BlitSurface(hiscore->data, NULL, win_surface, &hiscore_rect);
@@ -202,7 +205,9 @@ static void update(SDL_Window* window, struct Jdata** data){
 	SDL_UpdateWindowSurface(window);
 }
 
-static void object_handler(struct Jdata** data, SDL_Surface* win_surface){
+static void object_handler(struct Jdata** data, SDL_Window* window){
+	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
+
 	int num = rand() % 128;
 
 	if(distance != 0){
@@ -243,11 +248,10 @@ static void object_handler(struct Jdata** data, SDL_Surface* win_surface){
 			object_rect.w = obj->data->w;
 
 			// Detect collision and end play state if true
-			// TODO show a game over screen?
 			if(check_collision(object_rect, player_rect)){
+				over = true;
 				if(score_var >= hiscore_var)
 					write_score();
-				state = MENU;
 			}
 
 			if(obj->x < -obj->data->w){
