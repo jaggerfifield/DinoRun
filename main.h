@@ -16,6 +16,7 @@
 #include "jio.h"
 #include "jdata.h"
 #include "play.h"
+#include "gameover.h"
 #include "menu.h"
 #include "jtime.h"
 
@@ -32,3 +33,6 @@ enum Menu_Ids {ID_MENU_BACKGROUND, ID_MENU_PLAY, ID_MENU_STORY, ID_MENU_EXIT};
 
 // For play.c
 enum Play_Ids {ID_PLAY_BACKGROUND, ID_PLAY_PLAYER, ID_PLAY_3, ID_PLAY_2, ID_PLAY_1, ID_PLAY_GO, ID_PLAY_SCORE, ID_PLAY_HISCORE, ID_PLAY_OBJECT, ID_PLAY_OBJECT2, ID_PLAY_OBJECT3, ID_PLAY_OBJECT4};
+
+// For gameover.c
+enum Gameover_Ids {ID_GAMEOVER_TEXT, ID_GAMEOVER_PLAY, ID_GAMEOVER_EXIT};
