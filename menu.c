@@ -1,7 +1,7 @@
 
 #include "main.h"
 
-#define MENU_SIZE 3
+#define MENU_SIZE 4
 
 // Define functions
 void handle_keys(SDL_Event, bool*, int*);
@@ -17,11 +17,12 @@ void menu_state(SDL_Window* window){
 	bool quit = false;
 
 	// Load assets
-	struct Jdata* DTA[4];
+	struct Jdata* DTA[5];
 	DTA[0] = init(ID_MENU_BACKGROUND, JIMAGE, 0, 0, "Menu Background", "Assets/bg_fill.bmp", NULL);
 	DTA[1] = init(ID_MENU_PLAY, JFONT, CENTER, 0, "Play text", "Assets/font.ttf", "Play");
 	DTA[2] = init(ID_MENU_STORY, JFONT, CENTER, 100, "Stroy text", "Assets/font.ttf", "Story");
-	DTA[3] = init(ID_MENU_EXIT, JFONT, CENTER, 200, "Exit text", "Assets/font.ttf", "Exit");
+	DTA[3] = init(ID_MENU_SETTINGS, JFONT, CENTER, 200, "Settings text", "Assets/font.ttf", "Settings");
+	DTA[4] = init(ID_MENU_EXIT, JFONT, CENTER, 300, "Exit text", "Assets/font.ttf", "Exit");
 
 	info("Done loading data!");
 
@@ -38,6 +39,8 @@ void menu_state(SDL_Window* window){
 				else if(location == 1)
 					warn("WIP");
 				else if(location == 2)
+					info("goto settings");
+				else if(location == 3)
 					quit = true;
 			}
 		}
@@ -48,6 +51,7 @@ void menu_state(SDL_Window* window){
 	jdata_free(DTA[1]);
 	jdata_free(DTA[2]);
 	jdata_free(DTA[3]);
+	jdata_free(DTA[4]);
 	
 	return;	
 }
@@ -61,7 +65,7 @@ void handle_keys(SDL_Event e, bool* selected, int* location){
 
 		// Check for wrap-around
 		if(*location < 0)
-			*location = 2;
+			*location = MENU_SIZE - 1;
 
 	}else if(key == SDLK_DOWN){
 		*location += 1;
@@ -80,7 +84,7 @@ void update(SDL_Window* window, struct Jdata** data, int* location){
 	// TODO: dynamic data length (pass size in update)
 	// for(int i = 0; i < size; i++){
 	
-	for(int i = 0; i < 4; i++){
+	for(int i = 0; i < 5; i++){
 		struct Jdata* node = data[i];
 
 		SDL_Rect temp_rect = get_rect(node);
