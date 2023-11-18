@@ -34,7 +34,7 @@ void play_state(SDL_Window* window){
 
 	struct Jdata* DTA[dSize];
 	DTA[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play background", "Assets/bg_fill.bmp", NULL);
-	DTA[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/dino.bmp", NULL);
+	DTA[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/image.bmp", NULL);
 	DTA[2] = init(ID_PLAY_3, JFONT, CENTER, CENTER, "Countdown 3", "Assets/font.ttf", "3");
 	DTA[3] = init(ID_PLAY_2, JFONT, CENTER, CENTER, "Countdown 2", "Assets/font.ttf", "2");
 	DTA[4] = init(ID_PLAY_1, JFONT, CENTER, CENTER, "Countdown 1", "Assets/font.ttf", "1");
@@ -153,8 +153,8 @@ static void update(SDL_Window* window, struct Jdata** data){
 		// Apply jump physics (up/down movement)
 
 		// Move dino up
-		if(!down && up && dino->y > WINDOW_HEIGHT - dino->data->h * 4)
-			dino->y = dino->y - (gravity * 2);
+		if(!down && up && dino->y > 0)
+			dino->y = dino->y - gravity;
 		else{
 			down = true;
 			up = false;

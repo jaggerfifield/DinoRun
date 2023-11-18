@@ -37,7 +37,7 @@ void menu_state(SDL_Window* window){
 				if(location == 0)
 					play_state(window);
 				else if(location == 1)
-					warn("WIP");
+					story_state(window);
 				else if(location == 2)
 					info("goto settings");
 				else if(location == 3)

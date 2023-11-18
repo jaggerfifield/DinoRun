@@ -19,6 +19,7 @@
 #include "gameover.h"
 #include "menu.h"
 #include "jtime.h"
+#include "story.h"
 
 #define WINDOW_HEIGHT 1080/2
 #define WINDOW_WIDTH 1920/2

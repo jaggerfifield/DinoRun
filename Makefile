@@ -24,7 +24,7 @@ DEF := -D$(OS)
 
 NAME := game
 
-DEP := jtime.o play.o gameover.o menu.o jdata.o jio.o main.o
+DEP := jtime.o play.o story.o gameover.o menu.o jdata.o jio.o main.o
 
 all : $(RESO) project $(DEP)
 	@echo =====Empty build folder=====
@@ -48,6 +48,11 @@ jtime.o : jtime.c
 play.o : play.c
 	@echo =====Compile play.c=====
 	gcc $(IPATH) $(DEF) -Wall -g -c play.c
+	@echo
+
+story.o : story.c
+	@echo =====Compile story.c=====
+	gcc $(IPATH) $(DEF) -Wall -g -c story.c
 	@echo
 
 gameover.o : gameover.c
