@@ -36,6 +36,11 @@ void gameover_state(SDL_Window* window){
 		update(window, DTA, sel);
 	}
 	
+	// Clean up memory
+	for(int i = 0; i < dSize; i++){
+		jdata_free(DTA[i]);
+	}
+
 	if(sel)
 		play_state(window);
 }
