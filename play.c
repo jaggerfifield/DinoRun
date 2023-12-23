@@ -326,7 +326,7 @@ void write_score(){
 static void handle_keys(SDL_Event e){
 	int key = e.key.keysym.sym;
 	
-	if(key == SDLK_UP){
+	if(key == SDLK_UP || key == SDLK_SPACE){
 		up = true;
 	}else if(key == SDLK_F3){
 		debug_overlay = ! debug_overlay;
