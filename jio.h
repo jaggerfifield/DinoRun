@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 int colorize(void);
 void info(char*);
 void warn(char*);

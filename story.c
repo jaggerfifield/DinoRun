@@ -1,4 +1,13 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <time.h>
+
 #include "main.h"
+#include "jdata.h"
+#include "jtime.h"
+#include "jio.h"
+
+static int w, h;
 
 // TODO: movement struct, remove the global varialbes.
 static bool up = false;
@@ -18,15 +27,22 @@ static void handle_keyup(SDL_Event);
 
 void story_state(SDL_Window* window){
 
+	SDL_GetWindowSize(window, &w, &h);
+
+	if(w<0||h<0){
+		error("Bad window size!");
+		exit(-1);
+	}
+
 	fpsTimer = timer_init();
 
 	int dSize = 3;
 
 	struct Jdata* DTA[dSize];
-	DTA[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play background", "Assets/bg_fill.bmp", NULL);
-	DTA[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/image.bmp", NULL);
+	DTA[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play background", "Assets/bg_fill.bmp", NULL, window);
+	DTA[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/image.bmp", NULL, window);
 	// Debug layers
-	DTA[2] = init(912, JFONT, 0, 0, "Debug overlay", "Assets/font.ttf", "");
+	DTA[2] = init(912, JFONT, 0, 0, "Debug overlay", "Assets/font.ttf", "", window);
 
 	// Enable background render on debug layer
 	set_text_bg(DTA[2]);
@@ -71,9 +87,6 @@ void story_state(SDL_Window* window){
 	}
 
 	timer_free(fpsTimer);
-	
-	if(!quit)
-		gameover_state(window);
 }
 
 static void update(SDL_Window* window, struct Jdata** data){
@@ -96,13 +109,13 @@ static void update(SDL_Window* window, struct Jdata** data){
 	}
 
 	// Move dino back down
-	if(dino->y < WINDOW_HEIGHT - dino->data->h && down)
+	if(dino->y < h - dino->data->h && down)
 		dino->y = dino->y + (gravity);
 	else
 		down = false;
 
 	// Move left and right
-	if(right && !left && dino->x < WINDOW_WIDTH)
+	if(right && !left && dino->x < w)
 		dino->x = dino->x + 1;
 
 	if(left && !right && dino->x > 0)

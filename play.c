@@ -1,5 +1,22 @@
-#include "main.h"
+#ifdef WIN
+#include <SDL.h>
+#endif
 
+#ifdef NIX
+#include <SDL2/SDL.h>
+#endif
+
+#include <stdio.h>
+#include<stdbool.h>
+#include <time.h>
+
+#include "main.h"
+#include "jdata.h"
+#include "jtime.h"
+#include "jio.h"
+#include "gameover.h"
+
+static int h,w;
 static int timer = 3000;
 int score_var = 0;
 int hiscore_var = 0;
@@ -24,6 +41,12 @@ void write_score(void);
 int time_left(int);
 
 void play_state(SDL_Window* window){
+	SDL_GetWindowSize(window, &h, &w);
+	if(h<0||w<0){
+		error("Bad window Size!");
+		exit(-1);
+	}
+
 	score_var = 0;
 	
 	read_score();
@@ -33,20 +56,20 @@ void play_state(SDL_Window* window){
 	int dSize = 13;
 
 	struct Jdata* DTA[dSize];
-	DTA[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play background", "Assets/bg_fill.bmp", NULL);
-	DTA[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/image.bmp", NULL);
-	DTA[2] = init(ID_PLAY_3, JFONT, CENTER, CENTER, "Countdown 3", "Assets/font.ttf", "3");
-	DTA[3] = init(ID_PLAY_2, JFONT, CENTER, CENTER, "Countdown 2", "Assets/font.ttf", "2");
-	DTA[4] = init(ID_PLAY_1, JFONT, CENTER, CENTER, "Countdown 1", "Assets/font.ttf", "1");
-	DTA[5] = init(ID_PLAY_GO, JFONT, CENTER, CENTER, "Countdown GO", "Assets/font.ttf", "GO!");
-	DTA[6] = init(ID_PLAY_SCORE, JFONT, 0, 0, "Score text", "Assets/font.ttf", "SCORE: 0");
-	DTA[7] = init(ID_PLAY_HISCORE, JFONT, 0, 0, "Hiscore text", "Assets/font.ttf", "HISCORE: 0");
-	DTA[8] = init(ID_PLAY_OBJECT, JIMAGE, WINDOW_WIDTH, 0, "Object 1", "Assets/dino.bmp", NULL);
-	DTA[9] = init(ID_PLAY_OBJECT2, JIMAGE, WINDOW_WIDTH, 0, "Object 2", "Assets/ball.bmp", NULL);
-	DTA[10] = init(ID_PLAY_OBJECT3, JIMAGE, WINDOW_WIDTH, 0, "Object 3", "Assets/OBJ3.bmp", NULL);
-	DTA[11] = init(ID_PLAY_OBJECT4, JIMAGE, WINDOW_WIDTH, 0, "Object 4", "Assets/dino.bmp", NULL);
+	DTA[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play background", "Assets/bg_fill.bmp", NULL, window);
+	DTA[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/image.bmp", NULL, window);
+	DTA[2] = init(ID_PLAY_3, JFONT, CENTER, CENTER, "Countdown 3", "Assets/font.ttf", "3", window);
+	DTA[3] = init(ID_PLAY_2, JFONT, CENTER, CENTER, "Countdown 2", "Assets/font.ttf", "2", window);
+	DTA[4] = init(ID_PLAY_1, JFONT, CENTER, CENTER, "Countdown 1", "Assets/font.ttf", "1", window);
+	DTA[5] = init(ID_PLAY_GO, JFONT, CENTER, CENTER, "Countdown GO", "Assets/font.ttf", "GO!", window);
+	DTA[6] = init(ID_PLAY_SCORE, JFONT, 0, 0, "Score text", "Assets/font.ttf", "SCORE: 0", window);
+	DTA[7] = init(ID_PLAY_HISCORE, JFONT, 0, 0, "Hiscore text", "Assets/font.ttf", "HISCORE: 0", window);
+	DTA[8] = init(ID_PLAY_OBJECT, JIMAGE, w, 0, "Object 1", "Assets/dino.bmp", NULL, window);
+	DTA[9] = init(ID_PLAY_OBJECT2, JIMAGE, w, 0, "Object 2", "Assets/ball.bmp", NULL, window);
+	DTA[10] = init(ID_PLAY_OBJECT3, JIMAGE, w, 0, "Object 3", "Assets/OBJ3.bmp", NULL, window);
+	DTA[11] = init(ID_PLAY_OBJECT4, JIMAGE, w, 0, "Object 4", "Assets/dino.bmp", NULL,window);
 	// Debug layers
-	DTA[12] = init(912, JFONT, 0, 0, "Debug overlay", "Assets/font.ttf", "");
+	DTA[12] = init(912, JFONT, 0, 0, "Debug overlay", "Assets/font.ttf", "", window);
 
 	// Enable background render on debug layer
 	set_text_bg(DTA[12]);
@@ -148,7 +171,7 @@ static void update(SDL_Window* window, struct Jdata** data){
 		sprintf(str, "High Score: %d", (int)(hiscore_var/10));
 		hiscore->string = str;
 		render(hiscore);
-		hiscore->x = WINDOW_WIDTH - hiscore->data->w;
+		hiscore->x = w - hiscore->data->w;
 
 		// Apply jump physics (up/down movement)
 
@@ -161,7 +184,7 @@ static void update(SDL_Window* window, struct Jdata** data){
 		}
 
 		// Move dino back down
-		if(dino->y < WINDOW_HEIGHT - dino->data->h && down)
+		if(dino->y < h - dino->data->h && down)
 			dino->y = dino->y + (gravity);
 		else
 			down = false;
@@ -227,7 +250,7 @@ static void object_handler(struct Jdata** data, SDL_Window* window){
 	for(int i = 0; i < 4; i++){
 		struct Jdata* obj = data[ID_PLAY_OBJECT + i];
 		if(obj != NULL && active[i]){
-			obj->y = WINDOW_HEIGHT - obj->data->h;
+			obj->y = h - obj->data->h;
 			obj->x = obj->x - 6;
 
 
@@ -255,7 +278,7 @@ static void object_handler(struct Jdata** data, SDL_Window* window){
 			}
 
 			if(obj->x < -obj->data->w){
-				obj->x = WINDOW_WIDTH;
+				obj->x = w;
 				active[i] = 0;
 			}
 
