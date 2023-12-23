@@ -16,6 +16,7 @@
 #include "update.h"
 #include "play.h"
 #include "story.h"
+#include "settings.h"
 
 // How many button in menu?
 #define MENU_SIZE 4

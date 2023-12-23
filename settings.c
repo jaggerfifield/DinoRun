@@ -1,5 +1,16 @@
+#ifdef WIN
+#include <SDL.h>
+#endif
+
+#ifdef NIX
+#include <SDL2/SDL.h>
+#endif
+
+#include <stdbool.h>
 
 #include "main.h"
+#include "jdata.h"
+#include "jio.h"
 
 #define MENU_SIZE 4
 
@@ -23,11 +34,11 @@ void settings_state(SDL_Window* window){
 
 	// Load assets
 	struct Jdata* DTA[5];
-	DTA[0] = init(0, JIMAGE, 0, 0, "Menu Background", "Assets/bg_fill.bmp", NULL);
-	DTA[1] = init(1, JFONT, CENTER, 0, "Volume", "Assets/font.ttf", "<  Volume ---%  >");
-	DTA[2] = init(2, JFONT, CENTER, 100, "", "Assets/font.ttf", "Empty");
-	DTA[3] = init(3, JFONT, CENTER, 200, "", "Assets/font.ttf", "Empty");
-	DTA[4] = init(4, JFONT, CENTER, 300, "", "Assets/font.ttf", "Back");
+	DTA[0] = init(0, JIMAGE, 0, 0, "Menu Background", "Assets/bg_fill.bmp", NULL, window);
+	DTA[1] = init(1, JFONT, CENTER, 0, "Volume", "Assets/font.ttf", "<  Volume ---%  >", window);
+	DTA[2] = init(2, JFONT, CENTER, 100, "", "Assets/font.ttf", "Empty", window);
+	DTA[3] = init(3, JFONT, CENTER, 200, "", "Assets/font.ttf", "Empty", window);
+	DTA[4] = init(4, JFONT, CENTER, 300, "", "Assets/font.ttf", "Back", window);
 
 	while(!quit){
 		while(SDL_PollEvent(&e) != 0){
@@ -38,7 +49,7 @@ void settings_state(SDL_Window* window){
 			if(selected){
 				selected = false;
 				if(location == 0)
-					play_state(window);
+					info("test");
 				else if(location == 1)
 					warn("TODO");
 				else if(location == 2)
