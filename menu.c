@@ -48,7 +48,7 @@ void menu_state(SDL_Window* window, SDL_Renderer* render){
 				else if(location == 1)
 					story_state(window);
 				else if(location == 2)
-					info("goto settings");
+					settings_state(window);
 				else if(location == 3)
 					quit = true;
 			}
