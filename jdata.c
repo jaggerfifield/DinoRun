@@ -1,6 +1,22 @@
-#include "main.h"
+#ifdef WIN
+#include <SDL.h>
+#include <SDL_ttf.h>
+#endif
 
-struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char* string){
+#ifdef NIX
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#endif
+
+#include <stdlib.h>
+#include <stdbool.h>
+#include <assert.h>
+
+#include "main.h"
+#include "jio.h"
+#include "jdata.h"
+
+struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char* string, SDL_Window* window){
 	struct Jdata* data_node = malloc(sizeof(struct Jdata));
 
 	data_node->id = id;
@@ -13,6 +29,8 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 
 	data_node->text_bg = false;
 	data_node->text_size = 40;
+
+	data_node->window = window;
 
 	if(type == JIMAGE){
 		// Render the image
@@ -40,10 +58,23 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 	}
 
 	// Apply centering
-	if(x == CENTER)
-		data_node->x = (WINDOW_WIDTH / 2) - (data_node->data->w / 2);
-	if (y == CENTER)
-		data_node->y = (WINDOW_HEIGHT / 2) - (data_node->data->h / 2);
+	if(x == CENTER){
+		int w;
+		SDL_GetWindowSize(window, &w, NULL);
+		if(w < 0){
+			error("jdata.c : Bad width!");
+			exit(-1);
+		}
+		data_node->x = (w / 2) - (data_node->data->w / 2);
+	}if (y == CENTER){
+		int h;
+		SDL_GetWindowSize(window, NULL, &h);
+		if(h < 0){
+			error("jdata.c : Bad height!");
+			exit(-1);
+		}
+		data_node->y = (h / 2) - (data_node->data->h / 2);
+	}
 
 	return data_node;
 }

@@ -8,6 +8,8 @@
 #include <SDL2/SDL_ttf.h>
 #endif
 
+#include <stdbool.h>
+
 // TODO: Update flags, 
 
 struct Jdata{
@@ -45,9 +47,12 @@ struct Jdata{
 	TTF_Font* fnt;
 	SDL_Color fgColour;
 	SDL_Color bgColour;
+
+	// Window size
+	SDL_Window* window;
 };
 
-struct Jdata* init(int, int, int, int, char*, char*, char*);
+struct Jdata* init(int, int, int, int, char*, char*, char*, SDL_Window*);
 void render(struct Jdata*);
 
 void set_text_bg(struct Jdata*);

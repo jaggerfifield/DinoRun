@@ -1,4 +1,15 @@
+#ifdef WIN
+#include <SDL.h>
+#endif
+
+#ifdef NIX
+#include <SDL2/SDL.h>
+#endif
+
 #include "main.h"
+#include "jdata.h"
+#include "jio.h"
+#include "play.h"
 
 int choice;
 
@@ -9,9 +20,9 @@ void gameover_state(SDL_Window* window){
 	
 	int dSize = 3;
 	struct Jdata* DTA[dSize];
-	DTA[0] = init(ID_GAMEOVER_TEXT, JFONT, -1, 100, "Game Over! text", "Assets/font.ttf", "Game Over!");
-	DTA[1] = init(ID_GAMEOVER_PLAY, JFONT, -1, -1, "Play again text", "Assets/font.ttf", "Retry");
-	DTA[2] = init(ID_GAMEOVER_EXIT, JFONT, -1, -1, "Quit text", "Assets/font.ttf", "Back");
+	DTA[0] = init(ID_GAMEOVER_TEXT, JFONT, -1, 100, "Game Over! text", "Assets/font.ttf", "Game Over!", window);
+	DTA[1] = init(ID_GAMEOVER_PLAY, JFONT, -1, -1, "Play again text", "Assets/font.ttf", "Retry", window);
+	DTA[2] = init(ID_GAMEOVER_EXIT, JFONT, -1, -1, "Quit text", "Assets/font.ttf", "Back", window);
 	
 	struct Jdata* play = DTA[ID_GAMEOVER_PLAY];
 	struct Jdata* exit = DTA[ID_GAMEOVER_EXIT];
