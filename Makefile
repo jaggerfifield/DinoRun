@@ -1,41 +1,52 @@
 # Detect OS
 ifeq ($(OS), Windows_NT)
 	OS := WIN
+	OTHER := NIX
 	LINK := -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf
 	RESO := ico.res
 
 	IPATH := -I.\SDL\include
 	LPATH := -L.\SDL\lib
 
-	COPY1 := cp -r SDL/SDL2.dll bin/
-	COPY2 := cp -r SDL/SDL2_ttf.dll bin/
+	COPY1 := cp -r SDL/SDL2.dll bin/$(OS)
+	COPY2 := cp -r SDL/SDL2_ttf.dll bin/$(OS)
+	
+	BUILD_DIR := \\
 
 else
 	OS := NIX
+	OTHER := WIN
 
 	LINK := -lSDL2 -lSDL2_ttf
 	RESO :=
 
 	IPATH :=
 	LPATH :=
+
+	BUILD_DIR := //
 endif
 
 DEF := -D$(OS)
+
+WDIR := $(shell pwd)
 
 NAME := game
 
 DEP := jtime.o play.o story.o gameover.o menu.o settings.o jdata.o jio.o update.o data.o main.o
 
-all : $(RESO) project $(DEP)
+all : $(RESO) $(OS) $(DEP)
+	@echo =====Working Directory=====
+	@echo $(WDIR)
+	@echo
 	@echo =====Empty build folder=====
-	@echo . >> ./bin/file.txt
-	rm -r ./bin/*
+	@echo . >> ./bin/$(OS)/file.txt
+	rm -r ./bin/$(OS)/*
 	@echo
 	@echo =====Building for $(OS)=====
-	gcc -ggdb -o bin/$(NAME) $(DEP) $(DEF) $(LPATH) $(LINK) $(RESO)
+	gcc -ggdb -o $(WDIR)/bin/$(OS)/$(NAME) $(DEP) $(DEF) $(LPATH) $(LINK) $(RESO)
 	@echo
 	@echo =====Copy Assets to folder=====
-	cp -r Assets bin/
+	cp -r Assets bin/$(OS)/
 	$(COPY1)
 	$(COPY2)
 	@echo
@@ -88,16 +99,26 @@ update.o : update.c
 data.o : data.c
 	@echo =====Compie data.c=====
 	gcc $(IPATH) $(DEF) -Wall -g -c data.c
+	@echo
 
 main.o : main.c
 	@echo =====Compie main.c=====
 	gcc $(IPATH) $(DEF) -Wall -g -c main.c
 	@echo
 
-project :
+$(OS) : $(OS).proj
+	@echo =====Updating objects=====
+	touch tmp.o
+	@echo tmp >> $(OTHER)
+	rm $(OTHER)
+	rm ./*.o
+	@echo Do not delete >> $(OS)
+	@echo
+
+$(OS).proj :
 	@echo =====Create project directory=====
-	mkdir ./bin
-	@echo Do not delete >> project
+	mkdir bin$(BUILD_DIR)$(OS)
+	@echo Do no delete >> $(OS).proj
 	@echo
 
 ico.res : ico.rc
@@ -105,8 +126,10 @@ ico.res : ico.rc
 	windres ico.rc -O coff -o ico.res
 	@echo
 
-clean :
-	@echo =====Removing all past build files=====
-	rm -r ./bin
+clean : $(OS)
+	@echo =====Removing objects=====
+	@echo tmp >> tmp.o
 	rm ./*.o
-	rm project
+	rm -r ./bin/$(OS)
+	rm $(OS)
+	rm $(OS).proj
