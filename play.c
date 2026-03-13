@@ -241,7 +241,7 @@ static void object_handler(struct Jdata** data, SDL_Window* window){
 	}
 
 	// The number of objects allowed on the screen is determined by difficulty (2 means 2 objects)
-	int difficulity = 2;
+	int difficulity = 4;
 
 	// distance helps to prevent impossible jumps. (It counts down from 120 to 0 after a object is activated)
 	if(num < difficulity && ( (distance == 0) ) ) {//|| (distance > 95) ) ){
