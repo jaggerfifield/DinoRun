@@ -151,3 +151,20 @@ void jdata_free(struct Jdata* node){
 	free(node);
 }
 
+void jdata_print(struct Jdata* node){
+	char temp[64];
+	debug("=====Printing Jdata node=====");
+
+	sprintf(temp, "    ID: %d", node->id);
+	debug(temp);
+
+	sprintf(temp, "    TYPE: %d", node->type);
+	debug(temp);
+
+	sprintf(temp, "    X, Y: %d,%d", node->x, node->y);
+	debug(temp);
+
+	sprintf(temp, "    NAME: %s", node->name);
+	debug(temp);
+}
+
