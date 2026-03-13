@@ -63,3 +63,4 @@ void set_text_size(struct Jdata*, unsigned short int);
 SDL_Rect get_rect(struct Jdata*);
 
 void jdata_free(struct Jdata*);
+void jdata_print(struct Jdata*);
