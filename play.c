@@ -29,7 +29,7 @@ bool over = false;
 bool up = false;
 bool down = true;
 int active[4] = {0, 0, 0 ,0};
-int distance = 0;
+int distance = 100;
 
 static void update(SDL_Window*, struct Jdata**);
 static void handle_keys(SDL_Event);
@@ -156,6 +156,7 @@ static void update(SDL_Window* window, struct Jdata** data){
 		struct Jdata* debug = data[12];
 
 		int gravity = 4;
+		int accel = 1;
 
 		// Update score count here.
 		score_var += 1;
@@ -176,17 +177,20 @@ static void update(SDL_Window* window, struct Jdata** data){
 
 		// Move dino up
 		if( ( !down && up ) && ( dino->y > (h - (h/2)) ) ) 
-			dino->y = dino->y - gravity;
+			dino->y = dino->y - gravity*2;
 		else{
 			down = true;
 			up = false;
 		}
 
 		// Move dino back down
-		if(dino->y < h - dino->data->h && down)
-			dino->y = dino->y + (gravity);
-		else
+		if(dino->y < h - dino->data->h && down){
+			dino->y = dino->y + (gravity+accel);
+			accel += 1;
+		}else{
+			accel = 1;
 			down = false;
+		}
 
 		SDL_Rect bg_rect = get_rect(bg);
 		SDL_Rect score_rect = get_rect(score);
@@ -272,6 +276,11 @@ static void object_handler(struct Jdata** data, SDL_Window* window){
 			// Detect collision and end play state if true
 			if(check_collision(object_rect, player_rect)){
 				over = true;
+
+				for(int k = 0; k < 4; k++){
+					active[k] = 0;
+				}
+
 				if(score_var >= hiscore_var)
 					write_score();
 			}
