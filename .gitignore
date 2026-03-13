@@ -1,6 +1,11 @@
-Assets/KRA
+Assets/*.kra
+Assets/*.xcf
+SDL/*
 *.o
 *.gch
 *.exe
-project
+WIN
+WIN.proj
+NIX
+NIX.proj
 bin/*
