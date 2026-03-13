@@ -41,7 +41,7 @@ void write_score(void);
 int time_left(int);
 
 void play_state(SDL_Window* window){
-	SDL_GetWindowSize(window, &h, &w);
+	SDL_GetWindowSize(window, &w, &h);
 	if(h<0||w<0){
 		error("Bad window Size!");
 		exit(-1);
@@ -57,7 +57,7 @@ void play_state(SDL_Window* window){
 
 	struct Jdata* DTA[dSize];
 	DTA[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play background", "Assets/bg_fill.bmp", NULL, window);
-	DTA[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/image.bmp", NULL, window);
+	DTA[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/block.bmp", NULL, window);
 	DTA[2] = init(ID_PLAY_3, JFONT, CENTER, CENTER, "Countdown 3", "Assets/font.ttf", "3", window);
 	DTA[3] = init(ID_PLAY_2, JFONT, CENTER, CENTER, "Countdown 2", "Assets/font.ttf", "2", window);
 	DTA[4] = init(ID_PLAY_1, JFONT, CENTER, CENTER, "Countdown 1", "Assets/font.ttf", "1", window);
@@ -79,8 +79,7 @@ void play_state(SDL_Window* window){
 	int next_time = SDL_GetTicks() + 5;
 
 	// Apply a seed for random
-	time_t t;
-	srand((unsigned) time(&t));
+	srand(time(NULL));
 
 	SDL_Event e;
 
@@ -176,7 +175,7 @@ static void update(SDL_Window* window, struct Jdata** data){
 		// Apply jump physics (up/down movement)
 
 		// Move dino up
-		if(!down && up && dino->y > 0)
+		if( ( !down && up ) && ( dino->y > (h - (h/2)) ) ) 
 			dino->y = dino->y - gravity;
 		else{
 			down = true;
@@ -231,7 +230,7 @@ static void update(SDL_Window* window, struct Jdata** data){
 static void object_handler(struct Jdata** data, SDL_Window* window){
 	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
 
-	int num = rand() % 128;
+	int num = rand() % 4;
 
 	if(distance != 0){
 		distance = distance - 1;
@@ -241,7 +240,7 @@ static void object_handler(struct Jdata** data, SDL_Window* window){
 	int difficulity = 2;
 
 	// distance helps to prevent impossible jumps. (It counts down from 120 to 0 after a object is activated)
-	if(num < difficulity && ( (distance == 0) || (distance > 95) ) ){
+	if(num < difficulity && ( (distance == 0) ) ) {//|| (distance > 95) ) ){
 		active[num] = 1;
 		distance = 120;
 	}
