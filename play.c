@@ -108,11 +108,12 @@ void play_state(SDL_Window* window){
 	
 	// Free datas
 	for(int i = 0; i < dSize; i++){
-		jdata_free(DTA[i]);
+        jdata_free(DTA[i]);
 	}
 
 	timer_free(fpsTimer);
 	
+    warn("Gameover State");
 	if(!quit)
 		gameover_state(window);
 }
@@ -160,16 +161,13 @@ static void update(SDL_Window* window, struct Jdata** data){
 
 		// Update score count here.
 		score_var += 1;
-		char str[64];
-		sprintf(str, "SCORE: %d", (int)(score_var/10));
-		score->string = str;
+		sprintf(score->string, "SCORE: %d", (int)(score_var/10));
 		render(score);
 
 		// Update HiScore here
 		if(score_var > hiscore_var)
 			hiscore_var = score_var;
-		sprintf(str, "High Score: %d", (int)(hiscore_var/10));
-		hiscore->string = str;
+		sprintf(hiscore->string, "High Score: %d", (int)(hiscore_var/10));
 		render(hiscore);
 		hiscore->x = w - hiscore->data->w;
 
@@ -215,9 +213,7 @@ static void update(SDL_Window* window, struct Jdata** data){
 				avgFPS = 0;
 
 			// Update string
-			sprintf(str, "FPS: %f", avgFPS);
-			
-			debug->string = str;
+			sprintf(debug->string, "FPS: %f", avgFPS);
 			render(debug);
 			
 			SDL_Rect debug_rect = get_rect(debug);

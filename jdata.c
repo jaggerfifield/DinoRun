@@ -25,9 +25,10 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 	data_node->y = y;
 	data_node-> name = name;
 	data_node->path = path;
-	data_node->string = string;
-
-	data_node->text_bg = false;
+	data_node->string = (char*)malloc(128);
+    sprintf(data_node->string, "%s", string);
+    
+    data_node->text_bg = false;
 	data_node->text_size = 40;
 
 	data_node->window = window;
@@ -148,6 +149,12 @@ void jdata_free(struct Jdata* node){
 		node->fnt = NULL;
 	}
 	
+    // Free the text string
+    if(node->string != NULL){
+        free(node->string);
+        node->string = NULL;
+    }
+
 	free(node);
 }
 
