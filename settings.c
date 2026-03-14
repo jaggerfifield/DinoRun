@@ -40,6 +40,9 @@ void settings_state(SDL_Window* window){
 	DTA[3] = init(3, JFONT, CENTER, 200, "", "Assets/font.ttf", "Empty", window);
 	DTA[4] = init(4, JFONT, CENTER, 300, "", "Assets/font.ttf", "Back", window);
 
+    // Load current volume level
+    sprintf(DTA[1]->string, "<  Volume %.3d%%  >", volume);
+
 	while(!quit){
 		while(SDL_PollEvent(&e) != 0){
 			if(e.type == SDL_QUIT)
@@ -107,20 +110,19 @@ static void update(SDL_Window* window, struct Jdata** data, int* location){
 		
 		if(node->type == JFONT){
 			if(*location == node->id - 1){
-				char str[64];
 				if(direction == 1){
 					// Left
 					if(node->id == 1 && volume > 0){
 						// Turn volume down
 						volume -= 1;
-						sprintf(str, "<  Volume %.3d%%  >", volume);
-						node->string = str;
+						sprintf(node->string, "<  Volume %.3d%%  >", volume);
+						//node->string = str;
 					}
 				}else if(direction == 2){
 					if(node->id == 1 && volume < 100){
 						volume += 1;
-						sprintf(str, "<  Volume %.3d%%  >", volume);
-						node->string = str;
+						sprintf(node->string, "<  Volume %.3d%%  >", volume);
+						//node->string = str;
 					}
 				}
 
