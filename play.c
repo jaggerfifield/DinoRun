@@ -1,5 +1,5 @@
 #ifdef WIN
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 #ifdef NIX
@@ -7,6 +7,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdlib.h>
 #include<stdbool.h>
 #include <time.h>
 
@@ -32,7 +33,7 @@ int active[4] = {0, 0, 0 ,0};
 int distance = 100;
 
 static void update(SDL_Window*, struct Jdata**);
-static void handle_keys(SDL_Event);
+static void handle_keys(SDL_KeyboardEvent);
 static void object_handler(struct Jdata**, SDL_Window*);
 static bool check_collision(SDL_Rect, SDL_Rect);
 void read_score(void);
@@ -93,10 +94,10 @@ void play_state(SDL_Window* window){
 	// Play loop
 	while(!quit && !over){
 		while(SDL_PollEvent(&e)){
-			if(e.type == SDL_QUIT){
+			if(e.type == SDL_EVENT_QUIT){
 				quit = true;
-			}else if(e.type == SDL_KEYDOWN){
-				handle_keys(e);
+			}else if(e.type == SDL_EVENT_KEY_DOWN){
+				handle_keys(e.key);
 			}
 		}
 
@@ -327,8 +328,8 @@ void write_score(){
 	debug(content);
 }
 
-static void handle_keys(SDL_Event e){
-	int key = e.key.keysym.sym;
+static void handle_keys(SDL_KeyboardEvent e){
+	SDL_Keycode key = e.key;
 	
 	if(key == SDLK_UP || key == SDLK_SPACE){
 		up = true;

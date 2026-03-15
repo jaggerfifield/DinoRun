@@ -1,6 +1,6 @@
 #ifdef WIN
-#include <SDL.h>
-#include <SDL_ttf.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_ttf.h>
 #endif
 
 #ifdef NIX
@@ -26,8 +26,11 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 	data_node-> name = name;
 	data_node->path = path;
 	data_node->string = (char*)malloc(128);
+    memset(data_node->string, '\0', 128);
     sprintf(data_node->string, "%s", string);
     
+    assert(data_node->string[127] == '\0');
+
     data_node->text_bg = false;
 	data_node->text_size = 40;
 
@@ -38,7 +41,7 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 		data_node->data = SDL_LoadBMP(path);
 		
 		// Apply color key
-		SDL_SetColorKey(data_node->data, SDL_TRUE, SDL_MapRGB(data_node->data->format, 0, 0, 0));
+		SDL_SetSurfaceColorKey(data_node->data, true, SDL_MapSurfaceRGB(data_node->data, 0, 0, 0));
 
 	}else if(type == JFONT){
 		// Load font .ttf
@@ -53,9 +56,9 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 
 		// Render font
 		if(data_node->text_bg)
-			data_node->data = TTF_RenderText_Shaded(data_node->fnt, data_node->string, data_node->fgColour, data_node->bgColour);
+			data_node->data = TTF_RenderText_Shaded(data_node->fnt, data_node->string, 0, data_node->fgColour, data_node->bgColour);
 		else
-			data_node->data = TTF_RenderText_Solid(data_node->fnt, data_node->string, data_node->fgColour);
+			data_node->data = TTF_RenderText_Solid(data_node->fnt, data_node->string, 0, data_node->fgColour);
 	}
 
 	// Apply centering
@@ -82,7 +85,7 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 
 void render(struct Jdata* node){
 	if(node->data != NULL){
-		SDL_FreeSurface(node->data);
+		SDL_DestroySurface(node->data);
 		node->data = NULL;
 	}
 
@@ -92,11 +95,12 @@ void render(struct Jdata* node){
 
 	}else if(node->type == JFONT){
 		assert(node->fnt != NULL);
+        assert(node->string[127] == '\0');
 		
 		if(node->text_bg)
-			node->data = TTF_RenderText_Shaded(node->fnt, node->string, node->fgColour, node->bgColour);
+			node->data = TTF_RenderText_Shaded(node->fnt, node->string, 0, node->fgColour, node->bgColour);
 		else
-			node->data = TTF_RenderText_Solid(node->fnt, node->string, node->fgColour);
+			node->data = TTF_RenderText_Solid(node->fnt, node->string, 0, node->fgColour);
 	}
 
 	assert(node->data != NULL);
@@ -139,7 +143,7 @@ void jdata_free(struct Jdata* node){
 
 	// Free the surface
 	if(node->data != NULL){
-		SDL_FreeSurface(node->data);
+		SDL_DestroySurface(node->data);
 		node->data = NULL;
 	}
 

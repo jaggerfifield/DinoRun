@@ -1,11 +1,12 @@
 #ifdef WIN
-#include <SDL.h>
+#include <SDL3\SDL.h>
 #endif
 
 #ifdef NIX
 #include <SDL2/SDL.h>
 #endif
 
+#include <stdlib.h>
 #include <stdio.h>
 
 #include "main.h"

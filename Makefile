@@ -2,14 +2,14 @@
 ifeq ($(OS), Windows_NT)
 	OS := WIN
 	OTHER := NIX
-	LINK := -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf
+	LINK := -lmingw32 -lSDL3 -lSDL3_ttf
 	RESO := ico.res
 
 	IPATH := -I.\SDL\include
 	LPATH := -L.\SDL\lib
 
-	COPY1 := cp -r SDL/SDL2.dll bin/$(OS)
-	COPY2 := cp -r SDL/SDL2_ttf.dll bin/$(OS)
+	COPY1 := cp -r SDL/SDL3.dll bin/$(OS)
+	COPY2 := cp -r SDL/SDL3_ttf.dll bin/$(OS)
 	
 	BUILD_DIR := \\
 
