@@ -1,5 +1,5 @@
 #ifdef WIN
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 #ifdef NIX
@@ -22,7 +22,7 @@
 #define MENU_SIZE 4
 
 // Define functions
-void handle_keys(SDL_Event, bool*, int*);
+void handle_keys(SDL_KeyboardEvent, bool*, int*);
 
 void menu_state(SDL_Window* window, SDL_Renderer* render){
 
@@ -38,10 +38,10 @@ void menu_state(SDL_Window* window, SDL_Renderer* render){
 
 	while(!quit){
 		while(SDL_PollEvent(&e) != 0){
-			if(e.type == SDL_QUIT)
+			if(e.type == SDL_EVENT_QUIT)
 				quit = true;
-			else if(e.type == SDL_KEYDOWN)
-				handle_keys(e, &selected, &location);
+			else if(e.type == SDL_EVENT_KEY_DOWN)
+				handle_keys(e.key, &selected, &location);
 			if(selected){
 				selected = false;
 				if(location == 0)
@@ -62,9 +62,9 @@ void menu_state(SDL_Window* window, SDL_Renderer* render){
 	return;	
 }
 
-void handle_keys(SDL_Event e, bool* selected, int* location){
+void handle_keys(SDL_KeyboardEvent e, bool* selected, int* location){
 	
-	int key = e.key.keysym.sym;
+	int key = e.key;
 	
 	if(key == SDLK_UP){
 		*location -= 1;

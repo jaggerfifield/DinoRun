@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
@@ -22,8 +23,8 @@ static unsigned int frameCount = 0;
 static struct Jtimer* fpsTimer;
 
 static void update(SDL_Window*, struct Jdata**);
-static void handle_keys(SDL_Event);
-static void handle_keyup(SDL_Event);
+static void handle_keys(SDL_KeyboardEvent);
+static void handle_keyup(SDL_KeyboardEvent);
 
 void story_state(SDL_Window* window){
 
@@ -66,12 +67,12 @@ void story_state(SDL_Window* window){
 	// Play loop
 	while(!quit){
 		while(SDL_PollEvent(&e)){
-			if(e.type == SDL_QUIT){
+			if(e.type == SDL_EVENT_QUIT){
 				quit = true;
-			}else if(e.type == SDL_KEYDOWN){
-				handle_keys(e);
-			}else if(e.type == SDL_KEYUP){
-				handle_keyup(e);
+			}else if(e.type == SDL_EVENT_KEY_DOWN){
+				handle_keys(e.key);
+			}else if(e.type == SDL_EVENT_KEY_UP){
+				handle_keyup(e.key);
 			}
 		}
 
@@ -152,8 +153,8 @@ static void update(SDL_Window* window, struct Jdata** data){
 	SDL_UpdateWindowSurface(window);
 }
 
-static void handle_keys(SDL_Event e){
-	int key = e.key.keysym.sym;
+static void handle_keys(SDL_KeyboardEvent e){
+	int key = e.key;
 	
 	if(key == SDLK_UP){
 		up = true;
@@ -168,8 +169,8 @@ static void handle_keys(SDL_Event e){
 	}
 }
 
-static void handle_keyup(SDL_Event e){
-	int key = e.key.keysym.sym;
+static void handle_keyup(SDL_KeyboardEvent e){
+	int key = e.key;
 
 	if(key == SDLK_LEFT){
 		left = false;

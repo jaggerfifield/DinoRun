@@ -1,5 +1,5 @@
 #ifdef WIN
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #endif
 
 #ifdef NIX
@@ -14,7 +14,7 @@
 int choice;
 
 static void update(SDL_Window*, struct Jdata**, int);
-static int handle_keys(SDL_Event);
+static int handle_keys(SDL_KeyboardEvent);
 
 void gameover_state(SDL_Window* window){
 	
@@ -37,10 +37,10 @@ void gameover_state(SDL_Window* window){
 
 	while(!choice){
 		while(SDL_PollEvent(&e)){
-			if(e.type == SDL_QUIT){
+			if(e.type == SDL_EVENT_QUIT){
 				error("NEED TO QUIT!");
-			}else if(e.type == SDL_KEYDOWN){
-				sel = (sel + handle_keys(e)) % 2;
+			}else if(e.type == SDL_EVENT_KEY_DOWN){
+				sel = (sel + handle_keys(e.key)) % 2;
 			}
 		}
 
@@ -87,12 +87,12 @@ static void update(SDL_Window* window, struct Jdata** DTA, int sel){
 	SDL_UpdateWindowSurface(window);
 }
 
-static int handle_keys(SDL_Event e){
-	int key = e.key.keysym.sym;
+static int handle_keys(SDL_KeyboardEvent e){
+	int key = e.key;
 
-	if(key == SDLK_RIGHT || key == SDLK_a)
+	if(key == SDLK_RIGHT || key == SDLK_A)
 		return 1;
-	else if(key == SDLK_LEFT|| key == SDLK_d)
+	else if(key == SDLK_LEFT|| key == SDLK_D)
 		return -1;
 	else if(key == SDLK_RETURN)
 		choice = 1;

@@ -1,5 +1,5 @@
 #ifdef WIN
-#include <SDL.h>
+#include <SDL3\SDL.h>
 #endif
 
 #ifdef NIX
@@ -48,7 +48,7 @@ void update(SDL_Window* window, struct Jdata** data, int* location){
 		_rect.w = _rect.w / scale;
 		_rect.h = _rect.h / scale;
 
-		SDL_BlitScaled(node->data, NULL, win_surface, &_rect);
+		SDL_BlitSurface(node->data, NULL, win_surface, &_rect);
 		i = i + 1;
 	}
 

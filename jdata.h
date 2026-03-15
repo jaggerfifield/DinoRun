@@ -1,6 +1,6 @@
 #ifdef WIN
-#include <SDL.h>
-#include <SDL_ttf.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_ttf.h>
 #endif
 
 #ifdef NIX
