@@ -1,10 +1,6 @@
-#ifdef WIN
-#include <SDL3\SDL.h>
-#endif
+#include <SDL3/SDL.h>
 
-#ifdef NIX
-#include <SDL2/SDL.h>
-#endif
+#include <stdlib.h>
 
 #include "main.h"
 #include "jio.h"
