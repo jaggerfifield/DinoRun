@@ -17,7 +17,7 @@ else
 	OS := NIX
 	OTHER := WIN
 
-	LINK := -lSDL2 -lSDL2_ttf
+	LINK := -lSDL3 -lSDL3_ttf
 	RESO :=
 
 	IPATH :=

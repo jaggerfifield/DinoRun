@@ -1,11 +1,4 @@
-#ifdef WIN
 #include <SDL3/SDL.h>
-#endif
-
-#ifdef NIX
-#include <SDL2/SDL.h>
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include<stdbool.h>
