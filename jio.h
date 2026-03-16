@@ -1,10 +1,10 @@
 #include <stdio.h>
 
 int colorize(void);
-void info(char*);
-void warn(char*);
-void error(char*);
-void debug(char*);
+void info(char*, ...);
+void warn(char*, ...);
+void error(char*, ...);
+void debug(char*, ...);
 
 char* jread(FILE*, void*, size_t);
 void jwrite(FILE*, char*);

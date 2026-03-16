@@ -13,50 +13,108 @@ void jwrite(FILE*, char*);
 void jread(FILE*, void*, size_t);
 void init_files(void);
 
-void info(char* output){
-	char message[128];
-	sprintf(message, "\x1b[38;2;35;176;237m[Infos]\x1b[0m : %s\n", output);
-	printf(message);
-	sprintf(message, "[Infos] : %s\n", output);
-	logger(message);
+void parse(char* output, va_list args){
+    FILE* log = fopen("log.txt", "a");
+
+    for(; *output != '\0'; ++output){
+        switch(*output){
+            case '%': {
+                switch(*(output+1)){
+                    case 'd': {
+                        int a = va_arg(args, int);
+                        printf("%d", a);
+                        fprintf(log, "%d", a);
+                        ++output;
+                        break; 
+                    }case 'f': {
+                        double a = va_arg(args, double);
+                        printf("%f", a);
+                        fprintf(log, "%f", a);
+                        ++output;
+                        break;
+                    }
+                }
+                break;
+            }case '\\': {
+                switch(*(output+1)){
+                    case 'n':{
+                        printf("\n");
+                        fprintf(log, "\n");
+                        break;
+                    }
+                }
+                break;
+            }
+            default:
+                putchar(*output);
+                fprintf(log, "%c", *output);
+        }
+    }
+    putchar('\n');
+    fprintf(log, "%c", '\n');
+
+    fclose(log);
 }
 
-void warn(char* output){
-	char message[128];
-	sprintf(message, "\x1b[38;2;237;149;35m[Warns]\x1b[0m : %s\n", output);
-	printf(message);
-	sprintf(message, "[Warns] : %s\n", output);
-	logger(message);
+void info(char* output, ...){
+    va_list args;	
+    va_start(args, output);
+
+    logger("[Infos] : ");
+
+	printf("\x1b[38;2;35;176;237m[Infos]\x1b[0m : ");
+    parse(output, args);
+
+    va_end(args);
 }
 
-void error(char* output){
-	char message[128];
-	sprintf(message, "\x1b[38;2;237;49;35m[Error]\x1b[0m : %s\n", output);
-	printf(message);
-	sprintf(message, "[Error] : %s\n", output);
-	logger(message);
+void warn(char* output, ...){
+    va_list args;
+    va_start(args, output);
+	
+    logger("[Warns] : ");
+
+	printf("\x1b[38;2;237;149;35m[Warns]\x1b[0m : ");
+    parse(output, args);
+
+    va_end(args);
 }
 
-void debug(char* output){
-	char message[128];
-	sprintf(message, "\x1b[38;2;127;127;127m[Debug]\x1b[0m : %s\n", output);
-	printf(message);
-	sprintf(message, "[Debug] : %s\n", output);
-	logger(message);
+void error(char* output, ...){
+    va_list args;
+    va_start(args, output);
+
+	logger("[Error] : ");
+	
+    printf("\x1b[38;2;237;49;35m[Error]\x1b[0m : ");
+    parse(output, args);
+
+    va_end(args);
 }
 
-void logger(char* message){
-	FILE* logs = jaccess("log.txt", "a+");
-	jwrite(logs, message);
-	fclose(logs);
+void debug(char* output, ...){
+    va_list args;
+    va_start(args, output);
+	
+    logger("[Debug] : ");
+
+	printf("\x1b[38;2;127;127;127m[Debug]\x1b[0m : ");
+    parse(output, args);
+
+    va_end(args);
+}
+
+void logger(char* prefix){
+	FILE* log = fopen("log.txt", "a");
+    fprintf(log, prefix);
+	fclose(log);
 }
 
 FILE* jaccess(char* path, char* mode){
 	FILE* target = fopen(path, mode);
 
 	if(target == NULL){
-		error("");
-		printf("\bCan not open file: %s\n", path);
+		error("Can not open file: %s\n", path);
 	}
 
 	return target;

@@ -304,9 +304,7 @@ void read_score(){
 	fclose(f);
 	sscanf(value, "%d", &hiscore_var);
 	
-	char msg[64];
-	sprintf(msg, "Read score to be: %d", hiscore_var);
-	debug(msg);
+	debug("Read score to be: %d", hiscore_var);
 }
 
 void write_score(){
@@ -317,8 +315,7 @@ void write_score(){
 	jwrite(f, content);
 	fclose(f);
 
-	sprintf(content, "Recording new hiscore: %d", score_var);
-	debug(content);
+	debug("Recording new hiscore: %d", score_var);
 }
 
 static void handle_keys(SDL_KeyboardEvent e){
@@ -328,8 +325,6 @@ static void handle_keys(SDL_KeyboardEvent e){
 		up = true;
 	}else if(key == SDLK_F3){
 		debug_overlay = ! debug_overlay;
-		char tmp[64];
-		sprintf(tmp, "Toggle debug overlay to: %d", debug_overlay);
-		info(tmp);
+		info("Toggle debug overlay to: %d", debug_overlay);
 	}
 }
