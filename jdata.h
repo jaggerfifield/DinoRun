@@ -5,6 +5,22 @@
 
 // TODO: Update flags, 
 
+typedef struct Jgame{
+    SDL_Window* window;
+    SDL_Renderer* renderer;
+    SDL_Surface* surface;
+    //const SDL_DisplayMode* display; 
+    int display_w;
+    int display_h;
+    SDL_DisplayID* display_id; // A list of all displays 
+    int n_displays; // How many displays are there
+
+    int monitor; // The monitor we are using
+    int volume; // Current game volume
+    bool is_fullscreen; // Are we fullscreen
+
+} Jgame;
+
 struct Jdata{
 	// For all types
 	// id - unique number of data package
@@ -45,7 +61,7 @@ struct Jdata{
 	SDL_Window* window;
 };
 
-struct Jdata* init(int, int, int, int, char*, char*, char*, SDL_Window*);
+struct Jdata* init(int, int, int, int, char*, char*, char*, ...);
 void render(struct Jdata*);
 
 void set_text_bg(struct Jdata*);
@@ -53,7 +69,7 @@ void set_fgColour(struct Jdata*, short int, short int, short int);
 void set_bgColour(struct Jdata*, short int, short int, short int);
 void set_text_size(struct Jdata*, unsigned short int);
 
-SDL_Rect get_rect(struct Jdata*);
+SDL_Rect get_rect(struct Jdata*, Jgame*);
 
 void jdata_free(struct Jdata*);
 void jdata_print(struct Jdata*);

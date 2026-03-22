@@ -1,1 +1,1 @@
-void story_state(SDL_Window*);
+void story_state(Jgame*);

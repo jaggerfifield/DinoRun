@@ -3,22 +3,31 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <assert.h>
+
 #include "main.h"
 #include "jdata.h"
 #include "update.h"
+#include "jio.h"
 
 struct Jdata** pack[2];
 
-void loader(SDL_Window* window){
-	// Splash Screen
+void loader(Jgame* game_state){
+	info("data.c : Loading assets . . .");
+
+    SDL_Window* window=NULL;
+
+    // Splash Screen
+    debug("data.c : splash loading");
 	struct Jdata* splash[3];
-	splash[0] = init(0, JIMAGE, -1, -1, "Splash Icon", "Assets/splash.bmp", NULL, window);
+	splash[0] = init(0, JIMAGE, -1, -1, "Splash Icon", "Assets/splash.bmp", NULL);
 	splash[1] = NULL;//init(1,);
 	splash[2] = NULL;
 
-	update(window, splash, NULL);
+	update(game_state, splash, NULL);
 
 	// Main Menu
+    debug("data.c : menu loading");
 	struct Jdata** main_menu = (struct Jdata**)malloc(8*6);
 	main_menu[0] = init(ID_MAINMENU_BACKGROUND, JIMAGE, 0, 0, "Background Image", "Assets/bg_fill.bmp", NULL, window);
 	main_menu[1] = init(ID_MAINMENU_PLAY, JFONT, CENTER, 0, "Play Text", "Assets/font.ttf", "Play", window);

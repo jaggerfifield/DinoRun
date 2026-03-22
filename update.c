@@ -6,28 +6,13 @@
 #include "jio.h"
 #include "jdata.h"
 
-SDL_Surface* win_surface = NULL;
-float scale;
-static int w, h;
-
-void init_update(SDL_Window* window){
-	win_surface = SDL_GetWindowSurface(window);
-	SDL_GetWindowSize(window, &w, &h);
-	
-	if(w<0 || h<0){
-		error("Bad window size!");
-		exit(-1);
-	}
-
-}
-
-void update(SDL_Window* window, struct Jdata** data, int* location){
+void update(Jgame* game_state, struct Jdata** data, int* location){
 	int i = 0;
 	
-	while(data[i] != NULL){
+    while(data[i] != NULL){
 		struct Jdata* node = data[i];
 		
-		scale = 1.0f;
+		float scale = 1.0f;
 
 		// Menu Rendering, higlight in red
 		if(location != NULL && node->type == JFONT){
@@ -38,15 +23,15 @@ void update(SDL_Window* window, struct Jdata** data, int* location){
 			
 			render(node);
 		}else
-			scale = (float) MAX_WIDTH / w;
+			scale = (float) MAX_WIDTH / game_state->display_w;
 
-		SDL_Rect _rect = get_rect(node);
+	    SDL_Rect _rect = get_rect(node, game_state);
 		_rect.w = _rect.w / scale;
 		_rect.h = _rect.h / scale;
 
-		SDL_BlitSurface(node->data, NULL, win_surface, &_rect);
+		SDL_BlitSurface(node->data, NULL, game_state->surface, &_rect);
 		i = i + 1;
 	}
 
-	SDL_UpdateWindowSurface(window);
+	SDL_UpdateWindowSurface(game_state->window);
 }

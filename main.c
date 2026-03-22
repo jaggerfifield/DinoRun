@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "jio.h"
 #include "jdata.h"
@@ -11,7 +12,7 @@
 #include "update.h"
 
 int main(int argc, char* argv[]){
-	
+
     // Enable color in terminal for windows
     #ifdef WIN
     colorize();
@@ -22,60 +23,71 @@ int main(int argc, char* argv[]){
  
     // Init SDL systems
     if(!SDL_Init(SDL_INIT_VIDEO)){
-    	error("SDL cound not init! Error: %s", SDL_GetError());
+    	error("main.c : SDL cound not init! Error: %s", SDL_GetError());
         return 0;
     }
     if(!TTF_Init()){
-    	error("TTF could not init! Error: %s", SDL_GetError());
+    	error("main.c: TTF could not init! Error: %s", SDL_GetError());
         return 0;
     }
 
-    info("Start program!");
+    info("main.c : Start program!");
  
-    // Determine the number of displayes
-    int n_displays = 0;
-    SDL_DisplayID* displays = SDL_GetDisplays(&n_displays);
+    Jgame* game_state = (Jgame*)malloc(sizeof(Jgame));
 
-    if(displays == NULL){
-        error("SDL could not detect displays! Error: %s", SDL_GetError());
+    game_state->monitor = 0; // TODO we need to store and remember the last monitor used
+    game_state->volume = 50; // TODO this need to be stored too
+
+    // Determine the number of displayes
+    game_state->display_id = SDL_GetDisplays(&game_state->n_displays);
+
+    if(game_state->display_id == NULL){
+        error("main.c : SDL could not detect displays! Error: %s", SDL_GetError());
         return 0;
     }
 
-    info("There are %d displays connected!", n_displays);
+    info("main.c : There are %d displays connected!", game_state->n_displays);
 
     // Pick window size based on desktop
-    const SDL_DisplayMode* mode = SDL_GetDesktopDisplayMode(displays[0]); // TODO we pick the first display we find, need to add a select display in settings.c and make this pick the last used display.
+    const SDL_DisplayMode* mode = SDL_GetDesktopDisplayMode(game_state->display_id[game_state->monitor]); 
+    
     if(mode == NULL){
-    	error("SDL cound not get Diaply mode: %s", SDL_GetError());
+    	error("main.c : SDL cound not get Diaply mode: %s", SDL_GetError());
         return 0;
     }
 
-    info("Create Display (%d x %d)[%fHz]", mode->w, mode->h, mode->refresh_rate);
+    info("main.c : Create Display (%d x %d)[%fHz]", mode->w, mode->h, mode->refresh_rate);
 
     // Create a SDL window and renderer
-    SDL_Window* window = NULL;
-    SDL_Renderer* render = NULL;
-    if(!SDL_CreateWindowAndRenderer("game", mode->w, mode->h, SDL_WINDOW_RESIZABLE, &window, &render)){
-    	error("SDL cond not create window! Error: %s", SDL_GetError());
+    if(!SDL_CreateWindowAndRenderer("game", mode->w, mode->h, SDL_WINDOW_RESIZABLE, &game_state->window, &game_state->renderer)){
+    	error("main.c : SDL cond not create window! Error: %s", SDL_GetError());
         return 0;
     }
+    
+    SDL_GetWindowSize(game_state->window, &game_state->display_w, &game_state->display_h);
 
-    // Init the window for updates
-    init_update(window);
+    game_state->surface = SDL_GetWindowSurface(game_state->window);
+    
+    if(game_state->surface == NULL){
+        error("main.c : Could not get window surface! Error: %s", SDL_GetError());
+    }
+
+    info("main.c : Created game window and renderer! :D");
 
     // Load data
-    loader(window);
+    loader(game_state->window);
 
     // Enter the menu state's loop
-    info("Go to main menu");
-    menu_state(window, render);
+    info("main.c : Go to main menu");
+    menu_state(game_state);
 
     // Cleanup
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(render);
-    window = NULL;
-    render = NULL;
+    SDL_DestroyWindow(game_state->window);
+    SDL_DestroyRenderer(game_state->renderer);
+    SDL_DestroySurface(game_state->surface);
     SDL_Quit();
+
+    free(game_state);
 
     return 0;
 }

@@ -9,14 +9,17 @@
 #include "jio.h"
 #include "jdata.h"
 
-struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char* string, SDL_Window* window){
+struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char* string, ...){ // TODO we removed the window spot, 
 	struct Jdata* data_node = malloc(sizeof(struct Jdata));
 
 	data_node->id = id;
 	data_node->type = type;
 	data_node->x = x;
 	data_node->y = y;
-	data_node-> name = name;
+	data_node-> name = (char*)malloc(64);
+    memset(data_node->name, '\0', 64);
+    sprintf(data_node->name, "%s", name);
+
 	data_node->path = path;
 	data_node->string = (char*)malloc(128);
     memset(data_node->string, '\0', 128);
@@ -27,7 +30,7 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
     data_node->text_bg = false;
 	data_node->text_size = 40;
 
-	data_node->window = window;
+	data_node->window = NULL; // TODO need to delete this, we dont need it!
 
 	if(type == JIMAGE){
 		// Render the image
@@ -54,25 +57,7 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 			data_node->data = TTF_RenderText_Solid(data_node->fnt, data_node->string, 0, data_node->fgColour);
 	}
 
-	// Apply centering
-	if(x == CENTER){
-		int w;
-		SDL_GetWindowSize(window, &w, NULL);
-		if(w < 0){
-			error("jdata.c : Bad width!");
-			exit(-1);
-		}
-		data_node->x = (w / 2) - (data_node->data->w / 2);
-	}if (y == CENTER){
-		int h;
-		SDL_GetWindowSize(window, NULL, &h);
-		if(h < 0){
-			error("jdata.c : Bad height!");
-			exit(-1);
-		}
-		data_node->y = (h / 2) - (data_node->data->h / 2);
-	}
-
+    debug("jdata.c : [%d] %s is done loading!", id, data_node->name);
 	return data_node;
 }
 
@@ -99,11 +84,17 @@ void render(struct Jdata* node){
 	assert(node->data != NULL);
 }
 
-SDL_Rect get_rect(struct Jdata* node){
+SDL_Rect get_rect(struct Jdata* node, Jgame* game_state){
 	SDL_Rect rect;
 	rect.x = node->x;
 	rect.y = node->y;
-	assert(node->data != NULL);
+	
+    if(rect.x == CENTER)
+        rect.x = (game_state->display_w / 2) - (node->data->w / 2);
+    if(rect.y == CENTER)
+        rect.y = (game_state->display_h / 2) - (node->data->h / 2);
+
+    assert(node->data != NULL);
 	rect.h = node->data->h;
 	rect.w = node->data->w;
 	return rect;
@@ -146,6 +137,11 @@ void jdata_free(struct Jdata* node){
 		node->fnt = NULL;
 	}
 	
+    if(node->name != NULL){
+        free(node->name);
+        node->name = NULL;
+    }
+
     // Free the text string
     if(node->string != NULL){
         free(node->string);
