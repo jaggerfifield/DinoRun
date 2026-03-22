@@ -8,36 +8,27 @@
 #include "jtime.h"
 #include "jio.h"
 
-static int w, h;
-
 // TODO: movement struct, remove the global varialbes.
 static bool up = false;
 static bool down = true;
 static bool left = false;
 static bool right = false;
 
-static char str[64];
-
 static bool debug_overlay = false;
 static unsigned int frameCount = 0;
 static struct Jtimer* fpsTimer;
 
-static void update(SDL_Window*, struct Jdata**);
+static void update(Jgame*, struct Jdata**);
 static void handle_keys(SDL_KeyboardEvent);
 static void handle_keyup(SDL_KeyboardEvent);
 
-void story_state(SDL_Window* window){
-
-	SDL_GetWindowSize(window, &w, &h);
-
-	if(w<0||h<0){
-		error("Bad window size!");
-		exit(-1);
-	}
+void story_state(Jgame* game_state){
 
 	fpsTimer = timer_init();
 
 	int dSize = 3;
+
+    SDL_Window* window = game_state->window; // TODO this is temp for data loading, this will move to data.c
 
 	struct Jdata* DTA[dSize];
 	DTA[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play background", "Assets/bg_fill.bmp", NULL, window);
@@ -77,7 +68,7 @@ void story_state(SDL_Window* window){
 		}
 
 		if(SDL_GetTicks() > next_time){
-			update(window, DTA);
+			update(game_state, DTA);
 			next_time = next_time + 5;
 		}
 	}
@@ -90,9 +81,7 @@ void story_state(SDL_Window* window){
 	timer_free(fpsTimer);
 }
 
-static void update(SDL_Window* window, struct Jdata** data){
-
-	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
+static void update(Jgame* game_state, struct Jdata** data){
 	
 	// Here is the dino run loop (after the countdown)
 	struct Jdata* bg = data[0];
@@ -110,25 +99,25 @@ static void update(SDL_Window* window, struct Jdata** data){
 	}
 
 	// Move dino back down
-	if(dino->y < h - dino->data->h && down)
+	if(dino->y < game_state->display_h - dino->data->h && down)
 		dino->y = dino->y + (gravity);
 	else
 		down = false;
 
 	// Move left and right
-	if(right && !left && dino->x < w)
+	if(right && !left && dino->x < game_state->display_w)
 		dino->x = dino->x + 1;
 
 	if(left && !right && dino->x > 0)
 		dino->x = dino->x - 1;
 
-	SDL_Rect bg_rect = get_rect(bg);
-	SDL_Rect dino_rect = get_rect(dino);
+	SDL_Rect bg_rect = get_rect(bg, game_state);
+	SDL_Rect dino_rect = get_rect(dino, game_state);
 
 	// Blit the surfaces in order: bg, objects, score, player
-	SDL_BlitSurface(bg->data, NULL, win_surface, &bg_rect);
+	SDL_BlitSurface(bg->data, NULL, game_state->surface, &bg_rect);
 
-	SDL_BlitSurface(dino->data,    NULL, win_surface, &dino_rect);
+	SDL_BlitSurface(dino->data,    NULL, game_state->surface, &dino_rect);
 		
 	// Blit debug overlay if enabled
 	if(debug_overlay){
@@ -137,20 +126,23 @@ static void update(SDL_Window* window, struct Jdata** data){
 		if(avgFPS > 2000000)
 			avgFPS = 0;
 
+        char str[32];
+        memset(str, '\0', 32);
+
 		// Update string
 		sprintf(str, "FPS: %f", avgFPS);
 		
 		debug->string = str;
 		render(debug);
 			
-		SDL_Rect debug_rect = get_rect(debug);
+		SDL_Rect debug_rect = get_rect(debug, game_state);
 
-		SDL_BlitSurface(debug->data, NULL, win_surface, &debug_rect);
+		SDL_BlitSurface(debug->data, NULL, game_state->surface, &debug_rect);
 	}
 
 	frameCount = frameCount + 1;
 	
-	SDL_UpdateWindowSurface(window);
+	SDL_UpdateWindowSurface(game_state->window);
 }
 
 static void handle_keys(SDL_KeyboardEvent e){
@@ -164,8 +156,7 @@ static void handle_keys(SDL_KeyboardEvent e){
 		right = true;
 	}else if(key == SDLK_F3){
 		debug_overlay = ! debug_overlay;
-		sprintf(str, "Toggle debug overlay to: %d", debug_overlay);
-		info(str);
+		info("Toggle debug overlay to: %d", debug_overlay);
 	}
 }
 

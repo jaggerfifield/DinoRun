@@ -18,7 +18,7 @@
 // Define functions
 void handle_keys(SDL_KeyboardEvent, bool*, int*);
 
-void menu_state(SDL_Window* window, SDL_Renderer* render){
+void menu_state(Jgame* game_state){
 
 	// Declare variables
 	SDL_Event e;
@@ -39,16 +39,16 @@ void menu_state(SDL_Window* window, SDL_Renderer* render){
 			if(selected){
 				selected = false;
 				if(location == 0)
-					play_state(window);
+					play_state(game_state); // TODO
 				else if(location == 1)
-					story_state(window);
+					story_state(game_state); // TODO
 				else if(location == 2)
-					settings_state(window);
+					settings_state(game_state); // TODO
 				else if(location == 3)
 					quit = true;
 			}
 		}
-		update(window, DTA, &location);
+		update(game_state, DTA, &location);
 	}
 	
 	free_data(DTA);

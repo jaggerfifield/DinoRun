@@ -9,8 +9,8 @@
 #include "jtime.h"
 #include "jio.h"
 #include "gameover.h"
+#include "update.h"
 
-static int h,w;
 static int timer = 3000;
 int score_var = 0;
 int hiscore_var = 0;
@@ -25,22 +25,16 @@ bool down = true;
 int active[4] = {0, 0, 0 ,0};
 int distance = 100;
 
-static void update(SDL_Window*, struct Jdata**);
+static void _update(Jgame*, struct Jdata**);
 static void handle_keys(SDL_KeyboardEvent);
-static void object_handler(struct Jdata**, SDL_Window*);
+static void object_handler(struct Jdata**, Jgame*);
 static bool check_collision(SDL_Rect, SDL_Rect);
 void read_score(void);
 void write_score(void);
 
 int time_left(int);
 
-void play_state(SDL_Window* window){
-	SDL_GetWindowSize(window, &w, &h);
-	if(h<0||w<0){
-		error("Bad window Size!");
-		exit(-1);
-	}
-
+void play_state(Jgame* game_state){
 	score_var = 0;
 	
 	read_score();
@@ -48,6 +42,8 @@ void play_state(SDL_Window* window){
 	fpsTimer = timer_init();
 
 	int dSize = 13;
+
+    SDL_Window* window = game_state->window;
 
 	struct Jdata* DTA[dSize];
 	DTA[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play background", "Assets/bg_fill.bmp", NULL, window);
@@ -58,10 +54,10 @@ void play_state(SDL_Window* window){
 	DTA[5] = init(ID_PLAY_GO, JFONT, CENTER, CENTER, "Countdown GO", "Assets/font.ttf", "GO!", window);
 	DTA[6] = init(ID_PLAY_SCORE, JFONT, 0, 0, "Score text", "Assets/font.ttf", "SCORE: 0", window);
 	DTA[7] = init(ID_PLAY_HISCORE, JFONT, 0, 0, "Hiscore text", "Assets/font.ttf", "HISCORE: 0", window);
-	DTA[8] = init(ID_PLAY_OBJECT, JIMAGE, w, 0, "Object 1", "Assets/dino.bmp", NULL, window);
-	DTA[9] = init(ID_PLAY_OBJECT2, JIMAGE, w, 0, "Object 2", "Assets/ball.bmp", NULL, window);
-	DTA[10] = init(ID_PLAY_OBJECT3, JIMAGE, w, 0, "Object 3", "Assets/OBJ3.bmp", NULL, window);
-	DTA[11] = init(ID_PLAY_OBJECT4, JIMAGE, w, 0, "Object 4", "Assets/dino.bmp", NULL,window);
+	DTA[8] = init(ID_PLAY_OBJECT, JIMAGE, game_state->display_w, 0, "Object 1", "Assets/dino.bmp", NULL, window);
+	DTA[9] = init(ID_PLAY_OBJECT2, JIMAGE, game_state->display_w, 0, "Object 2", "Assets/ball.bmp", NULL, window);
+	DTA[10] = init(ID_PLAY_OBJECT3, JIMAGE, game_state->display_w, 0, "Object 3", "Assets/OBJ3.bmp", NULL, window);
+	DTA[11] = init(ID_PLAY_OBJECT4, JIMAGE, game_state->display_w, 0, "Object 4", "Assets/dino.bmp", NULL,window);
 	// Debug layers
 	DTA[12] = init(912, JFONT, 0, 0, "Debug overlay", "Assets/font.ttf", "", window);
 
@@ -95,7 +91,7 @@ void play_state(SDL_Window* window){
 		}
 
 		if(SDL_GetTicks() > next_time){
-			update(window, DTA);
+			_update(game_state, DTA);
 			next_time = next_time + 5;
 		}
 	}
@@ -107,15 +103,12 @@ void play_state(SDL_Window* window){
 
 	timer_free(fpsTimer);
 	
-    warn("Gameover State");
 	if(!quit)
-		gameover_state(window);
+		gameover_state(game_state);
 }
 
-static void update(SDL_Window* window, struct Jdata** data){
+static void _update(Jgame* game_state, struct Jdata** data){
 
-	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
-	
 	// Count down timer TODO: find a better way to time things here
 	if(timer >= -200){
 		struct Jdata* temp = NULL;
@@ -132,12 +125,12 @@ static void update(SDL_Window* window, struct Jdata** data){
 		if(temp != NULL){
 			// Clear the screen first!
 			struct Jdata* bg = data[ID_PLAY_BACKGROUND];
-			SDL_Rect bg_rect = get_rect(bg);
-			SDL_BlitSurface(bg->data, NULL, win_surface, &bg_rect);
+			SDL_Rect bg_rect = get_rect(bg, game_state);
+			SDL_BlitSurface(bg->data, NULL, game_state->surface, &bg_rect);
 				
 			// Blit the countdown
-			SDL_Rect temp_rect = get_rect(temp);
-			SDL_BlitSurface(temp->data, NULL, win_surface, &temp_rect);
+			SDL_Rect temp_rect = get_rect(temp, game_state);
+			SDL_BlitSurface(temp->data, NULL, game_state->surface, &temp_rect);
 		}
 		timer = timer - 5;
 
@@ -163,12 +156,12 @@ static void update(SDL_Window* window, struct Jdata** data){
 			hiscore_var = score_var;
 		sprintf(hiscore->string, "High Score: %d", (int)(hiscore_var/10));
 		render(hiscore);
-		hiscore->x = w - hiscore->data->w;
+		hiscore->x = game_state->display_w - hiscore->data->w;
 
 		// Apply jump physics (up/down movement)
 
 		// Move dino up
-		if( ( !down && up ) && ( dino->y > (h - (h/2)) ) ) 
+		if( ( !down && up ) && ( dino->y > (game_state->display_h - (game_state->display_h/2)) ) ) 
 			dino->y = dino->y - gravity*2;
 		else{
 			down = true;
@@ -176,7 +169,7 @@ static void update(SDL_Window* window, struct Jdata** data){
 		}
 
 		// Move dino back down
-		if(dino->y < h - dino->data->h && down){
+		if(dino->y < game_state->display_h - dino->data->h && down){
 			dino->y = dino->y + (gravity+accel);
 			accel += 1;
 		}else{
@@ -184,20 +177,20 @@ static void update(SDL_Window* window, struct Jdata** data){
 			down = false;
 		}
 
-		SDL_Rect bg_rect = get_rect(bg);
-		SDL_Rect score_rect = get_rect(score);
-		SDL_Rect hiscore_rect = get_rect(hiscore);
-		SDL_Rect dino_rect = get_rect(dino);
+		SDL_Rect bg_rect = get_rect(bg, game_state);
+		SDL_Rect score_rect = get_rect(score, game_state);
+		SDL_Rect hiscore_rect = get_rect(hiscore, game_state);
+		SDL_Rect dino_rect = get_rect(dino, game_state);
 
 		// Blit the surfaces in order: bg, objects, score, player
-		SDL_BlitSurface(bg->data, NULL, win_surface, &bg_rect);
+		SDL_BlitSurface(bg->data, NULL, game_state->surface, &bg_rect);
 
 		// Update object position and generate new objects
-		object_handler(data, window);		
+		object_handler(data, game_state);		
 
-		SDL_BlitSurface(score->data,   NULL, win_surface, &score_rect);
-		SDL_BlitSurface(hiscore->data, NULL, win_surface, &hiscore_rect);
-		SDL_BlitSurface(dino->data,    NULL, win_surface, &dino_rect);
+		SDL_BlitSurface(score->data,   NULL, game_state->surface, &score_rect);
+		SDL_BlitSurface(hiscore->data, NULL, game_state->surface, &hiscore_rect);
+		SDL_BlitSurface(dino->data,    NULL, game_state->surface, &dino_rect);
 		
 		// Blit debug overlay if enabled
 		if(debug_overlay){
@@ -210,20 +203,18 @@ static void update(SDL_Window* window, struct Jdata** data){
 			sprintf(debug->string, "FPS: %f", avgFPS);
 			render(debug);
 			
-			SDL_Rect debug_rect = get_rect(debug);
+			SDL_Rect debug_rect = get_rect(debug, game_state);
 
-			SDL_BlitSurface(debug->data, NULL, win_surface, &debug_rect);
+			SDL_BlitSurface(debug->data, NULL, game_state->surface, &debug_rect);
 		}
 	}
 
 	frameCount = frameCount + 1;
 	
-	SDL_UpdateWindowSurface(window);
+	SDL_UpdateWindowSurface(game_state->window);
 }
 
-static void object_handler(struct Jdata** data, SDL_Window* window){
-	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
-
+static void object_handler(struct Jdata** data, Jgame* game_state){
 	int num = rand() % 4;
 
 	if(distance != 0){
@@ -243,7 +234,7 @@ static void object_handler(struct Jdata** data, SDL_Window* window){
 	for(int i = 0; i < 4; i++){
 		struct Jdata* obj = data[ID_PLAY_OBJECT + i];
 		if(obj != NULL && active[i]){
-			obj->y = h - obj->data->h;
+			obj->y = game_state->display_h - obj->data->h;
 			obj->x = obj->x - 6;
 
 
@@ -276,11 +267,11 @@ static void object_handler(struct Jdata** data, SDL_Window* window){
 			}
 
 			if(obj->x < -obj->data->w){
-				obj->x = w;
+				obj->x = game_state->display_w;
 				active[i] = 0;
 			}
 
-			SDL_BlitSurface(obj->data, NULL, win_surface, &object_rect);
+			SDL_BlitSurface(obj->data, NULL, game_state->surface, &object_rect);
 		}
 	}
 }

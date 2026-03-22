@@ -10,21 +10,20 @@
 
 unsigned short int direction = 0;
 
-// TODO we need globals.c to hold our settings
-int volume = 0;
-
 // Define functions
 static void handle_keys(SDL_KeyboardEvent, bool*, int*);
 void* load_data(void);
-static void update(SDL_Window*, struct Jdata**, int*);
+static void update(Jgame*, struct Jdata**, int*);
 
-void settings_state(SDL_Window* window){
+void settings_state(Jgame* game_state){
 
 	// Declare variables
 	SDL_Event e;
 	int location = 0;
 	bool selected = false;
 	bool quit = false;
+
+    SDL_Window* window = game_state->window;
 
 	// Load assets
 	struct Jdata* DTA[5];
@@ -35,7 +34,7 @@ void settings_state(SDL_Window* window){
 	DTA[4] = init(4, JFONT, CENTER, 300, "", "Assets/font.ttf", "Back", window);
 
     // Load current volume level
-    sprintf(DTA[1]->string, "<  Volume %.3d%%  >", volume);
+    sprintf(DTA[1]->string, "<  Volume %.3d%%  >", game_state->volume);
 
 	while(!quit){
 		while(SDL_PollEvent(&e) != 0){
@@ -55,7 +54,7 @@ void settings_state(SDL_Window* window){
 					quit = true;
 			}
 		}
-		update(window, DTA, &location);
+		update(game_state, DTA, &location);
 	}
 
 	// TODO: dynamic data length
@@ -90,9 +89,7 @@ static void handle_keys(SDL_KeyboardEvent e, bool* selected, int* location){
 	
 }
 
-static void update(SDL_Window* window, struct Jdata** data, int* location){
-	
-	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
+static void update(Jgame* game_state, struct Jdata** data, int* location){
 
 	// TODO: dynamic data length (pass size in update)
 	// for(int i = 0; i < size; i++){
@@ -100,23 +97,21 @@ static void update(SDL_Window* window, struct Jdata** data, int* location){
 	for(int i = 0; i < 5; i++){
 		struct Jdata* node = data[i];
 
-		SDL_Rect temp_rect = get_rect(node);
+		SDL_Rect temp_rect = get_rect(node, game_state);
 		
 		if(node->type == JFONT){
 			if(*location == node->id - 1){
 				if(direction == 1){
 					// Left
-					if(node->id == 1 && volume > 0){
+					if(node->id == 1 && game_state->volume > 0){
 						// Turn volume down
-						volume -= 1;
-						sprintf(node->string, "<  Volume %.3d%%  >", volume);
-						//node->string = str;
+						game_state->volume -= 1;
+						sprintf(node->string, "<  Volume %.3d%%  >", game_state->volume);
 					}
 				}else if(direction == 2){
-					if(node->id == 1 && volume < 100){
-						volume += 1;
-						sprintf(node->string, "<  Volume %.3d%%  >", volume);
-						//node->string = str;
+					if(node->id == 1 && game_state->volume < 100){
+						game_state->volume += 1;
+						sprintf(node->string, "<  Volume %.3d%%  >", game_state->volume);
 					}
 				}
 
@@ -131,9 +126,9 @@ static void update(SDL_Window* window, struct Jdata** data, int* location){
 			}
 		}
 
-		SDL_BlitSurface(node->data, NULL, win_surface, &temp_rect);
+		SDL_BlitSurface(node->data, NULL, game_state->surface, &temp_rect);
 	}
 
-	SDL_UpdateWindowSurface(window);
+	SDL_UpdateWindowSurface(game_state->window);
 }
 

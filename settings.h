@@ -1,1 +1,1 @@
-void settings_state(SDL_Window*);
+void settings_state(Jgame*);

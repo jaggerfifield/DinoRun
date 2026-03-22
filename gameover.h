@@ -1,1 +1,1 @@
-void gameover_state(SDL_Window*);
+void gameover_state(Jgame*);

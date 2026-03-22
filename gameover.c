@@ -7,23 +7,20 @@
 
 int choice;
 
-static void update(SDL_Window*, struct Jdata**, int);
+static void update(Jgame*, struct Jdata**, int);
 static int handle_keys(SDL_KeyboardEvent);
 
-void gameover_state(SDL_Window* window){
+void gameover_state(Jgame* game_state){
 	
 	int dSize = 3;
 	struct Jdata* DTA[dSize];
-	DTA[0] = init(ID_GAMEOVER_TEXT, JFONT, -1, 100, "Game Over! text", "Assets/font.ttf", "Game Over!", window);
+	
+    SDL_Window* window = game_state->window;
+
+    DTA[0] = init(ID_GAMEOVER_TEXT, JFONT, -1, 100, "Game Over! text", "Assets/font.ttf", "Game Over!", window);
 	DTA[1] = init(ID_GAMEOVER_PLAY, JFONT, -1, -1, "Play again text", "Assets/font.ttf", "Retry", window);
 	DTA[2] = init(ID_GAMEOVER_EXIT, JFONT, -1, -1, "Quit text", "Assets/font.ttf", "Back", window);
 	
-	struct Jdata* play = DTA[ID_GAMEOVER_PLAY];
-	struct Jdata* exit = DTA[ID_GAMEOVER_EXIT];
-
-	play->x = play->x - 100;
-	exit->x = exit->x + 100;
-
 	choice = 0;
 	int sel = 1;
 
@@ -38,7 +35,7 @@ void gameover_state(SDL_Window* window){
 			}
 		}
 
-		update(window, DTA, sel);
+		update(game_state, DTA, sel);
 	}
 	
 	// Clean up memory
@@ -47,11 +44,10 @@ void gameover_state(SDL_Window* window){
 	}
 
 	if(sel)
-		play_state(window);
+		play_state(game_state);
 }
 
-static void update(SDL_Window* window, struct Jdata** DTA, int sel){
-	SDL_Surface* win_surface = SDL_GetWindowSurface(window);
+static void update(Jgame* game_state, struct Jdata** DTA, int sel){
 	
 	struct Jdata* title = DTA[ID_GAMEOVER_TEXT];
 	struct Jdata* play = DTA[ID_GAMEOVER_PLAY];
@@ -70,15 +66,18 @@ static void update(SDL_Window* window, struct Jdata** DTA, int sel){
 	}
 
 
-	SDL_Rect title_rect = get_rect(title);
-	SDL_Rect play_rect = get_rect(play);
-	SDL_Rect exit_rect = get_rect(exit);
+	SDL_Rect title_rect = get_rect(title, game_state);
+	SDL_Rect play_rect = get_rect(play, game_state);
+	SDL_Rect exit_rect = get_rect(exit, game_state);
 
-	SDL_BlitSurface(title->data, NULL, win_surface, &title_rect);
-	SDL_BlitSurface(play->data, NULL, win_surface, &play_rect);
-	SDL_BlitSurface(exit->data, NULL, win_surface, &exit_rect);
+    play_rect.x -= 100;
+    exit_rect.x += 100;
 
-	SDL_UpdateWindowSurface(window);
+	SDL_BlitSurface(title->data, NULL, game_state->surface, &title_rect);
+	SDL_BlitSurface(play->data, NULL, game_state->surface, &play_rect);
+	SDL_BlitSurface(exit->data, NULL, game_state->surface, &exit_rect);
+
+	SDL_UpdateWindowSurface(game_state->window);
 }
 
 static int handle_keys(SDL_KeyboardEvent e){

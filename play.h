@@ -1,1 +1,1 @@
-void play_state(SDL_Window*);
+void play_state(Jgame*);
