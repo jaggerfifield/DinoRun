@@ -12,13 +12,8 @@ static int handle_keys(SDL_KeyboardEvent);
 
 void gameover_state(Jgame* game_state){
 	
-	int dSize = 3;
-	struct Jdata* DTA[dSize];
+	struct Jdata** DTA = game_state->data_pack[2];
 
-    DTA[0] = init(ID_GAMEOVER_TEXT, JFONT, -1, 100, "Game Over! text", "Assets/font.ttf", "Game Over!");
-	DTA[1] = init(ID_GAMEOVER_PLAY, JFONT, -1, -1, "Play again text", "Assets/font.ttf", "Retry");
-	DTA[2] = init(ID_GAMEOVER_EXIT, JFONT, -1, -1, "Quit text", "Assets/font.ttf", "Back");
-	
 	choice = 0;
 	int sel = 1;
 
@@ -36,11 +31,6 @@ void gameover_state(Jgame* game_state){
 		update(game_state, DTA, sel);
 	}
 	
-	// Clean up memory
-	for(int i = 0; i < dSize; i++){
-		jdata_free(DTA[i]);
-	}
-
 	if(sel)
 		play_state(game_state);
 }
