@@ -14,12 +14,10 @@ void gameover_state(Jgame* game_state){
 	
 	int dSize = 3;
 	struct Jdata* DTA[dSize];
-	
-    SDL_Window* window = game_state->window;
 
-    DTA[0] = init(ID_GAMEOVER_TEXT, JFONT, -1, 100, "Game Over! text", "Assets/font.ttf", "Game Over!", window);
-	DTA[1] = init(ID_GAMEOVER_PLAY, JFONT, -1, -1, "Play again text", "Assets/font.ttf", "Retry", window);
-	DTA[2] = init(ID_GAMEOVER_EXIT, JFONT, -1, -1, "Quit text", "Assets/font.ttf", "Back", window);
+    DTA[0] = init(ID_GAMEOVER_TEXT, JFONT, -1, 100, "Game Over! text", "Assets/font.ttf", "Game Over!");
+	DTA[1] = init(ID_GAMEOVER_PLAY, JFONT, -1, -1, "Play again text", "Assets/font.ttf", "Retry");
+	DTA[2] = init(ID_GAMEOVER_EXIT, JFONT, -1, -1, "Quit text", "Assets/font.ttf", "Back");
 	
 	choice = 0;
 	int sel = 1;

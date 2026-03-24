@@ -12,44 +12,62 @@
 
 struct Jdata** pack[2];
 
-void loader(Jgame* game_state){
+Jgame* loader(Jgame* game_state){
 	info("data.c : Loading assets . . .");
-
-    SDL_Window* window=NULL;
+    game_state->data_pack = malloc(sizeof(struct Jdata**) * 2);
 
     // Splash Screen
-    debug("data.c : splash loading");
-	struct Jdata* splash[3];
-	splash[0] = init(0, JIMAGE, -1, -1, "Splash Icon", "Assets/splash.bmp", NULL);
-	splash[1] = NULL;//init(1,);
-	splash[2] = NULL;
-
-	update(game_state, splash, NULL);
+    debug("data.c : splash data loading");
+	struct Jdata* splash[2];
+    splash[0] = init(0, JIMAGE, -1, -1, "Splash Icon", "Assets/splash.bmp", NULL);
+	splash[1] = NULL;
+    update(game_state, splash, NULL);
 
 	// Main Menu
-    debug("data.c : menu loading");
-	struct Jdata** main_menu = (struct Jdata**)malloc(8*6);
-	main_menu[0] = init(ID_MAINMENU_BACKGROUND, JIMAGE, 0, 0, "Background Image", "Assets/bg_fill.bmp", NULL, window);
-	main_menu[1] = init(ID_MAINMENU_PLAY, JFONT, CENTER, 0, "Play Text", "Assets/font.ttf", "Play", window);
-	main_menu[2] = init(ID_MAINMENU_ARCADE, JFONT, CENTER, 100, "Arcade Text", "Assets/font.ttf", "Arcade", window);
-	main_menu[3] = init(ID_MAINMENU_SETTINGS, JFONT, CENTER, 200, "Settings Text", "Assets/font.ttf", "Settings", window);
-	main_menu[4] = init(ID_MAINMENU_EXIT, JFONT, CENTER, 300, "Exit Text", "Assets/font.ttf", "Exit", window);
+    debug("data.c : menu data loading");
+	struct Jdata** main_menu = malloc(sizeof(struct Jdata) * 6);
+	main_menu[0] = init(ID_MAINMENU_BACKGROUND, JIMAGE, 0, 0, "Background Image", "Assets/bg_fill.bmp", NULL);
+	main_menu[1] = init(ID_MAINMENU_PLAY, JFONT, CENTER, 0, "Play Text", "Assets/font.ttf", "Play");
+	main_menu[2] = init(ID_MAINMENU_ARCADE, JFONT, CENTER, 100, "Arcade Text", "Assets/font.ttf", "Arcade");
+	main_menu[3] = init(ID_MAINMENU_SETTINGS, JFONT, CENTER, 200, "Settings Text", "Assets/font.ttf", "Settings");
+	main_menu[4] = init(ID_MAINMENU_EXIT, JFONT, CENTER, 300, "Exit Text", "Assets/font.ttf", "Exit");
 	main_menu[5] = NULL;
 
-	pack[DATA_MAINMENU] = main_menu;
+	game_state->data_pack[0] = main_menu;
 
+    // Play
+    debug("data.c : play data loading");
+    struct Jdata** play_data = malloc(sizeof(struct Jdata) * 11);
+    play_data[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play Background", "Assets/bg_fill.bmp", NULL);
+    play_data[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, game_state->display_h-500, "Player", "Assets/block.bmp", NULL);
+    play_data[2] = init(ID_PLAY_TIMER, JFONT, CENTER, CENTER, "Countdown text", "Assets/font.ttf", "3");
+    play_data[3] = init(ID_PLAY_SCORE, JFONT, 0, 0, "Score text", "Assets/font.ttf", "SCORE: 0");
+    play_data[4] = init(ID_PLAY_HISCORE, JFONT, 0, 0, "Highscore Text", "Assets/font.ttf", "HIGHSCORE: 0");
+    play_data[5] = init(ID_PLAY_OBJECT, JIMAGE, game_state->display_w, 0, "Object 1", "Assets/dino.bmp", NULL);
+    play_data[6] = init(ID_PLAY_OBJECT2, JIMAGE, game_state->display_w, 0, "Object 2", "Assets/ball.bmp", NULL);
+    play_data[7] = init(ID_PLAY_OBJECT3, JIMAGE, game_state->display_w, 0, "Object 3", "Assets/OBJ3.bmp", NULL);
+    play_data[8] = init(ID_PLAY_OBJECT4, JIMAGE, game_state->display_w, 0, "Object 4", "Assets/dino.bmp", NULL);
+    play_data[9] = init(ID_PLAY_DEBUG, JFONT, 0, 0, "Debug overlay", "Assets/font.ttf", "");
+    play_data[10] = NULL;
+
+    game_state->data_pack[1] = play_data;
+
+    return game_state;
 }
 
-void get_data(struct Jdata*** data, int id){
-	*data = pack[id];
-}
+void free_data(Jgame* game_state){
+    for(int h = 0; game_state->data_pack[h] != NULL; h++){
+	    struct Jdata** node = game_state->data_pack[h];
+            
+        int i = 0;
 
-void free_data(struct Jdata** data){
-	int i = 0;
-	while(data[i] != NULL){
-		jdata_free(data[i]);
-		data[i] = NULL;
-		i = i + 1;
-	}
-	free(data);
+        while(node[i] != NULL){
+		    jdata_free(node[i]);
+		    node[i] = NULL;
+		    i = i + 1;
+	    }
+	    free(node);
+    }
+
+    free(game_state->data_pack);
 }

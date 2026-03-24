@@ -75,7 +75,7 @@ int main(int argc, char* argv[]){
     info("main.c : Created game window and renderer! :D");
 
     // Load data
-    loader(game_state->window);
+    game_state = loader(game_state);
 
     // Enter the menu state's loop
     info("main.c : Go to main menu");
