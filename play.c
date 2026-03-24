@@ -41,28 +41,6 @@ void play_state(Jgame* game_state){
 
 	fpsTimer = timer_init();
 
-	//int dSize = 13;
-    
-    /*
-    SDL_Window* window = game_state->window;
-
-	struct Jdata* DTA[dSize];
-	DTA[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play background", "Assets/bg_fill.bmp", NULL, window);
-	DTA[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/block.bmp", NULL, window);
-	DTA[2] = init(ID_PLAY_3, JFONT, CENTER, CENTER, "Countdown 3", "Assets/font.ttf", "3", window);
-	DTA[3] = init(ID_PLAY_2, JFONT, CENTER, CENTER, "Countdown 2", "Assets/font.ttf", "2", window);
-	DTA[4] = init(ID_PLAY_1, JFONT, CENTER, CENTER, "Countdown 1", "Assets/font.ttf", "1", window);
-	DTA[5] = init(ID_PLAY_GO, JFONT, CENTER, CENTER, "Countdown GO", "Assets/font.ttf", "GO!", window);
-	DTA[6] = init(ID_PLAY_SCORE, JFONT, 0, 0, "Score text", "Assets/font.ttf", "SCORE: 0", window);
-	DTA[7] = init(ID_PLAY_HISCORE, JFONT, 0, 0, "Hiscore text", "Assets/font.ttf", "HISCORE: 0", window);
-	DTA[8] = init(ID_PLAY_OBJECT, JIMAGE, game_state->display_w, 0, "Object 1", "Assets/dino.bmp", NULL, window);
-	DTA[9] = init(ID_PLAY_OBJECT2, JIMAGE, game_state->display_w, 0, "Object 2", "Assets/ball.bmp", NULL, window);
-	DTA[10] = init(ID_PLAY_OBJECT3, JIMAGE, game_state->display_w, 0, "Object 3", "Assets/OBJ3.bmp", NULL, window);
-	DTA[11] = init(ID_PLAY_OBJECT4, JIMAGE, game_state->display_w, 0, "Object 4", "Assets/dino.bmp", NULL,window);
-	// Debug layers
-	DTA[12] = init(912, JFONT, 0, 0, "Debug overlay", "Assets/font.ttf", "", window);
-    */
-
     struct Jdata** DTA = game_state->data_pack[1];
 
 	// Enable background render on debug layer

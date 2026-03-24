@@ -10,11 +10,9 @@
 #include "update.h"
 #include "jio.h"
 
-struct Jdata** pack[2];
-
 Jgame* loader(Jgame* game_state){
 	info("data.c : Loading assets . . .");
-    game_state->data_pack = malloc(sizeof(struct Jdata**) * 2);
+    game_state->data_pack = malloc(sizeof(struct Jdata**) * 3);
 
     // Splash Screen
     debug("data.c : splash data loading");
@@ -24,7 +22,7 @@ Jgame* loader(Jgame* game_state){
     update(game_state, splash, NULL);
 
 	// Main Menu
-    debug("data.c : menu data loading");
+    info("data.c : Loading menu data . . .");
 	struct Jdata** main_menu = malloc(sizeof(struct Jdata) * 6);
 	main_menu[0] = init(ID_MAINMENU_BACKGROUND, JIMAGE, 0, 0, "Background Image", "Assets/bg_fill.bmp", NULL);
 	main_menu[1] = init(ID_MAINMENU_PLAY, JFONT, CENTER, 0, "Play Text", "Assets/font.ttf", "Play");
@@ -36,7 +34,7 @@ Jgame* loader(Jgame* game_state){
 	game_state->data_pack[0] = main_menu;
 
     // Play
-    debug("data.c : play data loading");
+    info("data.c : Loading play data . . .");
     struct Jdata** play_data = malloc(sizeof(struct Jdata) * 11);
     play_data[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play Background", "Assets/bg_fill.bmp", NULL);
     play_data[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, game_state->display_h-500, "Player", "Assets/block.bmp", NULL);
@@ -51,6 +49,16 @@ Jgame* loader(Jgame* game_state){
     play_data[10] = NULL;
 
     game_state->data_pack[1] = play_data;
+
+    // Gameover
+    info("data.c : Loading gameover data . . .");
+    struct Jdata** gameover_data = malloc(sizeof(struct Jdata)* 4);
+    gameover_data[0] = init(ID_GAMEOVER_TEXT, JFONT, CENTER, 100, "Game Over! text", "Assets/font.ttf", "Game Over!");
+    gameover_data[1] = init(ID_GAMEOVER_PLAY, JFONT, CENTER, CENTER, "Play again text", "Assets/font.ttf", "Retry");
+    gameover_data[2] = init(ID_GAMEOVER_EXIT, JFONT, CENTER, CENTER, "Quit text", "Assets/font.ttf", "Back");
+    gameover_data[3] = NULL;
+
+    game_state->data_pack[2] = gameover_data;
 
     return game_state;
 }
