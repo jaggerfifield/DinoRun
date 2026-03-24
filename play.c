@@ -118,7 +118,7 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		struct Jdata* hiscore = data[ID_PLAY_HISCORE];
 		struct Jdata* bg = data[ID_PLAY_BACKGROUND];
 		struct Jdata* dino = data[ID_PLAY_PLAYER];
-		struct Jdata* debug = data[12];
+		struct Jdata* debug = data[ID_PLAY_DEBUG];
 
 		int gravity = 4;
 		int accel = 1;
