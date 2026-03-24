@@ -26,9 +26,12 @@ void menu_state(Jgame* game_state){
 	bool selected = false;
 	bool quit = false;
 
+    info("menu.c : trying to load data");
+
 	// Load assets
-	struct Jdata** DTA = NULL;
-	get_data(&DTA, DATA_MAINMENU);
+	struct Jdata** DTA = game_state->data_pack[0];
+
+    info("menu.c : Menu data loaded");
 
 	while(!quit){
 		while(SDL_PollEvent(&e) != 0){

@@ -1,3 +1,2 @@
-void loader(SDL_Window*);
-void get_data(struct Jdata***, int);
+Jgame* loader(Jgame*);
 void free_data(struct Jdata**);

@@ -41,8 +41,9 @@ void play_state(Jgame* game_state){
 
 	fpsTimer = timer_init();
 
-	int dSize = 13;
-
+	//int dSize = 13;
+    
+    /*
     SDL_Window* window = game_state->window;
 
 	struct Jdata* DTA[dSize];
@@ -60,11 +61,14 @@ void play_state(Jgame* game_state){
 	DTA[11] = init(ID_PLAY_OBJECT4, JIMAGE, game_state->display_w, 0, "Object 4", "Assets/dino.bmp", NULL,window);
 	// Debug layers
 	DTA[12] = init(912, JFONT, 0, 0, "Debug overlay", "Assets/font.ttf", "", window);
+    */
+
+    struct Jdata** DTA = game_state->data_pack[1];
 
 	// Enable background render on debug layer
-	set_text_bg(DTA[12]);
-	set_bgColour(DTA[12], 190, 190, 190);
-	set_text_size(DTA[12], 10);
+	set_text_bg(DTA[ID_PLAY_DEBUG]);
+	set_bgColour(DTA[ID_PLAY_DEBUG], 190, 190, 190);
+	set_text_size(DTA[ID_PLAY_DEBUG], 10);
 
 	int next_time = SDL_GetTicks() + 5;
 
@@ -96,11 +100,6 @@ void play_state(Jgame* game_state){
 		}
 	}
 	
-	// Free datas
-	for(int i = 0; i < dSize; i++){
-        jdata_free(DTA[i]);
-	}
-
 	timer_free(fpsTimer);
 	
 	if(!quit)
@@ -111,26 +110,26 @@ static void _update(Jgame* game_state, struct Jdata** data){
 
 	// Count down timer TODO: find a better way to time things here
 	if(timer >= -200){
-		struct Jdata* temp = NULL;
+		struct Jdata* timer_node = data[ID_PLAY_TIMER];
 
-		if(timer == 3000)
-			temp = data[ID_PLAY_3];
-		else if(timer == 2000)
-			temp = data[ID_PLAY_2];
+		if(timer == 2000)
+			sprintf(timer_node->string, "2");
 		else if(timer == 1000)
-			temp = data[ID_PLAY_1];
+			sprintf(timer_node->string, "1");
 		else if(timer == 0)
-			temp = data[ID_PLAY_GO];
+            sprintf(timer_node->string, "Go!");
 
-		if(temp != NULL){
+        render(timer_node); // TODO this is called too many times
+
+		if(timer_node != NULL){
 			// Clear the screen first!
 			struct Jdata* bg = data[ID_PLAY_BACKGROUND];
 			SDL_Rect bg_rect = get_rect(bg, game_state);
 			SDL_BlitSurface(bg->data, NULL, game_state->surface, &bg_rect);
 				
 			// Blit the countdown
-			SDL_Rect temp_rect = get_rect(temp, game_state);
-			SDL_BlitSurface(temp->data, NULL, game_state->surface, &temp_rect);
+			SDL_Rect temp_rect = get_rect(timer_node, game_state);
+			SDL_BlitSurface(timer_node->data, NULL, game_state->surface, &temp_rect);
 		}
 		timer = timer - 5;
 

@@ -15,6 +15,8 @@ typedef struct Jgame{
     SDL_DisplayID* display_id; // A list of all displays 
     int n_displays; // How many displays are there
 
+    struct Jdata*** data_pack;
+
     int monitor; // The monitor we are using
     int volume; // Current game volume
     bool is_fullscreen; // Are we fullscreen
