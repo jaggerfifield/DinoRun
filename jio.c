@@ -33,6 +33,9 @@ void parse(char* output, va_list args){
                         fprintf(log, "%f", a);
                         ++output;
                         break;
+                    }case 's': {
+                        printf("%s", va_arg(args, char*));
+                        ++output;
                     }
                 }
                 break;
