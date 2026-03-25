@@ -81,6 +81,10 @@ int main(int argc, char* argv[]){
     info("main.c : Go to main menu");
     menu_state(game_state);
 
+    info("Cleaning up data");
+    free_data(game_state);
+
+    info("Quit SDL");
     // Cleanup
     SDL_DestroyWindow(game_state->window);
     SDL_DestroyRenderer(game_state->renderer);
@@ -88,6 +92,8 @@ int main(int argc, char* argv[]){
     SDL_Quit();
 
     free(game_state);
+    
+    info("Goodbye!");
 
     return 0;
 }

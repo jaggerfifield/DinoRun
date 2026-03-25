@@ -12,7 +12,7 @@
 
 Jgame* loader(Jgame* game_state){
 	info("data.c : Loading assets . . .");
-    game_state->data_pack = malloc(sizeof(struct Jdata**) * 3);
+    game_state->data_pack = malloc(sizeof(struct Jdata**) * 4);
 
     // Splash Screen
     debug("data.c : splash data loading");
@@ -60,6 +60,8 @@ Jgame* loader(Jgame* game_state){
 
     game_state->data_pack[2] = gameover_data;
 
+
+    game_state->data_pack[3] = NULL;
     return game_state;
 }
 
