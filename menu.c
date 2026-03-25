@@ -53,8 +53,6 @@ void menu_state(Jgame* game_state){
 		}
 		update(game_state, DTA, &location);
 	}
-	
-	free_data(DTA);
 
 	return;	
 }

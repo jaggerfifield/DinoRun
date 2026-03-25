@@ -1,2 +1,2 @@
 Jgame* loader(Jgame*);
-void free_data(struct Jdata**);
+void free_data(Jgame*);
