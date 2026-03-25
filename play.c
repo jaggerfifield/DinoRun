@@ -48,6 +48,11 @@ void play_state(Jgame* game_state){
 	set_bgColour(DTA[ID_PLAY_DEBUG], 190, 190, 190);
 	set_text_size(DTA[ID_PLAY_DEBUG], 10);
 
+    DTA[ID_PLAY_OBJECT]->x = game_state->display_w;
+    DTA[ID_PLAY_OBJECT2]->x = game_state->display_w;
+    DTA[ID_PLAY_OBJECT3]->x = game_state->display_w;
+    DTA[ID_PLAY_OBJECT4]->x = game_state->display_w;
+
 	int next_time = SDL_GetTicks() + 5;
 
 	// Apply a seed for random
