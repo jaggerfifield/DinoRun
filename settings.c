@@ -102,13 +102,13 @@ static void update(Jgame* game_state, struct Jdata** data, int* location){
             // Handle left right settings here
 			if(direction == 1){
 				// Left
-				if(*location == ID_SETTINGS_VOLUME == node->id){
+				if((*location == ID_SETTINGS_VOLUME) && (*location == node->id)){
 					// Turn volume down
                     if(game_state->volume > 0){
 					    game_state->volume -= 1;
 					    sprintf(node->string, "<  Volume %.3d%%  >", game_state->volume);
                     }
-				}else if(*location == ID_SETTINGS_DISPLAY == node->id){
+				}else if((*location == ID_SETTINGS_DISPLAY) && (*location == node->id)){
                     // Swap selected monitor
                     if(game_state->monitor == 0)
                         game_state->monitor = game_state->n_displays-1;
@@ -118,13 +118,13 @@ static void update(Jgame* game_state, struct Jdata** data, int* location){
                 }
 			}else if(direction == 2){
                 // Right
-				if(*location == ID_SETTINGS_VOLUME == node->id){
+				if((*location == ID_SETTINGS_VOLUME) && (*location == node->id)){
                     // Turn Volume up
                     if(game_state->volume < 100){
 					    game_state->volume += 1;
 					    sprintf(node->string, "<  Volume %.3d%%  >", game_state->volume);
                     }
-				}else if(*location == ID_SETTINGS_DISPLAY == node->id){
+				}else if((*location == ID_SETTINGS_DISPLAY) && (*location == node->id)){
                     if(game_state->monitor == game_state->n_displays-1){
                         game_state->monitor = 0;
                     }else
@@ -133,13 +133,14 @@ static void update(Jgame* game_state, struct Jdata** data, int* location){
                 }
 			}
 
-			direction = 0;
 		    render(node); // TODO : add update flag to node to check if it needs to be rendered!
         }
 
 		SDL_BlitSurface(node->data, NULL, game_state->surface, &temp_rect);
 	    i++;
     }
+
+    direction = 0;
 
 	SDL_UpdateWindowSurface(game_state->window);
 }
