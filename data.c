@@ -20,6 +20,8 @@ Jgame* loader(Jgame* game_state){
     splash[0] = init(0, JIMAGE, -1, -1, "Splash Icon", "Assets/splash.bmp", NULL);
 	splash[1] = NULL;
     update(game_state, splash, NULL);
+	jdata_free(splash[0]);
+
 
 	// Main Menu
     info("data.c : Loading menu data . . .");
@@ -88,8 +90,11 @@ void free_data(Jgame* game_state){
 		    node[i] = NULL;
 		    i = i + 1;
 	    }
-	    free(node);
-    }
 
-    free(game_state->data_pack);
+		free(node);
+		node = NULL;
+    }
+    
+	free(game_state->data_pack);
+	game_state->data_pack = NULL;
 }
