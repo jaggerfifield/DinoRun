@@ -9,7 +9,6 @@ typedef struct Jgame{
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Surface* surface;
-    //const SDL_DisplayMode* display; 
     int display_w;
     int display_h;
     SDL_DisplayID* display_id; // A list of all displays 
