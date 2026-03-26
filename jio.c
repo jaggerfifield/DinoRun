@@ -134,7 +134,7 @@ void jread(FILE* file, void* dst, size_t size){
 
 void init_files(void){
 	fclose(jaccess("log.txt", "w+"));
-	info("Generate log!");
+	info("jio.c : Generate log!");
 
 	fclose(jaccess("score", "a+"));
 }

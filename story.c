@@ -31,10 +31,10 @@ void story_state(Jgame* game_state){
     SDL_Window* window = game_state->window; // TODO this is temp for data loading, this will move to data.c
 
 	struct Jdata* DTA[dSize];
-	DTA[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play background", "Assets/bg_fill.bmp", NULL, window);
-	DTA[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/image.bmp", NULL, window);
+	DTA[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play background", "Assets/bg_fill.bmp", NULL);
+	DTA[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/image.bmp", NULL);
 	// Debug layers
-	DTA[2] = init(912, JFONT, 0, 0, "Debug overlay", "Assets/font.ttf", "", window);
+	DTA[2] = init(912, JFONT, 0, 0, "Debug overlay", "Assets/font.ttf", "");
 
 	// Enable background render on debug layer
 	set_text_bg(DTA[2]);

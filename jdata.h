@@ -62,7 +62,7 @@ struct Jdata{
 	SDL_Window* window;
 };
 
-struct Jdata* init(int, int, int, int, char*, char*, char*, ...);
+struct Jdata* init(int, int, int, int, char*, char*, char*);
 void render(struct Jdata*);
 
 void set_text_bg(struct Jdata*);

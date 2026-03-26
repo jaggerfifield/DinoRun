@@ -9,18 +9,20 @@
 #include "jio.h"
 #include "jdata.h"
 
-struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char* string, ...){ // TODO we removed the window spot, 
+struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char* string){  
 	struct Jdata* data_node = malloc(sizeof(struct Jdata));
 
 	data_node->id = id;
 	data_node->type = type;
 	data_node->x = x;
 	data_node->y = y;
+
 	data_node-> name = (char*)malloc(64);
     memset(data_node->name, '\0', 64);
     sprintf(data_node->name, "%s", name);
 
 	data_node->path = path;
+	
 	data_node->string = (char*)malloc(128);
     memset(data_node->string, '\0', 128);
     sprintf(data_node->string, "%s", string);
@@ -29,8 +31,6 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 
     data_node->text_bg = false;
 	data_node->text_size = 40;
-
-	data_node->window = NULL; // TODO need to delete this, we dont need it!
 
 	if(type == JIMAGE){
 		// Render the image
@@ -152,19 +152,10 @@ void jdata_free(struct Jdata* node){
 }
 
 void jdata_print(struct Jdata* node){
-	char temp[64];
 	debug("=====Printing Jdata node=====");
-
-	sprintf(temp, "    ID: %d", node->id);
-	debug(temp);
-
-	sprintf(temp, "    TYPE: %d", node->type);
-	debug(temp);
-
-	sprintf(temp, "    X, Y: %d,%d", node->x, node->y);
-	debug(temp);
-
-	sprintf(temp, "    NAME: %s", node->name);
-	debug(temp);
+	debug("    ID: %d", node->id);
+	debug("    TYPE: %d", node->type);
+	debug("    X, Y: %d,%d", node->x, node->y);
+	debug("    NAME: %s", node->name);
 }
 

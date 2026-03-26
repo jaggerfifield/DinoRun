@@ -63,7 +63,7 @@ int main(int argc, char* argv[]){
     	error("main.c : SDL cond not create window! Error: %s", SDL_GetError());
         return 0;
     }
-    
+
     SDL_GetWindowSize(game_state->window, &game_state->display_w, &game_state->display_h);
 
     game_state->surface = SDL_GetWindowSurface(game_state->window);
@@ -87,9 +87,9 @@ int main(int argc, char* argv[]){
     info("Quit SDL");
     // Cleanup
     SDL_free(game_state->display_id);
+    SDL_DestroySurface(game_state->surface);
     SDL_DestroyWindow(game_state->window);
     SDL_DestroyRenderer(game_state->renderer);
-    SDL_DestroySurface(game_state->surface);
     SDL_Quit();
 
     free(game_state);
