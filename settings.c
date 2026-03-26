@@ -6,7 +6,7 @@
 #include "jdata.h"
 #include "jio.h"
 
-#define MENU_SIZE 4
+#define MENU_SIZE 5
 
 unsigned short int direction = 0;
 
@@ -14,27 +14,24 @@ unsigned short int direction = 0;
 static void handle_keys(SDL_KeyboardEvent, bool*, int*);
 void* load_data(void);
 static void update(Jgame*, struct Jdata**, int*);
+void update_display(Jgame*, struct Jdata**);
 
 void settings_state(Jgame* game_state){
 
 	// Declare variables
 	SDL_Event e;
-	int location = 0;
+	int location = 1;
 	bool selected = false;
 	bool quit = false;
 
-    SDL_Window* window = game_state->window;
-
 	// Load assets
-	struct Jdata* DTA[5];
-	DTA[0] = init(0, JIMAGE, 0, 0, "Menu Background", "Assets/bg_fill.bmp", NULL, window);
-	DTA[1] = init(1, JFONT, CENTER, 0, "Volume", "Assets/font.ttf", "<  Volume ---%  >", window);
-	DTA[2] = init(2, JFONT, CENTER, 100, "", "Assets/font.ttf", "Empty", window);
-	DTA[3] = init(3, JFONT, CENTER, 200, "", "Assets/font.ttf", "Empty", window);
-	DTA[4] = init(4, JFONT, CENTER, 300, "", "Assets/font.ttf", "Back", window);
+    struct Jdata** DTA = game_state->data_pack[3];
 
     // Load current volume level
-    sprintf(DTA[1]->string, "<  Volume %.3d%%  >", game_state->volume);
+    sprintf(DTA[ID_SETTINGS_VOLUME]->string, "<  Volume %.3d%%  >", game_state->volume);
+    render(DTA[ID_SETTINGS_VOLUME]);
+
+    update_display(game_state, DTA);
 
 	while(!quit){
 		while(SDL_PollEvent(&e) != 0){
@@ -44,23 +41,19 @@ void settings_state(Jgame* game_state){
 				handle_keys(e.key, &selected, &location);
 			if(selected){
 				selected = false;
-				if(location == 0)
+				if(location == ID_SETTINGS_VOLUME)
 					info("test");
 				else if(location == 1)
 					warn("TODO");
 				else if(location == 2)
 					info("TODO");
-				else if(location == 3)
+				else if(location == ID_SETTINGS_BACK)
 					quit = true;
 			}
 		}
 		update(game_state, DTA, &location);
 	}
 
-	// TODO: dynamic data length
-	for(int i = 0; i < 5; i++)
-		jdata_free(DTA[i]);
-	
 	return;	
 }
 
@@ -72,14 +65,15 @@ static void handle_keys(SDL_KeyboardEvent e, bool* selected, int* location){
 		*location -= 1;
 
 		// Check for wrap-around
-		if(*location < 0)
+		if(*location < 1)
 			*location = MENU_SIZE - 1;
 
 	}else if(key == SDLK_DOWN){
 		*location += 1;
 
-		if(*location > (MENU_SIZE - 1) )
+		if(*location > (MENU_SIZE) )
 			*location = 0;
+
 	}else if(key == SDLK_RIGHT)
 		direction = 2;
 	else if(key == SDLK_LEFT)
@@ -91,44 +85,71 @@ static void handle_keys(SDL_KeyboardEvent e, bool* selected, int* location){
 
 static void update(Jgame* game_state, struct Jdata** data, int* location){
 
-	// TODO: dynamic data length (pass size in update)
-	// for(int i = 0; i < size; i++){
+    int i = 0;
 	
-	for(int i = 0; i < 5; i++){
+    while(data[i] != NULL){
 		struct Jdata* node = data[i];
 
 		SDL_Rect temp_rect = get_rect(node, game_state);
 		
 		if(node->type == JFONT){
-			if(*location == node->id - 1){
-				if(direction == 1){
-					// Left
-					if(node->id == 1 && game_state->volume > 0){
-						// Turn volume down
-						game_state->volume -= 1;
-						sprintf(node->string, "<  Volume %.3d%%  >", game_state->volume);
-					}
-				}else if(direction == 2){
-					if(node->id == 1 && game_state->volume < 100){
-						game_state->volume += 1;
-						sprintf(node->string, "<  Volume %.3d%%  >", game_state->volume);
-					}
-				}
-
-
-				direction = 0;
-
+			if(*location == node->id){
 				set_fgColour(node, 255, 0 , 0);
-				render(node);
 			}else{
 				set_fgColour(node, 0, 0, 0);
-				render(node);
 			}
-		}
+
+            // Handle left right settings here
+			if(direction == 1){
+				// Left
+				if(*location == ID_SETTINGS_VOLUME == node->id){
+					// Turn volume down
+                    if(game_state->volume > 0){
+					    game_state->volume -= 1;
+					    sprintf(node->string, "<  Volume %.3d%%  >", game_state->volume);
+                    }
+				}else if(*location == ID_SETTINGS_DISPLAY == node->id){
+                    // Swap selected monitor
+                    if(game_state->monitor == 0)
+                        game_state->monitor = game_state->n_displays-1;
+                    else
+                        game_state->monitor -= 1;
+                    update_display(game_state, data);
+                }
+			}else if(direction == 2){
+                // Right
+				if(*location == ID_SETTINGS_VOLUME == node->id){
+                    // Turn Volume up
+                    if(game_state->volume < 100){
+					    game_state->volume += 1;
+					    sprintf(node->string, "<  Volume %.3d%%  >", game_state->volume);
+                    }
+				}else if(*location == ID_SETTINGS_DISPLAY == node->id){
+                    if(game_state->monitor == game_state->n_displays-1){
+                        game_state->monitor = 0;
+                    }else
+                        game_state->monitor += 1;
+                    update_display(game_state, data);
+                }
+			}
+
+			direction = 0;
+		    render(node); // TODO : add update flag to node to check if it needs to be rendered!
+        }
 
 		SDL_BlitSurface(node->data, NULL, game_state->surface, &temp_rect);
-	}
+	    i++;
+    }
 
 	SDL_UpdateWindowSurface(game_state->window);
 }
 
+void update_display(Jgame* game_state, struct Jdata** DTA){
+    // Load current display
+    const char* name = SDL_GetDisplayName(game_state->display_id[game_state->monitor]);
+    if(name == NULL)
+        error("settings.c : SDL could not get display name! Error: %s", SDL_GetError());
+    else
+        sprintf(DTA[ID_SETTINGS_DISPLAY]->string, "<  Display: %s  >", name);
+    render(DTA[ID_SETTINGS_DISPLAY]); 
+}

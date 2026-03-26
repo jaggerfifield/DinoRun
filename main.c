@@ -86,6 +86,7 @@ int main(int argc, char* argv[]){
 
     info("Quit SDL");
     // Cleanup
+    SDL_free(game_state->display_id);
     SDL_DestroyWindow(game_state->window);
     SDL_DestroyRenderer(game_state->renderer);
     SDL_DestroySurface(game_state->surface);

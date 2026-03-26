@@ -12,7 +12,7 @@
 
 Jgame* loader(Jgame* game_state){
 	info("data.c : Loading assets . . .");
-    game_state->data_pack = malloc(sizeof(struct Jdata**) * 4);
+    game_state->data_pack = malloc(sizeof(struct Jdata**) * 5);
 
     // Splash Screen
     debug("data.c : splash data loading");
@@ -60,8 +60,20 @@ Jgame* loader(Jgame* game_state){
 
     game_state->data_pack[2] = gameover_data;
 
+    // Settings 
+    info("data.c : Loading settings data . . .");
+    struct Jdata** settings_data = malloc(sizeof(struct Jdata)* 7);
+    settings_data[0] = init(ID_SETTINGS_BACKGROUND, JIMAGE, 0, 0, "Menu Background", "Assets/bg_fill.bmp", NULL);
+    settings_data[1] = init(ID_SETTINGS_VOLUME, JFONT, CENTER, 0, "Volume", "Assets/font.ttf", "<  Volume ---%  >");
+    settings_data[2] = init(ID_SETTINGS_DISPLAY, JFONT, CENTER, 100, "Display", "Assets/font.ttf", "<  Display:  >");
+    settings_data[3] = init(ID_SETTINGS_THEME, JFONT, CENTER, 200, "Theme", "Assets/font.ttf", "<  Theme: Default  >");
+    settings_data[4] = init(ID_SETTINGS_DIFFICULTY, JFONT, CENTER, 300, "Difficulty", "Assets/font.ttf", "<  Difficulty: Normal  >");
+    settings_data[5] = init(ID_SETTINGS_BACK, JFONT, CENTER, 400, "Back", "Assets/font.ttf", "Back");
+    settings_data[6] = NULL;
 
-    game_state->data_pack[3] = NULL;
+    game_state->data_pack[3] = settings_data;
+
+    game_state->data_pack[4] = NULL;
     return game_state;
 }
 
