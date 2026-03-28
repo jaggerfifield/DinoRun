@@ -42,6 +42,7 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 	}else if(type == JFONT){
 		// Load font .ttf
 		data_node->fnt = TTF_OpenFont(path, data_node->text_size);
+        assert(data_node->fnt != NULL);
 
 		// Make font color black
 		SDL_Color colour = {0, 0, 0};
@@ -117,8 +118,10 @@ void set_text_bg(struct Jdata* node){
 void set_text_size(struct Jdata* node, unsigned short int size){
 	node->text_size = size;
 	
-	if(node->fnt != NULL)
+	if(node->fnt != NULL){
 		TTF_CloseFont(node->fnt);
+        node->fnt = NULL;
+    }
 	
 	TTF_OpenFont(node->path, node->text_size);
 }
@@ -132,7 +135,7 @@ void jdata_free(struct Jdata* node){
 	}
 
 	// Free loaded font .ttf
-	if(node->type == JFONT){
+	if((node->type == JFONT) && (node->fnt != NULL)){
 		TTF_CloseFont(node->fnt);
 		node->fnt = NULL;
 	}
