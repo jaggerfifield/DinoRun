@@ -12,7 +12,7 @@
 
 Jgame* loader(Jgame* game_state){
 	info("data.c : Loading assets . . .");
-    game_state->data_pack = malloc(sizeof(struct Jdata**) * 5);
+    game_state->data_pack = malloc(sizeof(struct Jdata**) * 6);
 
     // Splash Screen
     debug("data.c : splash data loading");
@@ -75,7 +75,17 @@ Jgame* loader(Jgame* game_state){
 
     game_state->data_pack[3] = settings_data;
 
-    game_state->data_pack[4] = NULL;
+    // Story
+    info("data.c : Loading Sotry data . . .");
+    struct Jdata** story_data = malloc(sizeof(struct Jdata)*4);
+    story_data[0] = init(ID_STORY_BACKGROUND, JIMAGE, 0, 0, "Play Background", "Assets/bg_fill.bmp", NULL);
+    story_data[1] = init(ID_STORY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/image.bmp", NULL);
+    story_data[2] = init(ID_STORY_DEBUG, JFONT, 0, 0, "Debug Overlay", "Assets/font.ttf", "");
+    story_data[3] = NULL;
+
+    game_state->data_pack[4] = story_data;
+
+    game_state->data_pack[5] = NULL;
     return game_state;
 }
 

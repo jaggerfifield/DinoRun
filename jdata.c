@@ -123,7 +123,7 @@ void set_text_size(struct Jdata* node, unsigned short int size){
         node->fnt = NULL;
     }
 	
-	TTF_OpenFont(node->path, node->text_size);
+	node->fnt = TTF_OpenFont(node->path, node->text_size);
 }
 
 void jdata_free(struct Jdata* node){
