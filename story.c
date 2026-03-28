@@ -26,20 +26,12 @@ void story_state(Jgame* game_state){
 
 	fpsTimer = timer_init();
 
-	int dSize = 3;
-
-    SDL_Window* window = game_state->window; // TODO this is temp for data loading, this will move to data.c
-
-	struct Jdata* DTA[dSize];
-	DTA[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play background", "Assets/bg_fill.bmp", NULL);
-	DTA[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/image.bmp", NULL);
-	// Debug layers
-	DTA[2] = init(912, JFONT, 0, 0, "Debug overlay", "Assets/font.ttf", "");
+	struct Jdata** DTA = game_state->data_pack[4];
 
 	// Enable background render on debug layer
-	set_text_bg(DTA[2]);
-	set_bgColour(DTA[2], 190, 190, 190);
-	set_text_size(DTA[2], 10);
+	set_text_bg(DTA[ID_STORY_DEBUG]);
+	set_bgColour(DTA[ID_STORY_DEBUG], 190, 190, 190);
+	set_text_size(DTA[ID_STORY_DEBUG], 10);
 
 	int next_time = SDL_GetTicks() + 5;
 
@@ -73,20 +65,15 @@ void story_state(Jgame* game_state){
 		}
 	}
 	
-	// Free datas
-	for(int i = 0; i < dSize; i++){
-		jdata_free(DTA[i]);
-	}
-
 	timer_free(fpsTimer);
 }
 
 static void update(Jgame* game_state, struct Jdata** data){
 	
 	// Here is the dino run loop (after the countdown)
-	struct Jdata* bg = data[0];
-	struct Jdata* dino = data[1];
-	struct Jdata* debug = data[2];
+	struct Jdata* bg = data[ID_PLAY_BACKGROUND];
+	struct Jdata* dino = data[ID_PLAY_PLAYER];
+	struct Jdata* debug = data[ID_PLAY_DEBUG];
 
 	int gravity = 4;
 
