@@ -43,6 +43,7 @@ struct Jdata{
 	// frames - the number of frames used for animation
 	char* path;
 	int frames;
+    int current_frame;
 
 	// For font types
 	// string - the font string to render
