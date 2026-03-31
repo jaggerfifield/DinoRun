@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <dirent.h>
 
 #ifdef WIN
 #include <wchar.h>
@@ -13,6 +14,7 @@ FILE* jaccess(char*, char*);
 void jwrite(FILE*, char*);
 void jread(FILE*, void*, size_t);
 void init_files(void);
+int f_count(char*);
 
 void parse(char* output, va_list args){
     FILE* log = fopen("log.txt", "a");
@@ -130,6 +132,24 @@ void jwrite(FILE* file, char* content){
 
 void jread(FILE* file, void* dst, size_t size){
 	fread(dst, size, sizeof(char), file);
+}
+
+int f_count(char* path){
+    DIR* dir = opendir(path);
+    int count = 0;
+
+    if(dir == NULL){
+        error("jio.c : could not read directory: %s", path);
+        return -1;
+    }
+
+    while(readdir(dir) != NULL)
+        count++;
+
+    closedir(dir);
+
+    // Subtract 2 for . and ..
+    return count-2;
 }
 
 void init_files(void){

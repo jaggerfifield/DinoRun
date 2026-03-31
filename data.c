@@ -25,13 +25,14 @@ Jgame* loader(Jgame* game_state){
 
 	// Main Menu
     info("data.c : Loading menu data . . .");
-	struct Jdata** main_menu = malloc(sizeof(struct Jdata) * 6);
+	struct Jdata** main_menu = malloc(sizeof(struct Jdata) * 7);
 	main_menu[0] = init(ID_MAINMENU_BACKGROUND, JIMAGE, 0, 0, "Background Image", "Assets/bg_fill.bmp", NULL);
 	main_menu[1] = init(ID_MAINMENU_PLAY, JFONT, CENTER, 0, "Play Text", "Assets/font.ttf", "Play");
 	main_menu[2] = init(ID_MAINMENU_ARCADE, JFONT, CENTER, 100, "Arcade Text", "Assets/font.ttf", "Arcade");
 	main_menu[3] = init(ID_MAINMENU_SETTINGS, JFONT, CENTER, 200, "Settings Text", "Assets/font.ttf", "Settings");
 	main_menu[4] = init(ID_MAINMENU_EXIT, JFONT, CENTER, 300, "Exit Text", "Assets/font.ttf", "Exit");
-	main_menu[5] = NULL;
+	main_menu[5] = init(ID_MAINMENU_EXIT+1, JANIMATION, 0, 0, "Test Animations", "Assets/chara/", NULL);
+	main_menu[6] = NULL;
 
 	game_state->data_pack[0] = main_menu;
 

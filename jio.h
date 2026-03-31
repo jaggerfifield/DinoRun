@@ -10,3 +10,5 @@ char* jread(FILE*, void*, size_t);
 void jwrite(FILE*, char*);
 FILE* jaccess(char*, char*);
 void init_files(void);
+int f_count(char*);
+

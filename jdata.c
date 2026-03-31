@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <string.h>
 
 #include "main.h"
 #include "jio.h"
@@ -32,9 +33,24 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
     data_node->text_bg = false;
 	data_node->text_size = 40;
 
-	if(type == JIMAGE){
+    data_node->frames = 0;
+    data_node->current_frame = 0;
+
+	if(type == JIMAGE || type == JANIMATION){
+        // Animated JIMAGE has a directory not a .bmp
+        char _path[128];
+        memset(_path, '\0', 128);
+
+        if(type == JANIMATION){
+            data_node->frames = f_count(path);
+            // Load the first image
+            sprintf(_path, "%s%d.bmp", path, data_node->current_frame);
+        }else{
+            sprintf(_path, "%s", path);
+        }
+
 		// Render the image
-		data_node->data = SDL_LoadBMP(path);
+		data_node->data = SDL_LoadBMP(_path);
 		
 		// Apply color key
 		SDL_SetSurfaceColorKey(data_node->data, true, SDL_MapSurfaceRGB(data_node->data, 0, 0, 0));
@@ -70,9 +86,15 @@ void render(struct Jdata* node){
 
 	if(node->type == JIMAGE){
 		node->data = SDL_LoadBMP(node->path);
-		// TODO: animation frames here?
-
-	}else if(node->type == JFONT){
+	
+    }else if(node->type == JANIMATION){
+        char _path[128];
+        memset(_path, '\0', 128);
+        node->current_frame = (node->current_frame+1)%node->frames;
+        sprintf(_path, "%s%d.bmp", node->path, node->current_frame);
+        node->data = SDL_LoadBMP(_path);
+    
+    }else if(node->type == JFONT){
 		assert(node->fnt != NULL);
         assert(node->string[127] == '\0');
 		
@@ -80,7 +102,7 @@ void render(struct Jdata* node){
 			node->data = TTF_RenderText_Shaded(node->fnt, node->string, 0, node->fgColour, node->bgColour);
 		else
 			node->data = TTF_RenderText_Solid(node->fnt, node->string, 0, node->fgColour);
-	}
+    }
 
 	assert(node->data != NULL);
 }

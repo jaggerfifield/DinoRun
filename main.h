@@ -1,7 +1,7 @@
 #define MAX_WIDTH 3840
 #define MAX_HEIGHT 2160
 
-enum Data {JIMAGE, JFONT};
+enum Data {JIMAGE, JANIMATION, JFONT};
 enum State {MENU, PLAY, PAUSE, STORY, EXIT};
 enum Position {CENTER = -1};
 enum Targets {LMENU, LPLAY};
