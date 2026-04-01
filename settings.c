@@ -52,8 +52,6 @@ void settings_state(Jgame* game_state){
                         SDL_Rect bounds;
                         SDL_GetWindowPosition(game_state->window, &win_x, &win_y);
                         SDL_GetDisplayBounds(game_state->display_id[game_state->monitor], &bounds);
-                        info("settings.c : Current Window Position: (%d, %d)", win_x, win_y);
-                        info("settings.c : Diaplay Bounds of next monitor (%d, %d) [%d, %d]", bounds.x, bounds.y, bounds.w, bounds.h);
 					    SDL_SetWindowPosition(game_state->window, bounds.x + (bounds.w-game_state->display_w)/2, bounds.y + (bounds.h-game_state->display_h)/2);
                         info("settings.c : Current display is [%d] %s", game_state->monitor, name);
                     }
