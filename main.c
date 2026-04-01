@@ -81,6 +81,21 @@ int main(int argc, char* argv[]){
     info("main.c : Go to main menu");
     menu_state(game_state);
 
+    // Save gamestate for next launch
+    char data[256];
+    memset(data, '\0', 256);
+    sprintf(data, "display,resoultion,volume\n%d\n%d\n%d", game_state->monitor, -1, game_state->volume);
+
+    FILE* out = jaccess("./game_state", "w+");
+    
+    if(out == NULL)
+        error("Could not write file");
+    else{
+        info("main.c : Saving gamestate to disk");
+        jwrite(out, data);
+        fclose(out);
+    }
+
     info("Cleaning up data");
     free_data(game_state);
 
