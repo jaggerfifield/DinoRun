@@ -59,7 +59,7 @@ int main(int argc, char* argv[]){
     info("main.c : Create Display (%d x %d)[%fHz]", mode->w, mode->h, mode->refresh_rate);
 
     // Create a SDL window and renderer
-    if(!SDL_CreateWindowAndRenderer("game", mode->w, mode->h, SDL_WINDOW_RESIZABLE, &game_state->window, &game_state->renderer)){
+    if(!SDL_CreateWindowAndRenderer("game", 1920, 1080, SDL_WINDOW_RESIZABLE, &game_state->window, &game_state->renderer)){
     	error("main.c : SDL cond not create window! Error: %s", SDL_GetError());
         return 0;
     }
@@ -89,17 +89,17 @@ int main(int argc, char* argv[]){
     FILE* out = jaccess("./game_state", "w+");
     
     if(out == NULL)
-        error("Could not write file");
+        error("main.c : Could not write file");
     else{
         info("main.c : Saving gamestate to disk");
         jwrite(out, data);
         fclose(out);
     }
 
-    info("Cleaning up data");
+    info("main.c : Cleaning up data");
     free_data(game_state);
 
-    info("Quit SDL");
+    info("main.c : Quit SDL");
     // Cleanup
     SDL_free(game_state->display_id);
     SDL_DestroySurface(game_state->surface);
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]){
 
     free(game_state);
     
-    info("Goodbye!");
+    info("main.c : Goodbye!");
 
     return 0;
 }
