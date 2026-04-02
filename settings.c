@@ -6,8 +6,6 @@
 #include "jdata.h"
 #include "jio.h"
 
-#define MENU_SIZE 5
-
 unsigned short int direction = 0;
 
 // Define functions
@@ -30,8 +28,14 @@ void settings_state(Jgame* game_state){
     // Load current volume level
     sprintf(DTA[ID_SETTINGS_VOLUME]->string, "<  Volume %.3d%%  >", game_state->volume);
     render(DTA[ID_SETTINGS_VOLUME]);
-
+    
+    // Load current display
     update_display(game_state, DTA);
+
+    // Load current resolution
+    sprintf(DTA[ID_SETTINGS_RESOLUTION]->string, "<  Resolution: %d x %d  >", game_state->display_w, game_state->display_h);
+    render(DTA[ID_SETTINGS_RESOLUTION]);
+
 
 	while(!quit){
 		while(SDL_PollEvent(&e) != 0){
@@ -39,25 +43,29 @@ void settings_state(Jgame* game_state){
 				quit = true;
 			else if(e.type == SDL_EVENT_KEY_DOWN)
 				handle_keys(e.key, &selected, &location);
-			if(selected){
+			
+            // Handle pressing/clicking
+            if(selected){
 				selected = false;
-				if(location == ID_SETTINGS_VOLUME)
+			
+                if(location == ID_SETTINGS_VOLUME)
 					info("settings.c : Current volume is %d", game_state->volume);
-				else if(location == ID_SETTINGS_DISPLAY){
-                    const char* name = SDL_GetDisplayName(game_state->display_id[game_state->monitor]);
-                    if(name == NULL)
-                        error("settings.c : Could not get display name! %s", SDL_GetError());
-                    else{
-                        int win_x, win_y;
-                        SDL_Rect bounds;
-                        SDL_GetWindowPosition(game_state->window, &win_x, &win_y);
-                        SDL_GetDisplayBounds(game_state->display_id[game_state->monitor], &bounds);
-					    SDL_SetWindowPosition(game_state->window, bounds.x + (bounds.w-game_state->display_w)/2, bounds.y + (bounds.h-game_state->display_h)/2);
-                        info("settings.c : Current display is [%d] %s", game_state->monitor, name);
-                    }
-                 }else if(location == ID_SETTINGS_THEME)
+				
+                else if(location == ID_SETTINGS_DISPLAY){
+                    int win_x, win_y;
+                    SDL_Rect bounds;
+                    SDL_GetWindowPosition(game_state->window, &win_x, &win_y);
+                    SDL_GetDisplayBounds(game_state->display_id[game_state->monitor], &bounds);
+					SDL_SetWindowPosition(game_state->window, bounds.x+(bounds.w-game_state->display_w)/2, bounds.y+(bounds.h-game_state->display_h)/2);
+                    info("settings.c : Current display is [%d]", game_state->monitor);
+                
+                }else if(location == ID_SETTINGS_RESOLUTION){
+                    info("WIP");
+                
+                }else if(location == ID_SETTINGS_THEME)
 					info("TODO");
-				else if(location == ID_SETTINGS_BACK)
+				
+                else if(location == ID_SETTINGS_BACK)
 					quit = true;
 			}
 		}
@@ -73,17 +81,8 @@ static void handle_keys(SDL_KeyboardEvent e, bool* selected, int* location){
 	
 	if(key == SDLK_UP){
 		*location -= 1;
-
-		// Check for wrap-around
-		if(*location < 1)
-			*location = MENU_SIZE - 1;
-
 	}else if(key == SDLK_DOWN){
 		*location += 1;
-
-		if(*location > (MENU_SIZE) )
-			*location = 0;
-
 	}else if(key == SDLK_RIGHT)
 		direction = 2;
 	else if(key == SDLK_LEFT)
@@ -95,7 +94,7 @@ static void handle_keys(SDL_KeyboardEvent e, bool* selected, int* location){
 
 static void update(Jgame* game_state, struct Jdata** data, int* location){
 
-    int i = 0;
+    int i = 0, j = 1;
 	
     while(data[i] != NULL){
 		struct Jdata* node = data[i];
@@ -103,6 +102,7 @@ static void update(Jgame* game_state, struct Jdata** data, int* location){
 		SDL_Rect temp_rect = get_rect(node, game_state);
 		
 		if(node->type == JFONT){
+            j++;
 			if(*location == node->id){
 				set_fgColour(node, 255, 0 , 0);
 			}else{
@@ -135,11 +135,15 @@ static void update(Jgame* game_state, struct Jdata** data, int* location){
 					    sprintf(node->string, "<  Volume %.3d%%  >", game_state->volume);
                     }
 				}else if((*location == ID_SETTINGS_DISPLAY) && (*location == node->id)){
+                    // Change displays
                     if(game_state->monitor == game_state->n_displays-1){
                         game_state->monitor = 0;
                     }else
                         game_state->monitor += 1;
                     update_display(game_state, data);
+                }else if((*location == ID_SETTINGS_RESOLUTION) && (*location == node->id)){
+                    // Change resolution
+                    info("WIP");
                 }
 			}
 
@@ -151,6 +155,11 @@ static void update(Jgame* game_state, struct Jdata** data, int* location){
     }
 
     direction = 0;
+    
+    *location = *location % j;
+    if(*location == 0){
+        *location = *location + 1;
+    }
 
 	SDL_UpdateWindowSurface(game_state->window);
 }
