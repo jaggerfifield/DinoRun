@@ -37,7 +37,7 @@ void menu_state(Jgame* game_state){
 			if(e.type == SDL_EVENT_QUIT)
 				quit = true;
             else if(e.type == SDL_EVENT_WINDOW_RESIZED){
-                resize_window(game_state);
+                game_state = resize_window(game_state);
             }else if(e.type == SDL_EVENT_KEY_DOWN)
 				handle_keys(e.key, &selected, &location);
 			if(selected){
