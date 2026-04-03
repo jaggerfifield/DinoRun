@@ -4,7 +4,6 @@
 
 #include "main.h"
 #include "jio.h"
-#include "jdata.h"
 
 void update(Jgame* game_state, struct Jdata** data, int* location){
 	int i = 0;
@@ -24,12 +23,12 @@ void update(Jgame* game_state, struct Jdata** data, int* location){
 			render(node);
 		}else if(node->type == JANIMATION){
             render(node); // TODO this is only used for testing right now, if no animations are added to the menu then this can be removed
-        }else
-			scale = (float) MAX_WIDTH / game_state->display_w;
+        }
+            //scale = (float) MAX_WIDTH / game_state->display_w;
 
 	    SDL_Rect _rect = get_rect(node, game_state);
-		_rect.w = _rect.w / scale;
-		_rect.h = _rect.h / scale;
+		//_rect.w = _rect.w / scale;
+		//_rect.h = _rect.h / scale;
 
 		SDL_BlitSurface(node->data, NULL, game_state->surface, &_rect);
 		i = i + 1;

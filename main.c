@@ -49,6 +49,7 @@ int main(int argc, char* argv[]){
     info("main.c : There are %d displays connected!", game_state->n_displays);
 
     // Pick window size based on desktop
+    // TODO we are not really using mode right now.
     const SDL_DisplayMode* mode = SDL_GetDesktopDisplayMode(game_state->display_id[game_state->monitor]); 
     
     if(mode == NULL){
@@ -58,7 +59,7 @@ int main(int argc, char* argv[]){
 
     info("main.c : Create Display (%d x %d)[%fHz]", mode->w, mode->h, mode->refresh_rate);
 
-    // Create a SDL window and renderer
+    // Create a SDL window and renderer // TODO The window is forced to 1920x180 for right now
     if(!SDL_CreateWindowAndRenderer("game", 1920, 1080, SDL_WINDOW_RESIZABLE, &game_state->window, &game_state->renderer)){
     	error("main.c : SDL cond not create window! Error: %s", SDL_GetError());
         return 0;
@@ -112,5 +113,12 @@ int main(int argc, char* argv[]){
     info("main.c : Goodbye!");
 
     return 0;
+}
+
+Jgame* resize_window(Jgame* game_state){
+    SDL_GetWindowSize(game_state->window, &game_state->display_w, &game_state->display_h);
+    info("main.c : Update window size to %dx%d", game_state->display_w, game_state->display_h);
+
+    return game_state;
 }
 
