@@ -1,7 +1,6 @@
 #include <SDL3/SDL.h>
 
 #include "main.h"
-#include "jdata.h"
 #include "jio.h"
 #include "play.h"
 

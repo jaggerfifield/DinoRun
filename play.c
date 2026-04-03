@@ -5,7 +5,6 @@
 #include <time.h>
 
 #include "main.h"
-#include "jdata.h"
 #include "jtime.h"
 #include "jio.h"
 #include "gameover.h"

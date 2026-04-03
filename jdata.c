@@ -8,7 +8,6 @@
 
 #include "main.h"
 #include "jio.h"
-#include "jdata.h"
 
 struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char* string){  
 	struct Jdata* data_node = malloc(sizeof(struct Jdata));

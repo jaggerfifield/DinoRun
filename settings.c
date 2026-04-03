@@ -3,7 +3,6 @@
 #include <stdbool.h>
 
 #include "main.h"
-#include "jdata.h"
 #include "jio.h"
 
 unsigned short int direction = 0;

@@ -6,7 +6,6 @@
 #include <assert.h>
 
 #include "main.h"
-#include "jdata.h"
 #include "update.h"
 #include "jio.h"
 
