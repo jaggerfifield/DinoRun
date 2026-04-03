@@ -10,8 +10,6 @@ void update(Jgame* game_state, struct Jdata** data, int* location){
 	
     while(data[i] != NULL){
 		struct Jdata* node = data[i];
-		
-		float scale = 1.0f;
 
 		// Menu Rendering, higlight in red
 		if(location != NULL && (node->type == JFONT) ){
@@ -24,11 +22,8 @@ void update(Jgame* game_state, struct Jdata** data, int* location){
 		}else if(node->type == JANIMATION){
             render(node); // TODO this is only used for testing right now, if no animations are added to the menu then this can be removed
         }
-            //scale = (float) MAX_WIDTH / game_state->display_w;
 
 	    SDL_Rect _rect = get_rect(node, game_state);
-		//_rect.w = _rect.w / scale;
-		//_rect.h = _rect.h / scale;
 
 		SDL_BlitSurface(node->data, NULL, game_state->surface, &_rect);
 		i = i + 1;

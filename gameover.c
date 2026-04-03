@@ -22,7 +22,9 @@ void gameover_state(Jgame* game_state){
 		while(SDL_PollEvent(&e)){
 			if(e.type == SDL_EVENT_QUIT){
 				error("NEED TO QUIT!");
-			}else if(e.type == SDL_EVENT_KEY_DOWN){
+			}else if(e.type == SDL_EVENT_WINDOW_RESIZED){
+                game_state = resize_window(game_state);
+            }else if(e.type == SDL_EVENT_KEY_DOWN){
 				sel = (sel + handle_keys(e.key)) % 2;
 			}
 		}

@@ -42,7 +42,9 @@ void settings_state(Jgame* game_state){
 				quit = true;
 			else if(e.type == SDL_EVENT_KEY_DOWN)
 				handle_keys(e.key, &selected, &location);
-			
+	        else if(e.type == SDL_EVENT_WINDOW_RESIZED)
+                game_state = resize_window(game_state);
+
             // Handle pressing/clicking
             if(selected){
 				selected = false;

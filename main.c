@@ -119,6 +119,13 @@ Jgame* resize_window(Jgame* game_state){
     SDL_GetWindowSize(game_state->window, &game_state->display_w, &game_state->display_h);
     info("main.c : Update window size to %dx%d", game_state->display_w, game_state->display_h);
 
+    SDL_DestroySurface(game_state->surface);
+    game_state->surface = NULL;
+    game_state->surface = SDL_GetWindowSurface(game_state->window);
+
+    if(game_state->surface == NULL)
+        error("main.c : Could not get window surface! Error: %s", SDL_GetError());
+
     return game_state;
 }
 
