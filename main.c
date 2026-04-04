@@ -11,6 +11,9 @@
 #include "menu.h"
 #include "update.h"
 
+void software_window(Jgame*);
+void cleanup(Jgame* game_state);
+
 int main(int argc, char* argv[]){
 
     // Enable color in terminal for windows
@@ -34,6 +37,7 @@ int main(int argc, char* argv[]){
     info("main.c : Start program!");
  
     Jgame* game_state = (Jgame*)malloc(sizeof(Jgame));
+	game_state->data_pack = NULL;
 
     game_state->monitor = 0; // TODO we need to store and remember the last monitor used
     game_state->volume = 50; // TODO this need to be stored too
@@ -71,7 +75,9 @@ int main(int argc, char* argv[]){
     
     if(game_state->surface == NULL){
         error("main.c : Could not get window surface! Error: %s", SDL_GetError());
-    }
+    	software_window(game_state);
+		exit(0);
+	}
 
     info("main.c : Created game window and renderer! :D");
 
@@ -97,8 +103,19 @@ int main(int argc, char* argv[]){
         fclose(out);
     }
 
+
+	cleanup(game_state);
+	game_state = NULL;
+    
+    info("main.c : Goodbye!");
+
+    return 0;
+}
+
+void cleanup(Jgame* game_state){
     info("main.c : Cleaning up data");
-    free_data(game_state);
+	if(game_state->data_pack != NULL)
+    	free_data(game_state);
 
     info("main.c : Quit SDL");
     // Cleanup
@@ -110,9 +127,19 @@ int main(int argc, char* argv[]){
 
     free(game_state);
     
-    info("main.c : Goodbye!");
+}
 
-    return 0;
+void software_window(Jgame* game_state){
+	warn("Trying to recover window now . . .");
+
+	cleanup(game_state);
+	game_state = NULL;
+
+	info("Query hint: %s", SDL_GetHint(SDL_HINT_RENDER_DRIVER));
+	SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "software", SDL_HINT_OVERRIDE);
+	info("Setting hint to: %s", SDL_GetHint(SDL_HINT_RENDER_DRIVER));
+	
+	main(0, NULL);
 }
 
 Jgame* resize_window(Jgame* game_state){
