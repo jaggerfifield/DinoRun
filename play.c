@@ -11,32 +11,34 @@
 #include "update.h"
 
 static int timer = 3000;
-int score_var = 0;
-int hiscore_var = 0;
 
 bool debug_overlay = false;
 unsigned int frameCount = 0;
 struct Jtimer* fpsTimer;
 
-bool over = false;
-bool up = false;
-bool down = true;
-int active[4] = {0, 0, 0 ,0};
 int distance = 100;
 
 static void _update(Jgame*, struct Jdata**);
-static void handle_keys(SDL_KeyboardEvent);
+static void handle_keys(SDL_KeyboardEvent, Jgame*);
 static void object_handler(struct Jdata**, Jgame*);
 static bool check_collision(SDL_Rect, SDL_Rect);
-void read_score(void);
-void write_score(void);
+void read_score(Jgame*);
+void write_score(Jgame*);
 
 int time_left(int);
 
+enum {IDLE, UP, DOWN};
+
 void play_state(Jgame* game_state){
-	score_var = 0;
-	
-	read_score();
+	game_state->score = 0;
+	game_state->game_over = false;
+	game_state->objects = 4;
+
+	// TODO this is a temp key map, this nees to be set elsewhere!
+	game_state->jump1 = SDLK_UP;
+	game_state->jump_height = 100;
+
+	read_score(game_state);
 
 	fpsTimer = timer_init();
 
@@ -47,10 +49,12 @@ void play_state(Jgame* game_state){
 	set_bgColour(DTA[ID_PLAY_DEBUG], 190, 190, 190);
 	set_text_size(DTA[ID_PLAY_DEBUG], 10);
 
+	// Set object positions
     DTA[ID_PLAY_OBJECT]->x = game_state->display_w;
     DTA[ID_PLAY_OBJECT2]->x = game_state->display_w;
     DTA[ID_PLAY_OBJECT3]->x = game_state->display_w;
     DTA[ID_PLAY_OBJECT4]->x = game_state->display_w;
+	DTA[ID_PLAY_PLAYER]->y = game_state->display_h-DTA[ID_PLAY_PLAYER]->data->h;
 
 	int next_time = SDL_GetTicks() + 5;
 
@@ -63,18 +67,15 @@ void play_state(Jgame* game_state){
 	timer_start(fpsTimer);
 	frameCount = 0;
 
-	bool quit = false;
-	over = false;
-
 	// Play loop
-	while(!quit && !over){
+	while(!game_state->quit && !game_state->game_over){
 		while(SDL_PollEvent(&e)){
 			if(e.type == SDL_EVENT_QUIT){
-				quit = true;
+				game_state->quit = true;
 			}else if(e.type == SDL_EVENT_WINDOW_RESIZED){
                 game_state = resize_window(game_state);
             }else if(e.type == SDL_EVENT_KEY_DOWN){
-				handle_keys(e.key);
+				handle_keys(e.key, game_state);
 			}
 		}
 
@@ -86,7 +87,7 @@ void play_state(Jgame* game_state){
 	
 	timer_free(fpsTimer);
 	
-	if(!quit)
+	if(!game_state->quit)
 		gameover_state(game_state);
 }
 
@@ -127,39 +128,38 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		struct Jdata* debug = data[ID_PLAY_DEBUG];
 
 		int gravity = 4;
-		int accel = 1;
 
 		// Update score count here.
-		score_var += 1;
-		sprintf(score->string, "SCORE: %d", (int)(score_var/10));
+		game_state->score += 1;
+		sprintf(score->string, "SCORE: %d", (int)(game_state->score/10));
 		render(score);
 
 		// Update HiScore here
-		if(score_var > hiscore_var)
-			hiscore_var = score_var;
-		sprintf(hiscore->string, "High Score: %d", (int)(hiscore_var/10));
+		if(game_state->score > game_state->hiscore)
+			game_state->hiscore = game_state->score;
+		sprintf(hiscore->string, "High Score: %d", (int)(game_state->hiscore/10));
 		render(hiscore);
 		hiscore->x = game_state->display_w - hiscore->data->w;
 
 		// Apply jump physics (up/down movement)
 
-		// Move dino up
-		if( ( !down && up ) && ( dino->y > (game_state->display_h - (game_state->display_h/2)) ) ) 
-			dino->y = dino->y - gravity*2;
-		else{
-			down = true;
-			up = false;
+		switch(game_state->motion){
+			case IDLE:
+				break;
+			case UP:
+				if(dino->y > game_state->jump_height)
+					dino->y = dino->y - 4;
+				else
+				  	game_state->motion = DOWN;
+				break;
+			case DOWN:
+			  	if(dino->y < game_state->display_h - dino->data->h)
+					dino->y = dino->y + gravity;
+			  	else if(dino->y >= game_state->display_h - dino->data->h)
+				  	game_state->motion = IDLE;
+			  	break;
 		}
-
-		// Move dino back down
-		if(dino->y < game_state->display_h - dino->data->h && down){
-			dino->y = dino->y + (gravity+accel);
-			accel += 1;
-		}else{
-			accel = 1;
-			down = false;
-		}
-
+		
 		SDL_Rect bg_rect = get_rect(bg, game_state);
 		SDL_Rect score_rect = get_rect(score, game_state);
 		SDL_Rect hiscore_rect = get_rect(hiscore, game_state);
@@ -198,25 +198,22 @@ static void _update(Jgame* game_state, struct Jdata** data){
 }
 
 static void object_handler(struct Jdata** data, Jgame* game_state){
-	int num = rand() % 4;
+	int num = rand() % game_state->objects;
 
 	if(distance != 0){
 		distance = distance - 1;
 	}
 
-	// The number of objects allowed on the screen is determined by difficulty (2 means 2 objects)
-	int difficulity = 4;
-
 	// distance helps to prevent impossible jumps. (It counts down from 120 to 0 after a object is activated)
-	if(num < difficulity && ( (distance == 0) ) ) {//|| (distance > 95) ) ){
-		active[num] = 1;
+	if(distance == 0) {//|| (distance > 95) ) ){
+		game_state->obstacle[num] = 1;
 		distance = 120;
 	}
 
 	// Move and blit objects.
-	for(int i = 0; i < 4; i++){
+	for(int i = 0; i < game_state->objects; i++){
 		struct Jdata* obj = data[ID_PLAY_OBJECT + i];
-		if(obj != NULL && active[i]){
+		if(obj != NULL && game_state->obstacle[i]){
 			obj->y = game_state->display_h - obj->data->h;
 			obj->x = obj->x - 6;
 
@@ -239,19 +236,21 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 
 			// Detect collision and end play state if true
 			if(check_collision(object_rect, player_rect)){
-				over = true;
+				game_state->game_over = true;
 
+				// Reset active objects
 				for(int k = 0; k < 4; k++){
-					active[k] = 0;
+					game_state->obstacle[k] = 0;
 				}
 
-				if(score_var >= hiscore_var)
-					write_score();
+				if(game_state->score > game_state->hiscore)
+					write_score(game_state);
 			}
 
+			// Once object is off the screen we turn it off
 			if(obj->x < -obj->data->w){
 				obj->x = game_state->display_w;
-				active[i] = 0;
+				game_state->obstacle[i] = 0;
 			}
 
 			SDL_BlitSurface(obj->data, NULL, game_state->surface, &object_rect);
@@ -271,32 +270,33 @@ static bool check_collision(SDL_Rect a, SDL_Rect b){
 	return true;
 }
 
-void read_score(){
+void read_score(Jgame* game_state){
 	char value[9] = "00000000\0";
 	FILE* f = jaccess("score", "r");
 	jread(f, value, 8);
 	fclose(f);
-	sscanf(value, "%d", &hiscore_var);
+	sscanf(value, "%d", &game_state->hiscore);
 	
-	debug("Read score to be: %d", hiscore_var);
+	debug("Read score to be: %d", game_state->hiscore);
 }
 
-void write_score(){
+void write_score(Jgame* game_state){
 	FILE* f = jaccess("score", "w");
 	char content[64];
 	
-	sprintf(content, "%d\n", score_var);
+	sprintf(content, "%d\n", game_state->score);
 	jwrite(f, content);
 	fclose(f);
 
-	debug("Recording new hiscore: %d", score_var);
+	debug("Recording new hiscore: %d", game_state->score);
 }
 
-static void handle_keys(SDL_KeyboardEvent e){
+void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
 	SDL_Keycode key = e.key;
 	
-	if(key == SDLK_UP || key == SDLK_SPACE){
-		up = true;
+	if(key == game_state->jump1 || key == game_state->jump2 || key == game_state->jump3){
+		game_state->motion = UP;
+		info("KEYUP %d", game_state->motion);
 	}else if(key == SDLK_F3){
 		debug_overlay = ! debug_overlay;
 		info("Toggle debug overlay to: %d", debug_overlay);

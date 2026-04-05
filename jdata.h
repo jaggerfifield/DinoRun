@@ -16,9 +16,26 @@ typedef struct Jgame{
 
     struct Jdata*** data_pack;
 
+	// Settings
     int monitor; // The monitor we are using
     int volume; // Current game volume
     bool is_fullscreen; // Are we fullscreen
+	SDL_Keycode jump1;
+	SDL_Keycode jump2;
+	SDL_Keycode jump3;
+
+	bool quit;
+
+	// Gameplay
+	int objects;
+	int obstacle[10];
+	int platforms[10];
+	int treasure[10];
+	int motion; // Idle, Up, Down
+	int score;
+	int hiscore;
+	bool game_over;
+	int jump_height;
 
 } Jgame;
 
