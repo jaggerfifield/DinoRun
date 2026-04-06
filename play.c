@@ -33,10 +33,10 @@ void play_state(Jgame* game_state){
 	game_state->score = 0;
 	game_state->game_over = false;
 	game_state->objects = 4;
+    game_state->motion = IDLE;
 
 	// TODO this is a temp key map, this nees to be set elsewhere!
 	game_state->jump1 = SDLK_UP;
-	game_state->jump_height = 100;
 
 	read_score(game_state);
 
@@ -56,7 +56,9 @@ void play_state(Jgame* game_state){
     DTA[ID_PLAY_OBJECT4]->x = game_state->display_w;
 	DTA[ID_PLAY_PLAYER]->y = game_state->display_h-DTA[ID_PLAY_PLAYER]->data->h;
 
-	int next_time = SDL_GetTicks() + 5;
+	game_state->jump_height = game_state->display_h - DTA[ID_PLAY_PLAYER]->data->h - 250;
+	
+    int next_time = SDL_GetTicks() + 5;
 
 	// Apply a seed for random
 	srand(time(NULL));
@@ -79,11 +81,12 @@ void play_state(Jgame* game_state){
 			}
 		}
 
-		if(SDL_GetTicks() > next_time){
-			_update(game_state, DTA);
-			next_time = next_time + 5;
-		}
-	}
+        //if(SDL_GetTicks() > next_time){
+            _update(game_state, DTA);
+        //    next_time = next_time + 10;
+        //}
+
+    }
 	
 	timer_free(fpsTimer);
 	
@@ -296,7 +299,6 @@ void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
 	
 	if(key == game_state->jump1 || key == game_state->jump2 || key == game_state->jump3){
 		game_state->motion = UP;
-		info("KEYUP %d", game_state->motion);
 	}else if(key == SDLK_F3){
 		debug_overlay = ! debug_overlay;
 		info("Toggle debug overlay to: %d", debug_overlay);
