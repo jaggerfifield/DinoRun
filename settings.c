@@ -12,6 +12,7 @@ static void handle_keys(SDL_KeyboardEvent, bool*, int*);
 void* load_data(void);
 static void update(Jgame*, struct Jdata**, int*);
 void update_display(Jgame*, struct Jdata**);
+void update_fullscreen(Jgame*, struct Jdata**);
 
 void settings_state(Jgame* game_state){
 
@@ -35,6 +36,8 @@ void settings_state(Jgame* game_state){
     sprintf(DTA[ID_SETTINGS_RESOLUTION]->string, "<  Resolution: %d x %d  >", game_state->display_w, game_state->display_h);
     render(DTA[ID_SETTINGS_RESOLUTION]);
 
+	// Load current fullscreen state
+	update_fullscreen(game_state, DTA);
 
 	while(!quit){
 		while(SDL_PollEvent(&e) != 0){
@@ -126,7 +129,11 @@ static void update(Jgame* game_state, struct Jdata** data, int* location){
                     else
                         game_state->monitor -= 1;
                     update_display(game_state, data);
-                }
+                }else if((*location == ID_SETTINGS_FULLSCREEN) && (*location == node->id)){
+					game_state->is_fullscreen = !game_state->is_fullscreen;
+					update_fullscreen(game_state, data);
+					debug("settings.c : Toggled fullscreen to %d", game_state->is_fullscreen);
+				}
 			}else if(direction == 2){
                 // Right
 				if((*location == ID_SETTINGS_VOLUME) && (*location == node->id)){
@@ -145,7 +152,11 @@ static void update(Jgame* game_state, struct Jdata** data, int* location){
                 }else if((*location == ID_SETTINGS_RESOLUTION) && (*location == node->id)){
                     // Change resolution
                     info("WIP");
-                }
+                }else if((*location == ID_SETTINGS_FULLSCREEN) && (*location == node->id)){
+					game_state->is_fullscreen = !game_state->is_fullscreen;
+					update_fullscreen(game_state, data);
+					debug("settings.c : Toggled fullscreen to %d", game_state->is_fullscreen);
+				}
 			}
 
 		    render(node); // TODO : add update flag to node to check if it needs to be rendered!
@@ -174,3 +185,13 @@ void update_display(Jgame* game_state, struct Jdata** DTA){
         sprintf(DTA[ID_SETTINGS_DISPLAY]->string, "<  Display: %s  >", name);
     render(DTA[ID_SETTINGS_DISPLAY]); 
 }
+
+void update_fullscreen(Jgame* game_state, struct Jdata** DTA){
+	if(game_state->is_fullscreen)
+		memcpy(DTA[ID_SETTINGS_FULLSCREEN]->string, "<  Fullscreen: True  >\0", 23);
+	else
+		memcpy(DTA[ID_SETTINGS_FULLSCREEN]->string, "<  Fullscreen: False  >\0", 24);
+	render(DTA[ID_SETTINGS_FULLSCREEN]);
+	
+}
+
