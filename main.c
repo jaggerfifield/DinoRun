@@ -103,7 +103,6 @@ int main(int argc, char* argv[]){
         fclose(out);
     }
 
-
 	cleanup(game_state);
 	game_state = NULL;
     
@@ -130,14 +129,14 @@ void cleanup(Jgame* game_state){
 }
 
 void software_window(Jgame* game_state){
-	warn("Trying to recover window now . . .");
+	warn("main.c : Trying to recover window now . . .");
 
 	cleanup(game_state);
 	game_state = NULL;
 
-	info("Query hint: %s", SDL_GetHint(SDL_HINT_RENDER_DRIVER));
+	debug("main.c : Query hint: %s", SDL_GetHint(SDL_HINT_RENDER_DRIVER));
 	SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "software", SDL_HINT_OVERRIDE);
-	info("Setting hint to: %s", SDL_GetHint(SDL_HINT_RENDER_DRIVER));
+	debug("main.c : Setting hint to: %s", SDL_GetHint(SDL_HINT_RENDER_DRIVER));
 	
 	main(0, NULL);
 }

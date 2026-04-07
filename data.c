@@ -64,15 +64,16 @@ Jgame* loader(Jgame* game_state){
 
     // Settings 
     info("data.c : Loading settings data . . .");
-    struct Jdata** settings_data = malloc(sizeof(struct Jdata)* 8);
+    struct Jdata** settings_data = malloc(sizeof(struct Jdata)* 9);
     settings_data[0] = init(ID_SETTINGS_BACKGROUND, JIMAGE, 0, 0, "Menu Background", "Assets/bg_fill.bmp", NULL);
     settings_data[1] = init(ID_SETTINGS_VOLUME, JFONT, CENTER, 0, "Volume", "Assets/font.ttf", "<  Volume ---%  >");
     settings_data[2] = init(ID_SETTINGS_DISPLAY, JFONT, CENTER, 100, "Display", "Assets/font.ttf", "<  Display:  >");
     settings_data[3] = init(ID_SETTINGS_RESOLUTION, JFONT, CENTER, 200, "Resolution", "Assets/font.ttf", "<  Resolution ---- x ----  >");
     settings_data[4] = init(ID_SETTINGS_THEME, JFONT, CENTER, 300, "Theme", "Assets/font.ttf", "<  Theme: Default  >");
     settings_data[5] = init(ID_SETTINGS_DIFFICULTY, JFONT, CENTER, 400, "Difficulty", "Assets/font.ttf", "<  Difficulty: Normal  >");
-    settings_data[6] = init(ID_SETTINGS_BACK, JFONT, CENTER, 500, "Back", "Assets/font.ttf", "Back");
-    settings_data[7] = NULL;
+    settings_data[6] = init(ID_SETTINGS_FULLSCREEN, JFONT, CENTER, 500, "Fullscreen", "Assets/font.ttf", "<  Fullscreen:  >");
+    settings_data[7] = init(ID_SETTINGS_BACK, JFONT, CENTER, 600, "Back", "Assets/font.ttf", "Back");
+    settings_data[8] = NULL;
 
     game_state->data_pack[3] = settings_data;
 
