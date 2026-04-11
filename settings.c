@@ -13,6 +13,7 @@ void* load_data(void);
 static void update(Jgame*, struct Jdata**, int*);
 void update_display(Jgame*, struct Jdata**);
 void update_fullscreen(Jgame*, struct Jdata**);
+void restore_changes(Jgame* game_state);
 
 void settings_state(Jgame* game_state){
 
@@ -68,13 +69,18 @@ void settings_state(Jgame* game_state){
                 
                 }else if(location == ID_SETTINGS_THEME)
 					info("TODO");
-				
-                else if(location == ID_SETTINGS_BACK)
-					quit = true;
-			}
+
+                else if(location == ID_SETTINGS_FULLSCREEN){
+                    if(!SDL_SetWindowFullscreen(game_state->window, game_state->is_fullscreen))
+                        error("settings.c : Could not set fullscreen to %d. Error: %s", game_state->is_fullscreen, SDL_GetError());
+                }else if(location == ID_SETTINGS_BACK)
+					quit = true;	
+            }
 		}
 		update(game_state, DTA, &location);
 	}
+
+    restore_changes(game_state);
 
 	return;	
 }
@@ -193,5 +199,20 @@ void update_fullscreen(Jgame* game_state, struct Jdata** DTA){
 		memcpy(DTA[ID_SETTINGS_FULLSCREEN]->string, "<  Fullscreen: False  >\0", 24);
 	render(DTA[ID_SETTINGS_FULLSCREEN]);
 	
+}
+
+void restore_changes(Jgame* game_state){
+ 
+    if((SDL_GetWindowFlags(game_state->window) & SDL_WINDOW_FULLSCREEN) == !game_state->is_fullscreen){
+        game_state->is_fullscreen = !game_state->is_fullscreen;
+        info("settings.c : Rest fullscreen to previous value, not applied");
+    }
+
+
+    int disp = SDL_GetDisplayForWindow(game_state->window)-1;
+    if(disp != game_state->monitor){
+        game_state->monitor = disp;
+        info("settings.c : Reset window to previous value, not applied");
+    }
 }
 
