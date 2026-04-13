@@ -42,7 +42,9 @@ typedef struct Jgame{
 	int motion; // Idle, Up, Down
 	int score;
 	int hiscore;
-	bool game_over;
+	int coins;
+    bool coin_get;
+    bool game_over;
 	int jump_height;
 
 } Jgame;

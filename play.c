@@ -27,6 +27,8 @@ void play_state(Jgame* game_state){
 	game_state->objects = 4;
     game_state->motion = IDLE;
     game_state->point_mult = 1;
+    game_state->coins = 0;
+    game_state->coin_get = true; 
 
 	// TODO this is a temp key map, this nees to be set elsewhere!
 	game_state->jump1 = SDLK_UP;
@@ -42,11 +44,16 @@ void play_state(Jgame* game_state){
 	set_text_size(DTA[ID_PLAY_DEBUG], 10);
 
 	// Set object positions
+    DTA[ID_PLAY_COINS]->y = DTA[ID_PLAY_SCORE]->data->h+10;
+    
     DTA[ID_PLAY_OBJECT]->x = game_state->display_w;
     DTA[ID_PLAY_OBJECT2]->x = game_state->display_w;
     DTA[ID_PLAY_OBJECT3]->x = game_state->display_w;
     DTA[ID_PLAY_OBJECT4]->x = game_state->display_w;
 	DTA[ID_PLAY_PLAYER]->y = game_state->display_h-DTA[ID_PLAY_PLAYER]->data->h;
+    
+    DTA[ID_PLAY_COIN]->y = game_state->display_h-DTA[ID_PLAY_PLAYER]->data->h-DTA[ID_PLAY_COIN]->data->h-50;
+    DTA[ID_PLAY_COIN]->x = game_state->display_w;
 
 	game_state->jump_height = game_state->display_h - DTA[ID_PLAY_PLAYER]->data->h - 280;
 
@@ -72,7 +79,8 @@ void play_state(Jgame* game_state){
 		}
         
         _update(game_state, DTA);
-            
+        
+        // Every time we hit a mutiple of 1000 we increase the game speed
         if(game_state->score % 1000 == 0){
             game_state->game_speed += 2;
         }
@@ -112,7 +120,8 @@ static void _update(Jgame* game_state, struct Jdata** data){
 	}else{
 		// Here is the dino run loop (after the countdown)
 		struct Jdata* score = data[ID_PLAY_SCORE];
-		struct Jdata* hiscore = data[ID_PLAY_HISCORE];
+		struct Jdata* coin_t = data[ID_PLAY_COINS];
+        struct Jdata* hiscore = data[ID_PLAY_HISCORE];
 		struct Jdata* bg = data[ID_PLAY_BACKGROUND];
 		struct Jdata* dino = data[ID_PLAY_PLAYER];
 		struct Jdata* debug = data[ID_PLAY_DEBUG];
@@ -121,6 +130,13 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		game_state->score += game_state->point_mult;
 		sprintf(score->string, "SCORE: %d", game_state->score);
 		render(score);
+
+        // Update coin count
+        if(game_state->coin_get){
+            sprintf(coin_t->string, "COINS: %d", game_state->coins);
+            render(coin_t);
+            game_state->coin_get = false;
+        }
 
 		// Update HiScore here
 		if(game_state->score > game_state->hiscore)
@@ -152,6 +168,7 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		SDL_Rect score_rect = get_rect(score, game_state);
 		SDL_Rect hiscore_rect = get_rect(hiscore, game_state);
 		SDL_Rect dino_rect = get_rect(dino, game_state);
+        SDL_Rect coin_t_rect = get_rect(coin_t, game_state);
 
 		// Blit the surfaces in order: bg, objects, score, player
 		SDL_BlitSurface(bg->data, NULL, game_state->surface, &bg_rect);
@@ -161,7 +178,8 @@ static void _update(Jgame* game_state, struct Jdata** data){
 
 		SDL_BlitSurface(score->data,   NULL, game_state->surface, &score_rect);
 		SDL_BlitSurface(hiscore->data, NULL, game_state->surface, &hiscore_rect);
-		SDL_BlitSurface(dino->data,    NULL, game_state->surface, &dino_rect);
+		SDL_BlitSurface(coin_t->data,  NULL, game_state->surface, &coin_t_rect);
+        SDL_BlitSurface(dino->data,    NULL, game_state->surface, &dino_rect);
 		
 		// Blit debug overlay if enabled
 		if(debug_overlay && ( game_state->render_tick != 0 ) ){
@@ -203,29 +221,43 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 		distance = 120;
 	}
 
-	// Move and blit objects.
+    if(!game_state->treasure[0] && ( rand()%500==0 ) ){
+        game_state->treasure[0] = 1;
+    }
+	
+    // Generate player rect
+	struct Jdata* player = data[ID_PLAY_PLAYER];
+	SDL_Rect player_rect = get_rect(player, game_state);
+
+    if(game_state->treasure[0]){
+        struct Jdata* coin = data[ID_PLAY_COIN];
+        coin->x = coin->x - (int)(game_state->game_speed * (30.0 / game_state->fps_limit));
+
+        SDL_Rect coin_rect = get_rect(coin, game_state);
+
+        if(check_collision(coin_rect, player_rect)){
+            coin->x = -coin->data->w;
+            game_state->coin_get = true;
+            game_state->coins += 1;
+        }
+
+        if(coin->x < -coin->data->w){
+            game_state->treasure[0] = 0;
+            coin->x = game_state->display_w;
+        }
+    
+        render(coin);
+        SDL_BlitSurface(coin->data, NULL, game_state->surface, &coin_rect);
+    }
+
+    // Move and blit objects.
 	for(int i = 0; i < game_state->objects; i++){
 		struct Jdata* obj = data[ID_PLAY_OBJECT + i];
 		if(obj != NULL && game_state->obstacle[i]){
 			obj->y = game_state->display_h - obj->data->h;
 			obj->x = obj->x - (int)(game_state->game_speed * (30.0 / game_state->fps_limit));
 
-
-			// Generate rects
-			SDL_Rect player_rect;
-			struct Jdata* player = data[ID_PLAY_PLAYER];
-			
-			player_rect.x = player->x;
-			player_rect.y = player->y;
-			player_rect.h = player->data->h;
-			player_rect.w = player->data->w;
-
-			SDL_Rect object_rect;
-
-			object_rect.x = obj->x;
-			object_rect.y = obj->y;
-			object_rect.h = obj->data->h;
-			object_rect.w = obj->data->w;
+			SDL_Rect object_rect = get_rect(obj, game_state);
 
 			// Detect collision and end play state if true
 			if(check_collision(object_rect, player_rect)){
