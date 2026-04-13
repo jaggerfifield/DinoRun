@@ -43,14 +43,16 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
         if(type == JANIMATION){
             data_node->frames = f_count(path);
             // Load the first image
-            sprintf(_path, "%s%d.bmp", path, data_node->current_frame);
+            sprintf(_path, "%s%04d.bmp", path, data_node->current_frame);
         }else{
             sprintf(_path, "%s", path);
         }
 
 		// Render the image
 		data_node->data = SDL_LoadBMP(_path);
-		
+	    if(data_node->data == NULL)
+            error("jdata.c : Could not load bmp Error: %s", SDL_GetError());
+
 		// Apply color key
 		SDL_SetSurfaceColorKey(data_node->data, true, SDL_MapSurfaceRGB(data_node->data, 0, 0, 0));
 
@@ -85,13 +87,15 @@ void render(struct Jdata* node){
 
 	if(node->type == JIMAGE){
 		node->data = SDL_LoadBMP(node->path);
+		SDL_SetSurfaceColorKey(node->data, true, SDL_MapSurfaceRGB(node->data, 0, 0, 0));
 	
     }else if(node->type == JANIMATION){
         char _path[128];
         memset(_path, '\0', 128);
         node->current_frame = (node->current_frame+1)%node->frames;
-        sprintf(_path, "%s%d.bmp", node->path, node->current_frame);
+        sprintf(_path, "%s%04d.bmp", node->path, node->current_frame);
         node->data = SDL_LoadBMP(_path);
+		SDL_SetSurfaceColorKey(node->data, true, SDL_MapSurfaceRGB(node->data, 0, 0, 0));
     
     }else if(node->type == JFONT){
 		assert(node->fnt != NULL);

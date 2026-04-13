@@ -37,18 +37,20 @@ Jgame* loader(Jgame* game_state){
 
     // Play
     info("data.c : Loading play data . . .");
-    struct Jdata** play_data = malloc(sizeof(struct Jdata) * 11);
+    struct Jdata** play_data = malloc(sizeof(struct Jdata) * 13);
     play_data[0] = init(ID_PLAY_BACKGROUND, JIMAGE, 0, 0, "Play Background", "Assets/bg_fill.bmp", NULL);
     play_data[1] = init(ID_PLAY_PLAYER, JIMAGE, 25, game_state->display_h-500, "Player", "Assets/block.bmp", NULL);
     play_data[2] = init(ID_PLAY_TIMER, JFONT, CENTER, CENTER, "Countdown text", "Assets/font.ttf", "3");
     play_data[3] = init(ID_PLAY_SCORE, JFONT, 0, 0, "Score text", "Assets/font.ttf", "SCORE: 0");
     play_data[4] = init(ID_PLAY_HISCORE, JFONT, 0, 0, "Highscore Text", "Assets/font.ttf", "HIGHSCORE: 0");
-    play_data[5] = init(ID_PLAY_OBJECT, JIMAGE, game_state->display_w, 0, "Object 1", "Assets/dino.bmp", NULL);
-    play_data[6] = init(ID_PLAY_OBJECT2, JIMAGE, game_state->display_w, 0, "Object 2", "Assets/ball.bmp", NULL);
-    play_data[7] = init(ID_PLAY_OBJECT3, JIMAGE, game_state->display_w, 0, "Object 3", "Assets/OBJ3.bmp", NULL);
-    play_data[8] = init(ID_PLAY_OBJECT4, JIMAGE, game_state->display_w, 0, "Object 4", "Assets/dino.bmp", NULL);
-    play_data[9] = init(ID_PLAY_DEBUG, JFONT, 0, 0, "Debug overlay", "Assets/font.ttf", "");
-    play_data[10] = NULL;
+    play_data[5] = init(ID_PLAY_COINS, JFONT, 0, 0, "Coins Text", "Assets/font.ttf", "COINS: 0");
+    play_data[6] = init(ID_PLAY_OBJECT, JIMAGE, game_state->display_w, 0, "Object 1", "Assets/dino.bmp", NULL);
+    play_data[7] = init(ID_PLAY_OBJECT2, JIMAGE, game_state->display_w, 0, "Object 2", "Assets/ball.bmp", NULL);
+    play_data[8] = init(ID_PLAY_OBJECT3, JIMAGE, game_state->display_w, 0, "Object 3", "Assets/OBJ3.bmp", NULL);
+    play_data[9] = init(ID_PLAY_OBJECT4, JIMAGE, game_state->display_w, 0, "Object 4", "Assets/dino.bmp", NULL);
+    play_data[10] = init(ID_PLAY_COIN, JANIMATION, 0, 0, "Coin", "Assets/coin/", NULL);
+    play_data[11] = init(ID_PLAY_DEBUG, JFONT, 0, 0, "Debug overlay", "Assets/font.ttf", "");
+    play_data[12] = NULL;
 
     game_state->data_pack[1] = play_data;
 
