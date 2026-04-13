@@ -13,6 +13,7 @@ void* load_data(void);
 static void update(Jgame*, struct Jdata**, int*);
 void update_display(Jgame*, struct Jdata**);
 void update_fullscreen(Jgame*, struct Jdata**);
+void update_vsync(Jgame*, struct Jdata**);
 void restore_changes(Jgame* game_state);
 
 void settings_state(Jgame* game_state){
@@ -39,6 +40,11 @@ void settings_state(Jgame* game_state){
 
 	// Load current fullscreen state
 	update_fullscreen(game_state, DTA);
+    
+    // Load current vsync state
+    update_vsync(game_state, DTA);
+
+    sprintf(DTA[ID_SETTINGS_FPSLIMIT]->string, "<  FPS Limit: %d  >", game_state->fps_limit);
 
 	while(!quit){
 		while(SDL_PollEvent(&e) != 0){
@@ -73,6 +79,10 @@ void settings_state(Jgame* game_state){
                 else if(location == ID_SETTINGS_FULLSCREEN){
                     if(!SDL_SetWindowFullscreen(game_state->window, game_state->is_fullscreen))
                         error("settings.c : Could not set fullscreen to %d. Error: %s", game_state->is_fullscreen, SDL_GetError());
+                }else if(location == ID_SETTINGS_VSYNC){
+                    if(!SDL_SetRenderVSync(game_state->renderer, ( game_state->is_vsync ) ? 1 : SDL_RENDERER_VSYNC_DISABLED)){
+                        error("settings.c : Could not set vsync Error: %s", SDL_GetError());
+                    }
                 }else if(location == ID_SETTINGS_BACK)
 					quit = true;	
             }
@@ -138,8 +148,15 @@ static void update(Jgame* game_state, struct Jdata** data, int* location){
                 }else if((*location == ID_SETTINGS_FULLSCREEN) && (*location == node->id)){
 					game_state->is_fullscreen = !game_state->is_fullscreen;
 					update_fullscreen(game_state, data);
-					debug("settings.c : Toggled fullscreen to %d", game_state->is_fullscreen);
-				}
+				}else if((*location == ID_SETTINGS_VSYNC) && (*location == node->id)){
+                    game_state->is_vsync = !game_state->is_vsync;
+                    update_vsync(game_state, data);
+                }else if((*location == ID_SETTINGS_FPSLIMIT) && (*location == node->id)){
+                    if(game_state->fps_limit > 30){
+                        sprintf(node->string, "<  FPS Limit: %d  >", game_state->fps_limit /2);
+                        game_state->fps_limit = game_state->fps_limit / 2;
+                    }
+                }
 			}else if(direction == 2){
                 // Right
 				if((*location == ID_SETTINGS_VOLUME) && (*location == node->id)){
@@ -161,8 +178,15 @@ static void update(Jgame* game_state, struct Jdata** data, int* location){
                 }else if((*location == ID_SETTINGS_FULLSCREEN) && (*location == node->id)){
 					game_state->is_fullscreen = !game_state->is_fullscreen;
 					update_fullscreen(game_state, data);
-					debug("settings.c : Toggled fullscreen to %d", game_state->is_fullscreen);
-				}
+				}else if((*location == ID_SETTINGS_VSYNC) && (*location == node->id)){
+                    game_state->is_vsync = !game_state->is_vsync;
+                    update_vsync(game_state, data);
+                }else if((*location == ID_SETTINGS_FPSLIMIT) && (*location == node->id)){
+                    if(game_state->fps_limit < 120){
+                        sprintf(node->string, "<  FPS Limit: %d  >", game_state->fps_limit*2);
+                        game_state->fps_limit = game_state->fps_limit * 2;
+                    }
+                }
 			}
 
 		    render(node); // TODO : add update flag to node to check if it needs to be rendered!
@@ -188,17 +212,25 @@ void update_display(Jgame* game_state, struct Jdata** DTA){
     if(name == NULL)
         error("settings.c : SDL could not get display name! Error: %s", SDL_GetError());
     else
-        sprintf(DTA[ID_SETTINGS_DISPLAY]->string, "<  Display: %s  >", name);
+        sprintf(DTA[ID_SETTINGS_DISPLAY]->string, "<  Display: %s  > *", name);
     render(DTA[ID_SETTINGS_DISPLAY]); 
 }
 
 void update_fullscreen(Jgame* game_state, struct Jdata** DTA){
 	if(game_state->is_fullscreen)
-		memcpy(DTA[ID_SETTINGS_FULLSCREEN]->string, "<  Fullscreen: True  >\0", 23);
+		memcpy(DTA[ID_SETTINGS_FULLSCREEN]->string, "<  Fullscreen: True  > *\0", 25);
 	else
-		memcpy(DTA[ID_SETTINGS_FULLSCREEN]->string, "<  Fullscreen: False  >\0", 24);
+		memcpy(DTA[ID_SETTINGS_FULLSCREEN]->string, "<  Fullscreen: False  > *\0", 26);
 	render(DTA[ID_SETTINGS_FULLSCREEN]);
 	
+}
+
+void update_vsync(Jgame* game_state, struct Jdata** DTA){
+    if(game_state->is_vsync)
+        memcpy(DTA[ID_SETTINGS_VSYNC]->string, "<  VSync: True  > *\0", 20);
+    else
+        memcpy(DTA[ID_SETTINGS_VSYNC]->string, "<  VSync: False  > *\0", 21);
+    render(DTA[ID_SETTINGS_VSYNC]);
 }
 
 void restore_changes(Jgame* game_state){
@@ -214,5 +246,14 @@ void restore_changes(Jgame* game_state){
         game_state->monitor = disp;
         info("settings.c : Reset window to previous value, not applied");
     }
+
+    int vsync;
+    if(!SDL_GetRenderVSync(game_state->renderer, &vsync))
+        error("settings.c : could not get vsync status. Error: %s", SDL_GetError());
+    if(vsync != game_state->is_vsync){
+        game_state->is_vsync = vsync;
+        info("settings.c : Vsync setting not applied reverting back");
+    }
+    
 }
 

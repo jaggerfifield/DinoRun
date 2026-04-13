@@ -20,9 +20,17 @@ typedef struct Jgame{
     int monitor; // The monitor we are using
     int volume; // Current game volume
     bool is_fullscreen; // Are we fullscreen
-	SDL_Keycode jump1;
+	bool is_vsync;
+    int fps_limit;
+    int game_speed;
+    int point_mult;
+    SDL_Keycode jump1;
 	SDL_Keycode jump2;
 	SDL_Keycode jump3;
+
+    unsigned long long int time_tick;
+    unsigned long long int start_tick;
+    unsigned long long int render_tick;
 
 	bool quit;
 
@@ -75,9 +83,6 @@ struct Jdata{
 	TTF_Font* fnt;
 	SDL_Color fgColour;
 	SDL_Color bgColour;
-
-	// Window size
-	SDL_Window* window;
 };
 
 struct Jdata* init(int, int, int, int, char*, char*, char*);
