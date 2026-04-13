@@ -7,6 +7,7 @@
 
 #include "jio.h"
 #include "jdata.h"
+#include "jtime.h"
 #include "data.h"
 #include "menu.h"
 #include "update.h"
@@ -41,6 +42,8 @@ int main(int argc, char* argv[]){
 
     game_state->monitor = 0; // TODO we need to store and remember the last monitor used
     game_state->volume = 50; // TODO this need to be stored too
+    game_state->is_vsync = true;
+    game_state->fps_limit = 60;
 
     // Determine the number of displayes
     game_state->display_id = SDL_GetDisplays(&game_state->n_displays);

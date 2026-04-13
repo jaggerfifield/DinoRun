@@ -5,17 +5,11 @@
 #include <time.h>
 
 #include "main.h"
-#include "jtime.h"
 #include "jio.h"
 #include "gameover.h"
 #include "update.h"
 
-static int timer = 3000;
-
 bool debug_overlay = false;
-unsigned int frameCount = 0;
-struct Jtimer* fpsTimer;
-
 int distance = 100;
 
 static void _update(Jgame*, struct Jdata**);
@@ -25,22 +19,20 @@ static bool check_collision(SDL_Rect, SDL_Rect);
 void read_score(Jgame*);
 void write_score(Jgame*);
 
-int time_left(int);
-
 enum {IDLE, UP, DOWN};
 
 void play_state(Jgame* game_state){
-	game_state->score = 0;
+	game_state->score = 1;
 	game_state->game_over = false;
 	game_state->objects = 4;
     game_state->motion = IDLE;
+    game_state->point_mult = 1;
 
 	// TODO this is a temp key map, this nees to be set elsewhere!
 	game_state->jump1 = SDLK_UP;
+    game_state->game_speed = 20; // Speed multiplier TODO
 
 	read_score(game_state);
-
-	fpsTimer = timer_init();
 
     struct Jdata** DTA = game_state->data_pack[1];
 
@@ -56,22 +48,20 @@ void play_state(Jgame* game_state){
     DTA[ID_PLAY_OBJECT4]->x = game_state->display_w;
 	DTA[ID_PLAY_PLAYER]->y = game_state->display_h-DTA[ID_PLAY_PLAYER]->data->h;
 
-	game_state->jump_height = game_state->display_h - DTA[ID_PLAY_PLAYER]->data->h - 250;
-	
-    int next_time = SDL_GetTicks() + 5;
+	game_state->jump_height = game_state->display_h - DTA[ID_PLAY_PLAYER]->data->h - 280;
 
 	// Apply a seed for random
 	srand(time(NULL));
 
 	SDL_Event e;
 
-	// Start fps timer
-	timer_start(fpsTimer);
-	frameCount = 0;
+    game_state->time_tick = SDL_GetTicksNS();
 
 	// Play loop
 	while(!game_state->quit && !game_state->game_over){
-		while(SDL_PollEvent(&e)){
+		game_state->start_tick = SDL_GetTicksNS();
+
+        while(SDL_PollEvent(&e)){
 			if(e.type == SDL_EVENT_QUIT){
 				game_state->quit = true;
 			}else if(e.type == SDL_EVENT_WINDOW_RESIZED){
@@ -80,15 +70,13 @@ void play_state(Jgame* game_state){
 				handle_keys(e.key, game_state);
 			}
 		}
-
-        //if(SDL_GetTicks() > next_time){
-            _update(game_state, DTA);
-        //    next_time = next_time + 10;
-        //}
-
+        
+        _update(game_state, DTA);
+            
+        if(game_state->score % 1000 == 0){
+            game_state->game_speed += 2;
+        }
     }
-	
-	timer_free(fpsTimer);
 	
 	if(!game_state->quit)
 		gameover_state(game_state);
@@ -97,29 +85,28 @@ void play_state(Jgame* game_state){
 static void _update(Jgame* game_state, struct Jdata** data){
 
 	// Count down timer TODO: find a better way to time things here
-	if(timer >= -200){
-		struct Jdata* timer_node = data[ID_PLAY_TIMER];
+	if ( ( SDL_GetTicksNS() - game_state->time_tick ) < 4000000000){
+        struct Jdata* timer_node = data[ID_PLAY_TIMER];
 
-		if(timer == 2000)
+        if( ( SDL_GetTicksNS() - game_state->time_tick ) < 1000000000 )
+			sprintf(timer_node->string, "3");
+        else if( ( SDL_GetTicksNS() - game_state->time_tick ) < 2000000000 )
 			sprintf(timer_node->string, "2");
-		else if(timer == 1000)
+		else if( ( SDL_GetTicksNS() - game_state->time_tick ) < 3000000000 )
 			sprintf(timer_node->string, "1");
-		else if(timer == 0)
+		else if( ( SDL_GetTicksNS() - game_state->time_tick ) < 4000000000 )
             sprintf(timer_node->string, "Go!");
 
         render(timer_node); // TODO this is called too many times
 
-		if(timer_node != NULL){
-			// Clear the screen first!
-			struct Jdata* bg = data[ID_PLAY_BACKGROUND];
-			SDL_Rect bg_rect = get_rect(bg, game_state);
-			SDL_BlitSurface(bg->data, NULL, game_state->surface, &bg_rect);
+		// Clear the screen first!
+		struct Jdata* bg = data[ID_PLAY_BACKGROUND];
+		SDL_Rect bg_rect = get_rect(bg, game_state);
+		SDL_BlitSurface(bg->data, NULL, game_state->surface, &bg_rect);
 				
-			// Blit the countdown
-			SDL_Rect temp_rect = get_rect(timer_node, game_state);
-			SDL_BlitSurface(timer_node->data, NULL, game_state->surface, &temp_rect);
-		}
-		timer = timer - 5;
+		// Blit the countdown
+		SDL_Rect temp_rect = get_rect(timer_node, game_state);
+		SDL_BlitSurface(timer_node->data, NULL, game_state->surface, &temp_rect);
 
 	// This is the main update, where we hande the gameplay
 	}else{
@@ -130,17 +117,15 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		struct Jdata* dino = data[ID_PLAY_PLAYER];
 		struct Jdata* debug = data[ID_PLAY_DEBUG];
 
-		int gravity = 4;
-
 		// Update score count here.
-		game_state->score += 1;
-		sprintf(score->string, "SCORE: %d", (int)(game_state->score/10));
+		game_state->score += game_state->point_mult;
+		sprintf(score->string, "SCORE: %d", game_state->score);
 		render(score);
 
 		// Update HiScore here
 		if(game_state->score > game_state->hiscore)
 			game_state->hiscore = game_state->score;
-		sprintf(hiscore->string, "High Score: %d", (int)(game_state->hiscore/10));
+		sprintf(hiscore->string, "High Score: %d", game_state->hiscore);
 		render(hiscore);
 		hiscore->x = game_state->display_w - hiscore->data->w;
 
@@ -151,13 +136,13 @@ static void _update(Jgame* game_state, struct Jdata** data){
 				break;
 			case UP:
 				if(dino->y > game_state->jump_height)
-					dino->y = dino->y - 4;
+					dino->y = dino->y - (int)(game_state->game_speed * (30.0 / game_state->fps_limit));
 				else
 				  	game_state->motion = DOWN;
 				break;
 			case DOWN:
 			  	if(dino->y < game_state->display_h - dino->data->h)
-					dino->y = dino->y + gravity;
+					dino->y = dino->y + (int)(game_state->game_speed * (30.0 / game_state->fps_limit));
 			  	else if(dino->y >= game_state->display_h - dino->data->h)
 				  	game_state->motion = IDLE;
 			  	break;
@@ -179,14 +164,11 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		SDL_BlitSurface(dino->data,    NULL, game_state->surface, &dino_rect);
 		
 		// Blit debug overlay if enabled
-		if(debug_overlay){
-			float avgFPS = frameCount / (timer_getTicks(fpsTimer) / 1000.f);
-
-			if(avgFPS > 2000000)
-				avgFPS = 0;
+		if(debug_overlay && ( game_state->render_tick != 0 ) ){
+			double avgFPS = 1000000000.0 / (double)game_state->render_tick;
 
 			// Update string
-			sprintf(debug->string, "FPS: %f", avgFPS);
+			sprintf(debug->string, "FPS: %0.2f S: %d M: %d", avgFPS, game_state->game_speed, game_state->point_mult);
 			render(debug);
 			
 			SDL_Rect debug_rect = get_rect(debug, game_state);
@@ -195,9 +177,17 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		}
 	}
 
-	frameCount = frameCount + 1;
-	
 	SDL_UpdateWindowSurface(game_state->window);
+    
+    // Frame render time
+    game_state->render_tick = SDL_GetTicksNS() - game_state->start_tick;
+
+    if(game_state->render_tick < (int)( 1000000000 / game_state->fps_limit ) ){
+        unsigned int sleep = (1000000000 / game_state->fps_limit) - game_state->render_tick;
+        SDL_DelayNS(sleep);
+        
+        game_state->render_tick = SDL_GetTicksNS() - game_state->start_tick;
+    }
 }
 
 static void object_handler(struct Jdata** data, Jgame* game_state){
@@ -218,7 +208,7 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 		struct Jdata* obj = data[ID_PLAY_OBJECT + i];
 		if(obj != NULL && game_state->obstacle[i]){
 			obj->y = game_state->display_h - obj->data->h;
-			obj->x = obj->x - 6;
+			obj->x = obj->x - (int)(game_state->game_speed * (30.0 / game_state->fps_limit));
 
 
 			// Generate rects
@@ -246,7 +236,7 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 					game_state->obstacle[k] = 0;
 				}
 
-				if(game_state->score > game_state->hiscore)
+				if(game_state->score >= game_state->hiscore)
 					write_score(game_state);
 			}
 
@@ -298,7 +288,8 @@ void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
 	SDL_Keycode key = e.key;
 	
 	if(key == game_state->jump1 || key == game_state->jump2 || key == game_state->jump3){
-		game_state->motion = UP;
+	    if(game_state->motion == IDLE)
+            game_state->motion = UP;
 	}else if(key == SDLK_F3){
 		debug_overlay = ! debug_overlay;
 		info("Toggle debug overlay to: %d", debug_overlay);
