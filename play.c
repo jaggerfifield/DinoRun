@@ -63,6 +63,7 @@ void play_state(Jgame* game_state){
 	SDL_Event e;
 
     game_state->time_tick = SDL_GetTicksNS();
+    game_state->animation_tick = SDL_GetTicksNS();
 
 	// Play loop
 	while(!game_state->quit && !game_state->game_over){
@@ -92,9 +93,9 @@ void play_state(Jgame* game_state){
 
 static void _update(Jgame* game_state, struct Jdata** data){
 
-	// Count down timer TODO: find a better way to time things here
 	if ( ( SDL_GetTicksNS() - game_state->time_tick ) < 4000000000){
         struct Jdata* timer_node = data[ID_PLAY_TIMER];
+        bool do_update = true;
 
         if( ( SDL_GetTicksNS() - game_state->time_tick ) < 1000000000 )
 			sprintf(timer_node->string, "3");
@@ -104,18 +105,22 @@ static void _update(Jgame* game_state, struct Jdata** data){
 			sprintf(timer_node->string, "1");
 		else if( ( SDL_GetTicksNS() - game_state->time_tick ) < 4000000000 )
             sprintf(timer_node->string, "Go!");
+        else
+            do_update = false;
 
-        render(timer_node); // TODO this is called too many times
+        if(do_update){
+            render(timer_node);
 
-		// Clear the screen first!
-		struct Jdata* bg = data[ID_PLAY_BACKGROUND];
-		SDL_Rect bg_rect = get_rect(bg, game_state);
-		SDL_BlitSurface(bg->data, NULL, game_state->surface, &bg_rect);
+		    // Clear the screen first!
+		    struct Jdata* bg = data[ID_PLAY_BACKGROUND];
+		    SDL_Rect bg_rect = get_rect(bg, game_state);
+		    SDL_BlitSurface(bg->data, NULL, game_state->surface, &bg_rect);
 				
-		// Blit the countdown
-		SDL_Rect temp_rect = get_rect(timer_node, game_state);
-		SDL_BlitSurface(timer_node->data, NULL, game_state->surface, &temp_rect);
+		    // Blit the countdown
+		    SDL_Rect temp_rect = get_rect(timer_node, game_state);
+		    SDL_BlitSurface(timer_node->data, NULL, game_state->surface, &temp_rect);
 
+        }
 	// This is the main update, where we hande the gameplay
 	}else{
 		// Here is the dino run loop (after the countdown)
@@ -230,7 +235,17 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 	SDL_Rect player_rect = get_rect(player, game_state);
 
     if(game_state->treasure[0]){
+        
         struct Jdata* coin = data[ID_PLAY_COIN];
+        unsigned long long int ns = SDL_GetTicksNS();
+
+        if( (ns - game_state->animation_tick) > 83333333 ){
+            game_state->animation_tick = ns;
+        
+            // Update all animation frames
+            render(coin);
+        }
+
         coin->x = coin->x - (int)(game_state->game_speed * (30.0 / game_state->fps_limit));
 
         SDL_Rect coin_rect = get_rect(coin, game_state);
@@ -246,7 +261,6 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
             coin->x = game_state->display_w;
         }
     
-        render(coin);
         SDL_BlitSurface(coin->data, NULL, game_state->surface, &coin_rect);
     }
 

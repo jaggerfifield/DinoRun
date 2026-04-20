@@ -28,9 +28,11 @@ typedef struct Jgame{
 	SDL_Keycode jump2;
 	SDL_Keycode jump3;
 
+    // Timers
     unsigned long long int time_tick;
     unsigned long long int start_tick;
     unsigned long long int render_tick;
+    unsigned long long int animation_tick;
 
 	bool quit;
 
