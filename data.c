@@ -84,8 +84,8 @@ Jgame* loader(Jgame* game_state){
     // Story
     info("data.c : Loading Sotry data . . .");
     struct Jdata** story_data = malloc(sizeof(struct Jdata)*4);
-    story_data[0] = init(ID_STORY_BACKGROUND, JIMAGE, 0, 0, "Play Background", "Assets/bg_fill.bmp", NULL);
-    story_data[1] = init(ID_STORY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/image.bmp", NULL);
+    story_data[0] = init(ID_STORY_BACKGROUND, JIMAGE, 0, 0, "Play Background", "Assets/grid.bmp", NULL);
+    story_data[1] = init(ID_STORY_PLAYER, JIMAGE, 25, 100, "Player", "Assets/block.bmp", NULL);
     story_data[2] = init(ID_STORY_DEBUG, JFONT, 0, 0, "Debug Overlay", "Assets/font.ttf", "");
     story_data[3] = NULL;
 
