@@ -1,75 +1,30 @@
+#include <SDL3/SDL.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 #include <dirent.h>
+#include <errno.h>
 
 #ifdef WIN
 #include <wchar.h>
 #include <windows.h>
 #endif
 
-void logger(char*);
+enum {JINFO = SDL_LOG_CATEGORY_CUSTOM, JWARN, JERROR, JDEBUG};
+
 FILE* jaccess(char*, char*);
 void jwrite(FILE*, char*);
 void jread(FILE*, void*, size_t);
 void init_files(void);
 int f_count(char*);
 
-void parse(char* output, va_list args){
-    FILE* log = fopen("log.txt", "a");
-
-    for(; *output != '\0'; ++output){
-        switch(*output){
-            case '%': {
-                switch(*(output+1)){
-                    case 'd': {
-                        int a = va_arg(args, int);
-                        printf("%d", a);
-                        fprintf(log, "%d", a);
-                        ++output;
-                        break; 
-                    }case 'f': {
-                        double a = va_arg(args, double);
-                        printf("%f", a);
-                        fprintf(log, "%f", a);
-                        ++output;
-                        break;
-                    }case 's': {
-                        printf("%s", va_arg(args, char*));
-                        ++output;
-                    }
-                }
-                break;
-            }case '\\': {
-                switch(*(output+1)){
-                    case 'n':{
-                        printf("\n");
-                        fprintf(log, "\n");
-                        break;
-                    }
-                }
-                break;
-            }
-            default:
-                putchar(*output);
-                fprintf(log, "%c", *output);
-        }
-    }
-    putchar('\n');
-    fprintf(log, "%c", '\n');
-
-    fclose(log);
-}
-
 void info(char* output, ...){
     va_list args;	
     va_start(args, output);
 
-    logger("[Infos] : ");
-
-	printf("\x1b[38;2;35;176;237m[Infos]\x1b[0m : ");
-    parse(output, args);
+    SDL_LogMessageV(JINFO, SDL_LOG_PRIORITY_INFO, output, args);
 
     va_end(args);
 }
@@ -78,10 +33,7 @@ void warn(char* output, ...){
     va_list args;
     va_start(args, output);
 	
-    logger("[Warns] : ");
-
-	printf("\x1b[38;2;237;149;35m[Warns]\x1b[0m : ");
-    parse(output, args);
+    SDL_LogMessageV(JWARN, SDL_LOG_PRIORITY_WARN, output, args);
 
     va_end(args);
 }
@@ -90,10 +42,7 @@ void error(char* output, ...){
     va_list args;
     va_start(args, output);
 
-	logger("[Error] : ");
-	
-    printf("\x1b[38;2;237;49;35m[Error]\x1b[0m : ");
-    parse(output, args);
+    SDL_LogMessageV(JERROR, SDL_LOG_PRIORITY_ERROR, output, args);
 
     va_end(args);
 }
@@ -101,19 +50,10 @@ void error(char* output, ...){
 void debug(char* output, ...){
     va_list args;
     va_start(args, output);
-	
-    logger("[Debug] : ");
 
-	printf("\x1b[38;2;127;127;127m[Debug]\x1b[0m : ");
-    parse(output, args);
+    SDL_LogMessageV(JDEBUG, SDL_LOG_PRIORITY_DEBUG, output, args);
 
     va_end(args);
-}
-
-void logger(char* prefix){
-	FILE* log = fopen("log.txt", "a");
-    fprintf(log, prefix);
-	fclose(log);
 }
 
 FILE* jaccess(char* path, char* mode){
@@ -121,7 +61,9 @@ FILE* jaccess(char* path, char* mode){
 
 	if(target == NULL){
 		error("Can not open file: %s\n", path);
-	}
+        perror(NULL);
+	    exit(0);
+    }
 
 	return target;
 }
@@ -153,8 +95,18 @@ int f_count(char* path){
 }
 
 void init_files(void){
-	fclose(jaccess("log.txt", "w+"));
-	info("jio.c : Generate log!");
+	SDL_SetLogPriority(JINFO, SDL_LOG_PRIORITY_INFO);
+    SDL_SetLogPriority(JWARN, SDL_LOG_PRIORITY_WARN);
+    SDL_SetLogPriority(JERROR, SDL_LOG_PRIORITY_ERROR);
+    SDL_SetLogPriority(JDEBUG, SDL_LOG_PRIORITY_DEBUG);
+
+    
+    SDL_SetLogPriorityPrefix(SDL_LOG_PRIORITY_INFO, "\x1b[38;2;35;176;237m[Infos]\x1b[0m : ");
+    SDL_SetLogPriorityPrefix(SDL_LOG_PRIORITY_WARN, "\x1b[38;2;237;149;35m[Warns]\x1b[0m : ");
+    SDL_SetLogPriorityPrefix(SDL_LOG_PRIORITY_ERROR, "\x1b[38;2;237;49;35m[Error]\x1b[0m : ");
+    SDL_SetLogPriorityPrefix(SDL_LOG_PRIORITY_DEBUG, "\x1b[38;2;127;127;127m[Debug]\x1b[0m : ");
+    
+    info("jio.c : Generate log!");
 
 	fclose(jaccess("score", "a+"));
 }
