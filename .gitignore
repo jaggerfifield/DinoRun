@@ -1,9 +1,7 @@
-Assets/*.kra
-Assets/*.xcf
+nocheckin/*
 SDL/*
 *.o
 *.gch
-*.exe
 WIN
 WIN.proj
 NIX
