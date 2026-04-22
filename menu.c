@@ -90,8 +90,7 @@ void update(Jgame* game_state){
     struct Jdata* node = game_state->data_pack[ID_MAINMENU+i];
     
     while(node != NULL){
-        if(node->rect == NULL)
-            node->rect = get_rect(node, game_state);
+        node->rect = get_rect(node, game_state);
  
         if(game_state->ra == (node->id-ID_MAINMENU-1)){
             set_fgColour(node, 255, 0, 0); // TODO We are setting this every frame
