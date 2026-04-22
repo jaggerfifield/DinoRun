@@ -5,12 +5,16 @@
 #include "main.h"
 #include "jio.h"
 
-unsigned short int direction = 0;
+// ===== settings registers =====
+// ra --> Current loaction in settings
+// rb --> size of the settings menu
+// rc --> did we push enter
+// rd --> the direction 
 
 // Define functions
-static void handle_keys(SDL_KeyboardEvent, bool*, int*);
+static void handle_keys(SDL_KeyboardEvent, Jgame*);
 void* load_data(void);
-static void update(Jgame*, struct Jdata**, int*);
+static void update(Jgame*, struct Jdata**);
 void update_display(Jgame*, struct Jdata**);
 void update_fullscreen(Jgame*, struct Jdata**);
 void update_vsync(Jgame*, struct Jdata**);
@@ -20,12 +24,16 @@ void settings_state(Jgame* game_state){
 
 	// Declare variables
 	SDL_Event e;
-	int location = 1;
-	bool selected = false;
-	bool quit = false;
+    bool go_back = false;
+
+    // Clear registers
+    game_state->ra = 0;
+    game_state->rb = 8;
+    game_state->rc = 0;
+    game_state->rd = 0;
 
 	// Load assets
-    struct Jdata** DTA = game_state->data_pack[3];
+    struct Jdata** DTA = game_state->data_pack;
 
     // Load current volume level
     sprintf(DTA[ID_SETTINGS_VOLUME]->string, "<  Volume %.3d%%  >", game_state->volume);
@@ -46,19 +54,21 @@ void settings_state(Jgame* game_state){
 
     sprintf(DTA[ID_SETTINGS_FPSLIMIT]->string, "<  FPS Limit: %d  >", game_state->fps_limit);
 
-	while(!quit){
+	while(!game_state->quit && !go_back){
 		while(SDL_PollEvent(&e) != 0){
 			if(e.type == SDL_EVENT_QUIT)
-				quit = true;
+				game_state->quit = true;
 			else if(e.type == SDL_EVENT_KEY_DOWN)
-				handle_keys(e.key, &selected, &location);
+				handle_keys(e.key, game_state);
 	        else if(e.type == SDL_EVENT_WINDOW_RESIZED)
                 game_state = resize_window(game_state);
 
             // Handle pressing/clicking
-            if(selected){
-				selected = false;
+            if(game_state->rc){
+				game_state->rc = false;
 			
+                int location = ID_SETTINGS+game_state->ra+1;
+
                 if(location == ID_SETTINGS_VOLUME)
 					info("settings.c : Current volume is %d", game_state->volume);
 				
@@ -83,11 +93,13 @@ void settings_state(Jgame* game_state){
                     if(!SDL_SetRenderVSync(game_state->renderer, ( game_state->is_vsync ) ? 1 : SDL_RENDERER_VSYNC_DISABLED)){
                         error("settings.c : Could not set vsync Error: %s", SDL_GetError());
                     }
-                }else if(location == ID_SETTINGS_BACK)
-					quit = true;	
+                }else if(location == ID_SETTINGS_BACK){
+				    debug("Go Back");
+                    go_back = true;	
+                }
             }
 		}
-		update(game_state, DTA, &location);
+		update(game_state, DTA);
 	}
 
     restore_changes(game_state);
@@ -95,93 +107,101 @@ void settings_state(Jgame* game_state){
 	return;	
 }
 
-static void handle_keys(SDL_KeyboardEvent e, bool* selected, int* location){
+static void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
 	
 	int key = e.key;
 	
 	if(key == SDLK_UP){
-		*location -= 1;
+		game_state->ra -= 1;
+        if(game_state->ra < 0)
+            game_state->ra = game_state->rb;
 	}else if(key == SDLK_DOWN){
-		*location += 1;
+		game_state->ra += 1;
+        if(game_state->ra > game_state->rb)
+            game_state->ra = 0;
 	}else if(key == SDLK_RIGHT)
-		direction = 2;
+		game_state->rd = 2;
 	else if(key == SDLK_LEFT)
-		direction = 1;
+		game_state->rd = 1;
 	else if(key == SDLK_RETURN)
-		*selected = true;
+		game_state->rc = true;
 	
 }
 
-static void update(Jgame* game_state, struct Jdata** data, int* location){
+static void update(Jgame* game_state, struct Jdata** data){
 
-    int i = 0, j = 1;
+    struct Jdata* bg = game_state->data_pack[ID_DATA_BACKGROUND];
+    SDL_BlitSurface(bg->data, NULL, game_state->surface, bg->rect);
+
+    int i = ID_SETTINGS+1;
 	
     while(data[i] != NULL){
 		struct Jdata* node = data[i];
+        int location = node->id-ID_SETTINGS-1;
 
-		SDL_Rect temp_rect = get_rect(node, game_state);
-		
+        if(node->rect == NULL)
+		    node->rect = get_rect(node, game_state);
+
 		if(node->type == JFONT){
-            j++;
-			if(*location == node->id){
+			if(game_state->ra == location){
 				set_fgColour(node, 255, 0 , 0);
 			}else{
 				set_fgColour(node, 0, 0, 0);
 			}
 
             // Handle left right settings here
-			if(direction == 1){
+			if(game_state->rd == 1){
 				// Left
-				if((*location == ID_SETTINGS_VOLUME) && (*location == node->id)){
+				if((game_state->ra == location) && (node->id == ID_SETTINGS_VOLUME)){
 					// Turn volume down
                     if(game_state->volume > 0){
 					    game_state->volume -= 1;
 					    sprintf(node->string, "<  Volume %.3d%%  >", game_state->volume);
                     }
-				}else if((*location == ID_SETTINGS_DISPLAY) && (*location == node->id)){
+				}else if((node->id == ID_SETTINGS_DISPLAY) && (game_state->ra == location)){
                     // Swap selected monitor
                     if(game_state->monitor == 0)
                         game_state->monitor = game_state->n_displays-1;
                     else
                         game_state->monitor -= 1;
                     update_display(game_state, data);
-                }else if((*location == ID_SETTINGS_FULLSCREEN) && (*location == node->id)){
+                }else if((node->id == ID_SETTINGS_FULLSCREEN) && (game_state->ra == location)){
 					game_state->is_fullscreen = !game_state->is_fullscreen;
 					update_fullscreen(game_state, data);
-				}else if((*location == ID_SETTINGS_VSYNC) && (*location == node->id)){
+				}else if((node->id == ID_SETTINGS_VSYNC) && (game_state->ra == location)){
                     game_state->is_vsync = !game_state->is_vsync;
                     update_vsync(game_state, data);
-                }else if((*location == ID_SETTINGS_FPSLIMIT) && (*location == node->id)){
+                }else if((node->id == ID_SETTINGS_FPSLIMIT) && (game_state->ra == location)){
                     if(game_state->fps_limit > 30){
                         sprintf(node->string, "<  FPS Limit: %d  >", game_state->fps_limit /2);
                         game_state->fps_limit = game_state->fps_limit / 2;
                     }
                 }
-			}else if(direction == 2){
+			}else if(game_state->rd == 2){
                 // Right
-				if((*location == ID_SETTINGS_VOLUME) && (*location == node->id)){
+				if((node->id == ID_SETTINGS_VOLUME) && (game_state->ra == location)){
                     // Turn Volume up
                     if(game_state->volume < 100){
 					    game_state->volume += 1;
 					    sprintf(node->string, "<  Volume %.3d%%  >", game_state->volume);
                     }
-				}else if((*location == ID_SETTINGS_DISPLAY) && (*location == node->id)){
+				}else if((node->id == ID_SETTINGS_DISPLAY) && (game_state->ra == location)){
                     // Change displays
                     if(game_state->monitor == game_state->n_displays-1){
                         game_state->monitor = 0;
                     }else
                         game_state->monitor += 1;
                     update_display(game_state, data);
-                }else if((*location == ID_SETTINGS_RESOLUTION) && (*location == node->id)){
+                }else if((node->id == ID_SETTINGS_RESOLUTION) && (game_state->ra == location)){
                     // Change resolution
                     info("WIP");
-                }else if((*location == ID_SETTINGS_FULLSCREEN) && (*location == node->id)){
+                }else if((node->id == ID_SETTINGS_FULLSCREEN) && (game_state->ra == location)){
 					game_state->is_fullscreen = !game_state->is_fullscreen;
 					update_fullscreen(game_state, data);
-				}else if((*location == ID_SETTINGS_VSYNC) && (*location == node->id)){
+				}else if((node->id == ID_SETTINGS_VSYNC) && (game_state->ra == location)){
                     game_state->is_vsync = !game_state->is_vsync;
                     update_vsync(game_state, data);
-                }else if((*location == ID_SETTINGS_FPSLIMIT) && (*location == node->id)){
+                }else if((node->id == ID_SETTINGS_FPSLIMIT) && (game_state->ra == location)){
                     if(game_state->fps_limit < 120){
                         sprintf(node->string, "<  FPS Limit: %d  >", game_state->fps_limit*2);
                         game_state->fps_limit = game_state->fps_limit * 2;
@@ -192,17 +212,12 @@ static void update(Jgame* game_state, struct Jdata** data, int* location){
 		    render(node); // TODO : add update flag to node to check if it needs to be rendered!
         }
 
-		SDL_BlitSurface(node->data, NULL, game_state->surface, &temp_rect);
+		SDL_BlitSurface(node->data, NULL, game_state->surface, node->rect);
 	    i++;
     }
 
-    direction = 0;
+    game_state->rd = 0;
     
-    *location = *location % j;
-    if(*location == 0){
-        *location = *location + 1;
-    }
-
 	SDL_UpdateWindowSurface(game_state->window);
 }
 

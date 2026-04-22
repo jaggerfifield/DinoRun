@@ -10,7 +10,6 @@
 #include "jtime.h"
 #include "data.h"
 #include "menu.h"
-#include "update.h"
 
 void software_window(Jgame*);
 void cleanup(Jgame* game_state);
@@ -36,14 +35,15 @@ int main(int argc, char* argv[]){
     }
 
     info("main.c : Start program!");
- 
+
     Jgame* game_state = (Jgame*)malloc(sizeof(Jgame));
 	game_state->data_pack = NULL;
 
     game_state->monitor = 0; // TODO we need to store and remember the last monitor used
     game_state->volume = 50; // TODO this need to be stored too
-    game_state->is_vsync = true;
+    game_state->is_vsync = false;
     game_state->fps_limit = 60;
+    game_state->is_fullscreen = false;
 
     // Determine the number of displayes
     game_state->display_id = SDL_GetDisplays(&game_state->n_displays);
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]){
     info("main.c : Created game window and renderer! :D");
 
     // Load data
-    game_state = loader(game_state);
+    loader(game_state);
 
     // Enter the menu state's loop
     info("main.c : Go to main menu");

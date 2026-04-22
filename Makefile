@@ -32,7 +32,7 @@ WDIR := $(shell pwd)
 
 NAME := game
 
-DEP := jtime.o play.o story.o gameover.o menu.o settings.o jdata.o jio.o update.o data.o main.o
+DEP := jtime.o play.o story.o gameover.o menu.o settings.o jdata.o jio.o data.o main.o
 
 all : $(RESO) $(OS) $(DEP)
 	@echo =====Working Directory=====
@@ -89,11 +89,6 @@ jdata.o : jdata.c
 jio.o : jio.c
 	@echo =====Compile jio.c=====
 	gcc $(IPATH) $(DEF) -Wall -g -c jio.c
-	@echo
-
-update.o : update.c
-	@echo =====Compile update.c=====
-	gcc $(IPATH) $(DEF) -Wall -g -c update.c
 	@echo
 
 data.o : data.c

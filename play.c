@@ -7,7 +7,6 @@
 #include "main.h"
 #include "jio.h"
 #include "gameover.h"
-#include "update.h"
 
 bool debug_overlay = false;
 int distance = 100;
@@ -15,7 +14,7 @@ int distance = 100;
 static void _update(Jgame*, struct Jdata**);
 static void handle_keys(SDL_KeyboardEvent, Jgame*);
 static void object_handler(struct Jdata**, Jgame*);
-static bool check_collision(SDL_Rect, SDL_Rect);
+static bool check_collision(SDL_Rect*, SDL_Rect*);
 void read_score(Jgame*);
 void write_score(Jgame*);
 
@@ -36,7 +35,7 @@ void play_state(Jgame* game_state){
 
 	read_score(game_state);
 
-    struct Jdata** DTA = game_state->data_pack[1];
+    struct Jdata** DTA = game_state->data_pack;
 
 	// Enable background render on debug layer
 	set_text_bg(DTA[ID_PLAY_DEBUG]);
@@ -112,13 +111,18 @@ static void _update(Jgame* game_state, struct Jdata** data){
             render(timer_node);
 
 		    // Clear the screen first!
-		    struct Jdata* bg = data[ID_PLAY_BACKGROUND];
-		    SDL_Rect bg_rect = get_rect(bg, game_state);
-		    SDL_BlitSurface(bg->data, NULL, game_state->surface, &bg_rect);
+		    struct Jdata* bg = data[ID_DATA_BACKGROUND];
+		    
+            if(bg->rect == NULL)
+                bg->rect = get_rect(bg, game_state);
+
+		    SDL_BlitSurface(bg->data, NULL, game_state->surface, bg->rect);
 				
 		    // Blit the countdown
-		    SDL_Rect temp_rect = get_rect(timer_node, game_state);
-		    SDL_BlitSurface(timer_node->data, NULL, game_state->surface, &temp_rect);
+            if(timer_node->rect == NULL)
+		        timer_node->rect = get_rect(timer_node, game_state);
+
+		    SDL_BlitSurface(timer_node->data, NULL, game_state->surface, timer_node->rect);
 
         }
 	// This is the main update, where we hande the gameplay
@@ -127,7 +131,7 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		struct Jdata* score = data[ID_PLAY_SCORE];
 		struct Jdata* coin_t = data[ID_PLAY_COINS];
         struct Jdata* hiscore = data[ID_PLAY_HISCORE];
-		struct Jdata* bg = data[ID_PLAY_BACKGROUND];
+		struct Jdata* bg = data[ID_DATA_BACKGROUND];
 		struct Jdata* dino = data[ID_PLAY_PLAYER];
 		struct Jdata* debug = data[ID_PLAY_DEBUG];
 
@@ -169,22 +173,27 @@ static void _update(Jgame* game_state, struct Jdata** data){
 			  	break;
 		}
 		
-		SDL_Rect bg_rect = get_rect(bg, game_state);
-		SDL_Rect score_rect = get_rect(score, game_state);
-		SDL_Rect hiscore_rect = get_rect(hiscore, game_state);
-		SDL_Rect dino_rect = get_rect(dino, game_state);
-        SDL_Rect coin_t_rect = get_rect(coin_t, game_state);
+        if(bg->rect == NULL)
+		    bg->rect = get_rect(bg, game_state);
+		if(score->rect == NULL)
+            score->rect = get_rect(score, game_state);
+        if(hiscore->rect == NULL)
+		    hiscore->rect = get_rect(hiscore, game_state);
+		if(dino->rect == NULL)
+            dino->rect = get_rect(dino, game_state);
+        if(coin_t->rect == NULL)
+            coin_t->rect = get_rect(coin_t, game_state);
 
 		// Blit the surfaces in order: bg, objects, score, player
-		SDL_BlitSurface(bg->data, NULL, game_state->surface, &bg_rect);
+		SDL_BlitSurface(bg->data, NULL, game_state->surface, bg->rect);
 
 		// Update object position and generate new objects
 		object_handler(data, game_state);		
 
-		SDL_BlitSurface(score->data,   NULL, game_state->surface, &score_rect);
-		SDL_BlitSurface(hiscore->data, NULL, game_state->surface, &hiscore_rect);
-		SDL_BlitSurface(coin_t->data,  NULL, game_state->surface, &coin_t_rect);
-        SDL_BlitSurface(dino->data,    NULL, game_state->surface, &dino_rect);
+		SDL_BlitSurface(score->data,   NULL, game_state->surface, score->rect);
+		SDL_BlitSurface(hiscore->data, NULL, game_state->surface, hiscore->rect);
+		SDL_BlitSurface(coin_t->data,  NULL, game_state->surface, coin_t->rect);
+        SDL_BlitSurface(dino->data,    NULL, game_state->surface, dino->rect);
 		
 		// Blit debug overlay if enabled
 		if(debug_overlay && ( game_state->render_tick != 0 ) ){
@@ -194,9 +203,10 @@ static void _update(Jgame* game_state, struct Jdata** data){
 			sprintf(debug->string, "FPS: %0.2f S: %d M: %d", avgFPS, game_state->game_speed, game_state->point_mult);
 			render(debug);
 			
-			SDL_Rect debug_rect = get_rect(debug, game_state);
+            if(debug->rect == NULL)
+			    debug->rect = get_rect(debug, game_state);
 
-			SDL_BlitSurface(debug->data, NULL, game_state->surface, &debug_rect);
+			SDL_BlitSurface(debug->data, NULL, game_state->surface, debug->rect);
 		}
 	}
 
@@ -232,7 +242,8 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 	
     // Generate player rect
 	struct Jdata* player = data[ID_PLAY_PLAYER];
-	SDL_Rect player_rect = get_rect(player, game_state);
+	
+    player->rect = get_rect(player, game_state);
 
     if(game_state->treasure[0]){
         
@@ -248,9 +259,9 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 
         coin->x = coin->x - (int)(game_state->game_speed * (30.0 / game_state->fps_limit));
 
-        SDL_Rect coin_rect = get_rect(coin, game_state);
+        coin->rect = get_rect(coin, game_state);
 
-        if(check_collision(coin_rect, player_rect)){
+        if(check_collision(coin->rect, player->rect)){
             coin->x = -coin->data->w;
             game_state->coin_get = true;
             game_state->coins += 1;
@@ -261,7 +272,7 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
             coin->x = game_state->display_w;
         }
     
-        SDL_BlitSurface(coin->data, NULL, game_state->surface, &coin_rect);
+        SDL_BlitSurface(coin->data, NULL, game_state->surface, coin->rect);
     }
 
     // Move and blit objects.
@@ -271,10 +282,10 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 			obj->y = game_state->display_h - obj->data->h;
 			obj->x = obj->x - (int)(game_state->game_speed * (30.0 / game_state->fps_limit));
 
-			SDL_Rect object_rect = get_rect(obj, game_state);
+			obj->rect = get_rect(obj, game_state);
 
 			// Detect collision and end play state if true
-			if(check_collision(object_rect, player_rect)){
+			if(check_collision(obj->rect, player->rect)){
 				game_state->game_over = true;
 
 				// Reset active objects
@@ -292,19 +303,19 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 				game_state->obstacle[i] = 0;
 			}
 
-			SDL_BlitSurface(obj->data, NULL, game_state->surface, &object_rect);
+			SDL_BlitSurface(obj->data, NULL, game_state->surface, obj->rect);
 		}
 	}
 }
 
-static bool check_collision(SDL_Rect a, SDL_Rect b){
-	if(a.y + a.h <= b.y)
+static bool check_collision(SDL_Rect* a, SDL_Rect* b){
+	if(a->y + a->h <= b->y)
 		return false;
-	if(a.y >= b.y + b.h)
+	if(a->y >= b->y + b->h)
 		return false;
-	if(a.x + a.w <= b.x)
+	if(a->x + a->w <= b->x)
 		return false;
-	if(a.x >= b.x + b.w)
+	if(a->x >= b->x + b->w)
 		return false;
 	return true;
 }

@@ -35,6 +35,8 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
     data_node->frames = 0;
     data_node->current_frame = 0;
 
+    data_node->rect = NULL;
+
 	if(type == JIMAGE || type == JANIMATION){
         // Animated JIMAGE has a directory not a .bmp
         char _path[128];
@@ -76,7 +78,8 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 	}
 
     debug("jdata.c : [%d] %s is done loading!", id, data_node->name);
-	return data_node;
+	
+    return data_node;
 }
 
 void render(struct Jdata* node){
@@ -110,20 +113,27 @@ void render(struct Jdata* node){
 	assert(node->data != NULL);
 }
 
-SDL_Rect get_rect(struct Jdata* node, Jgame* game_state){
-	SDL_Rect rect;
-	rect.x = node->x;
-	rect.y = node->y;
+SDL_Rect* get_rect(struct Jdata* node, Jgame* game_state){
+	SDL_Rect* rect;
+    
+    if(node->rect == NULL)
+        rect = SDL_malloc(sizeof(SDL_Rect));
+    else
+        rect = node->rect;
+
+    rect->x = node->x;
+	rect->y = node->y;
 	
-    if(rect.x == CENTER)
-        rect.x = (game_state->display_w / 2) - (node->data->w / 2);
-    if(rect.y == CENTER)
-        rect.y = (game_state->display_h / 2) - (node->data->h / 2);
+    if(rect->x == CENTER)
+        rect->x = (game_state->display_w / 2) - (node->data->w / 2);
+    if(rect->y == CENTER)
+        rect->y = (game_state->display_h / 2) - (node->data->h / 2);
 
     assert(node->data != NULL);
-	rect.h = node->data->h;
-	rect.w = node->data->w;
-	return rect;
+	rect->h = node->data->h;
+	rect->w = node->data->w;
+	
+    return rect;
 }
 
 void set_fgColour(struct Jdata* node, short int r, short int g, short int b){
@@ -152,6 +162,9 @@ void set_text_size(struct Jdata* node, unsigned short int size){
 }
 
 void jdata_free(struct Jdata* node){
+    if(node == NULL){
+        return;
+    }
 
 	// Free the surface
 	if(node->data != NULL){
@@ -174,6 +187,12 @@ void jdata_free(struct Jdata* node){
     if(node->string != NULL){
         free(node->string);
         node->string = NULL;
+    }
+
+    // Free the rect
+    if(node->rect != NULL){
+        SDL_free(node->rect);
+        node->rect = NULL;
     }
 
 	free(node);

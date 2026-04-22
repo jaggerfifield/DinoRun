@@ -14,7 +14,7 @@ typedef struct Jgame{
     SDL_DisplayID* display_id; // A list of all displays 
     int n_displays; // How many displays are there
 
-    struct Jdata*** data_pack;
+    struct Jdata** data_pack;
 
 	// Settings
     int monitor; // The monitor we are using
@@ -27,6 +27,9 @@ typedef struct Jgame{
     SDL_Keycode jump1;
 	SDL_Keycode jump2;
 	SDL_Keycode jump3;
+
+    // Registers
+    int ra, rb, rc, rd;
 
     // Timers
     unsigned long long int time_tick;
@@ -65,6 +68,7 @@ struct Jdata{
 	int y;
 	char* name;
 	SDL_Surface* data;
+    SDL_Rect* rect;
 
 	// For image types
 	// path - path to the resource/image
@@ -97,7 +101,7 @@ void set_fgColour(struct Jdata*, short int, short int, short int);
 void set_bgColour(struct Jdata*, short int, short int, short int);
 void set_text_size(struct Jdata*, unsigned short int);
 
-SDL_Rect get_rect(struct Jdata*, Jgame*);
+SDL_Rect* get_rect(struct Jdata*, Jgame*);
 
 void jdata_free(struct Jdata*);
 void jdata_print(struct Jdata*);

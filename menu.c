@@ -6,76 +6,128 @@
 #include "main.h"
 #include "data.h"
 #include "jio.h"
-#include "update.h"
 #include "play.h"
 #include "story.h"
 #include "settings.h"
 
-// How many button in menu?
-#define MENU_SIZE 4
+// ===== game_state registers =====
+// ra --> Current location in menu
+// rb --> Size of the menu
+// rc --> did we push enter
 
 // Define functions
-void handle_keys(SDL_KeyboardEvent, bool*, int*);
+void handle_keys(SDL_KeyboardEvent, Jgame*);
+void update(Jgame*);
+void update_registers(Jgame*);
 
 void menu_state(Jgame* game_state){
 
-	// Declare variables
 	SDL_Event e;
-	int location = 0;
-	bool selected = false;
-	bool quit = false;
 
-    info("menu.c : trying to load data");
+    // Init registers
+	update_registers(game_state);
 
-	// Load assets
-	struct Jdata** DTA = game_state->data_pack[0];
-
-    info("menu.c : Menu data loaded");
-
-	while(!quit){
+    while(!game_state->quit){
 		while(SDL_PollEvent(&e) != 0){
-			if(e.type == SDL_EVENT_QUIT)
-				quit = true;
-            else if(e.type == SDL_EVENT_WINDOW_RESIZED){
+			
+            if(e.type == SDL_EVENT_QUIT)
+				game_state->quit = true;
+            else if(e.type == SDL_EVENT_WINDOW_RESIZED)
                 game_state = resize_window(game_state);
-            }else if(e.type == SDL_EVENT_KEY_DOWN)
-				handle_keys(e.key, &selected, &location);
-			if(selected){
-				selected = false;
-				if(location == 0)
-					play_state(game_state); // TODO
-				else if(location == 1)
-					story_state(game_state); // TODO
-				else if(location == 2)
-					settings_state(game_state); // TODO
-				else if(location == 3)
-					quit = true;
-			}
-		}
-		update(game_state, DTA, &location);
+            else if(e.type == SDL_EVENT_KEY_DOWN)
+				handle_keys(e.key, game_state);
+			
+            // Chck if enter was pressed
+            if(game_state->rc){
+				game_state->rc = false;
+                switch (game_state->ra){
+                    case 0:
+                        // Start the game
+					    play_state(game_state);
+                        update_registers(game_state);
+                        break;
+                    case 1:
+                        // enter story state
+					    story_state(game_state);
+                        update_registers(game_state);
+				        break;
+                    case 2:
+                        // enter settings state
+					    settings_state(game_state);
+                        update_registers(game_state);
+                        break;
+                    case 3:
+                        // quit the game
+					    game_state->quit = true;
+			            break;
+                }
+		    }
+        }
+
+		update(game_state);
 	}
 
 	return;	
 }
 
-void handle_keys(SDL_KeyboardEvent e, bool* selected, int* location){
-	
+void update_registers(Jgame* game_state){
+    game_state->ra = 0;
+    game_state->rb = 3;
+    game_state->rc = 0;
+}
+
+void update(Jgame* game_state){
+ 
+    struct Jdata* background = game_state->data_pack[ID_DATA_BACKGROUND];
+    
+    if(background->rect == NULL)
+        background->rect = get_rect(background, game_state);
+
+    SDL_BlitSurface(background->data, NULL, game_state->surface, background->rect);
+    
+    int i = 1;
+
+    struct Jdata* node = game_state->data_pack[ID_MAINMENU+i];
+    
+    while(node != NULL){
+        if(node->rect == NULL)
+            node->rect = get_rect(node, game_state);
+ 
+        if(game_state->ra == (node->id-ID_MAINMENU-1)){
+            set_fgColour(node, 255, 0, 0); // TODO We are setting this every frame
+            render(node);
+        }else{
+            set_fgColour(node, 0, 0, 0); // TODO We are setting this evey frame
+            render(node);
+        }
+
+        SDL_BlitSurface(node->data, NULL, game_state->surface, node->rect);
+        
+        node = game_state->data_pack[ID_MAINMENU+(i++)];
+    }
+
+    SDL_UpdateWindowSurface(game_state->window);
+}
+
+void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
+
 	int key = e.key;
 	
 	if(key == SDLK_UP){
-		*location -= 1;
+		game_state->ra -= 1;
 
 		// Check for wrap-around
-		if(*location < 0)
-			*location = MENU_SIZE - 1;
+		if(game_state->ra < 0)
+			game_state->ra = game_state->rb;
 
 	}else if(key == SDLK_DOWN){
-		*location += 1;
+		game_state->ra += 1;
 
-		if(*location > (MENU_SIZE - 1) )
-			*location = 0;
+		if(game_state->ra > game_state->rb )
+			game_state->ra = 0;
+
 	}else if(key == SDLK_RETURN)
-		*selected = true;
+		game_state->rc = true;
 	
 }
 

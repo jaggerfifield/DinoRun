@@ -25,12 +25,12 @@ void story_state(Jgame* game_state){
 
 	fpsTimer = timer_init();
 
-	struct Jdata** DTA = game_state->data_pack[4];
+	struct Jdata** DTA = game_state->data_pack;
 
 	// Enable background render on debug layer
-	set_text_bg(DTA[ID_STORY_DEBUG]);
-	set_bgColour(DTA[ID_STORY_DEBUG], 190, 190, 190);
-	set_text_size(DTA[ID_STORY_DEBUG], 10);
+	set_text_bg(DTA[ID_PLAY_DEBUG]);
+	set_bgColour(DTA[ID_PLAY_DEBUG], 190, 190, 190);
+	set_text_size(DTA[ID_PLAY_DEBUG], 10);
 
 	int next_time = SDL_GetTicks() + 5;
 
@@ -72,7 +72,7 @@ void story_state(Jgame* game_state){
 static void update(Jgame* game_state, struct Jdata** data){
 	
 	// Here is the dino run loop (after the countdown)
-	struct Jdata* bg = data[ID_PLAY_BACKGROUND];
+	struct Jdata* bg = data[ID_DATA_BACKGROUND];
 	struct Jdata* dino = data[ID_PLAY_PLAYER];
 	struct Jdata* debug = data[ID_PLAY_DEBUG];
 
@@ -99,13 +99,13 @@ static void update(Jgame* game_state, struct Jdata** data){
 	if(left && !right && dino->x > 0)
 		dino->x = dino->x - 1;
 
-	SDL_Rect bg_rect = get_rect(bg, game_state);
-	SDL_Rect dino_rect = get_rect(dino, game_state);
+	bg->rect = get_rect(bg, game_state);
+	dino->rect = get_rect(dino, game_state);
 
 	// Blit the surfaces in order: bg, objects, score, player
-	SDL_BlitSurface(bg->data, NULL, game_state->surface, &bg_rect);
+	SDL_BlitSurface(bg->data, NULL, game_state->surface, bg->rect);
 
-	SDL_BlitSurface(dino->data,    NULL, game_state->surface, &dino_rect);
+	SDL_BlitSurface(dino->data,    NULL, game_state->surface, dino->rect);
 		
 	// Blit debug overlay if enabled
 	if(debug_overlay){
@@ -123,9 +123,9 @@ static void update(Jgame* game_state, struct Jdata** data){
 		debug->string = str;
 		render(debug);
 			
-		SDL_Rect debug_rect = get_rect(debug, game_state);
+		debug->rect = get_rect(debug, game_state);
 
-		SDL_BlitSurface(debug->data, NULL, game_state->surface, &debug_rect);
+		SDL_BlitSurface(debug->data, NULL, game_state->surface, debug->rect);
 	}
 
 	frameCount = frameCount + 1;

@@ -11,7 +11,7 @@ static int handle_keys(SDL_KeyboardEvent);
 
 void gameover_state(Jgame* game_state){
 	
-	struct Jdata** DTA = game_state->data_pack[2];
+	struct Jdata** DTA = game_state->data_pack;
 
 	choice = 0;
 	int sel = 1;
@@ -55,16 +55,19 @@ static void update(Jgame* game_state, struct Jdata** DTA, int sel){
 	}
 
 
-	SDL_Rect title_rect = get_rect(title, game_state);
-	SDL_Rect play_rect = get_rect(play, game_state);
-	SDL_Rect exit_rect = get_rect(exit, game_state);
+    if(title->rect == NULL)
+	    title->rect = get_rect(title, game_state);
+	if(play->rect == NULL){
+        play->rect = get_rect(play, game_state);
+        play->rect->x -= 100;
+    }if(exit->rect == NULL){
+        exit->rect = get_rect(exit, game_state);
+        exit->rect->x += 100;
+    }
 
-    play_rect.x -= 100;
-    exit_rect.x += 100;
-
-	SDL_BlitSurface(title->data, NULL, game_state->surface, &title_rect);
-	SDL_BlitSurface(play->data, NULL, game_state->surface, &play_rect);
-	SDL_BlitSurface(exit->data, NULL, game_state->surface, &exit_rect);
+	SDL_BlitSurface(title->data, NULL, game_state->surface, title->rect);
+	SDL_BlitSurface(play->data, NULL, game_state->surface, play->rect);
+	SDL_BlitSurface(exit->data, NULL, game_state->surface, exit->rect);
 
 	SDL_UpdateWindowSurface(game_state->window);
 }
