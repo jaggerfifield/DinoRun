@@ -77,6 +77,5 @@ void free_data(Jgame* game_state){
 		game_state->data_pack[i] = NULL;
     }
     
-	free(game_state->data_pack);
 	game_state->data_pack = NULL;
 }
