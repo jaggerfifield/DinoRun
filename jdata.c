@@ -10,20 +10,20 @@
 #include "jio.h"
 
 struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char* string){  
-	struct Jdata* data_node = malloc(sizeof(struct Jdata));
+	struct Jdata* data_node = SDL_malloc(sizeof(struct Jdata));
 
 	data_node->id = id;
 	data_node->type = type;
 	data_node->x = x;
 	data_node->y = y;
 
-	data_node-> name = (char*)malloc(64);
+	data_node-> name = (char*)SDL_malloc(64);
     memset(data_node->name, '\0', 64);
     sprintf(data_node->name, "%s", name);
 
 	data_node->path = path;
 	
-	data_node->string = (char*)malloc(128);
+	data_node->string = (char*)SDL_malloc(128);
     memset(data_node->string, '\0', 128);
     sprintf(data_node->string, "%s", string);
     
@@ -179,13 +179,13 @@ void jdata_free(struct Jdata* node){
 	}
 	
     if(node->name != NULL){
-        free(node->name);
+        SDL_free(node->name);
         node->name = NULL;
     }
 
     // Free the text string
     if(node->string != NULL){
-        free(node->string);
+        SDL_free(node->string);
         node->string = NULL;
     }
 
@@ -195,7 +195,7 @@ void jdata_free(struct Jdata* node){
         node->rect = NULL;
     }
 
-	free(node);
+	SDL_free(node);
 }
 
 void jdata_print(struct Jdata* node){

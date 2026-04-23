@@ -10,7 +10,7 @@
 
 void loader(Jgame* game_state){
 	info("data.c : Loading assets . . .");
-    struct Jdata** data_pack = malloc(sizeof(struct Jdata*) * ID_DATA_END);
+    struct Jdata** data_pack = SDL_malloc(sizeof(struct Jdata*) * ID_DATA_END);
 
     // Splash Screen
     debug("data.c : splash data loading");

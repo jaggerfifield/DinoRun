@@ -36,7 +36,7 @@ int main(int argc, char* argv[]){
 
     info("main.c : Start program!");
 
-    Jgame* game_state = (Jgame*)malloc(sizeof(Jgame));
+    Jgame* game_state = (Jgame*)SDL_malloc(sizeof(Jgame));
 	game_state->data_pack = NULL;
 
     game_state->monitor = 0; // TODO we need to store and remember the last monitor used
@@ -127,7 +127,7 @@ void cleanup(Jgame* game_state){
     SDL_DestroyRenderer(game_state->renderer);
     SDL_Quit();
 
-    free(game_state);
+    SDL_free(game_state);
     
 }
 
