@@ -122,12 +122,17 @@ void cleanup(Jgame* game_state){
     info("main.c : Quit SDL");
     // Cleanup
     SDL_free(game_state->display_id);
+	game_state->display_id = NULL;
     SDL_DestroySurface(game_state->surface);
+	game_state->surface = NULL;
     SDL_DestroyWindow(game_state->window);
+	game_state->window = NULL;
     SDL_DestroyRenderer(game_state->renderer);
+	game_state->renderer = NULL;
     SDL_Quit();
 
     SDL_free(game_state);
+	game_state = NULL;
     
 }
 
