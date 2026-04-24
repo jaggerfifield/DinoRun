@@ -177,8 +177,7 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		    bg->rect = get_rect(bg, game_state);
 		if(score->rect == NULL)
             score->rect = get_rect(score, game_state);
-        if(hiscore->rect == NULL)
-		    hiscore->rect = get_rect(hiscore, game_state);
+		hiscore->rect = get_rect(hiscore, game_state);
 		if(dino->rect == NULL)
             dino->rect = get_rect(dino, game_state);
         if(coin_t->rect == NULL)
