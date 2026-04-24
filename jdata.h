@@ -5,6 +5,11 @@
 
 // TODO: Update flags, 
 
+typedef struct{
+    int x;
+    int y;
+} vec2;
+
 typedef struct Jgame{
     SDL_Window* window;
     SDL_Renderer* renderer;
@@ -61,22 +66,26 @@ struct Jdata{
 	// x - the x position of top right corner
 	// y - the y posotion of top right corner
 	// name - human readible name
+	// path - path to the resource/image
 	// data - the data package, a rendered surface
 	int id;
 	int type;
 	int x;
 	int y;
 	char* name;
+	char* path;
 	SDL_Surface* data;
     SDL_Rect* rect;
 
+    union{
+        char* string;
+        vec2 frames; 
+    }aux;
+
 	// For image types
-	// path - path to the resource/image
-	// 		note path is used for font resource file .ttf
 	// frames - the number of frames used for animation
-	char* path;
-	int frames;
-    int current_frame;
+	//int frames;
+    //int current_frame;
 
 	// For font types
 	// string - the font string to render
@@ -85,7 +94,7 @@ struct Jdata{
 	// fnt - loaded font package from path
 	// fgColour - foreground text colour
 	// bgColour - background text colour
-	char* string;
+	//char* string;
 	bool text_bg;
 	unsigned short int text_size;
 	TTF_Font* fnt;
@@ -93,9 +102,11 @@ struct Jdata{
 	SDL_Color bgColour;
 };
 
+
 struct Jdata* init(int, int, int, int, char*, char*, char*);
 void render(struct Jdata*);
 
+void set_string(struct Jdata*, char*);
 void set_text_bg(struct Jdata*);
 void set_fgColour(struct Jdata*, short int, short int, short int);
 void set_bgColour(struct Jdata*, short int, short int, short int);

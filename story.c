@@ -120,7 +120,7 @@ static void update(Jgame* game_state, struct Jdata** data){
 		// Update string
 		sprintf(str, "FPS: %f", avgFPS);
 		
-		debug->string = str;
+		debug->aux.string = str;
 		render(debug);
 			
 		debug->rect = get_rect(debug, game_state);

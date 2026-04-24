@@ -12,29 +12,31 @@
 struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char* string){  
 	struct Jdata* data_node = SDL_malloc(sizeof(struct Jdata));
 
+    // All jdata have id, type, and name
 	data_node->id = id;
 	data_node->type = type;
+	data_node-> name = name;
+	data_node->path = path;
+
+    // TODO we could probably remove x and y and just use the rects to set location
 	data_node->x = x;
 	data_node->y = y;
-
-	data_node-> name = (char*)SDL_malloc(64);
-    memset(data_node->name, '\0', 64);
-    sprintf(data_node->name, "%s", name);
-
-	data_node->path = path;
 	
-	data_node->string = (char*)SDL_malloc(128);
-    memset(data_node->string, '\0', 128);
-    sprintf(data_node->string, "%s", string);
-    
-    assert(data_node->string[127] == '\0');
+    // String is only set for JFONT TODO we need a set_string(node, string) function?
+    //if(string != NULL)
+	//    data_node->string = SDL_strdup(string);
+    //else
+    //   data_node->string = NULL;
 
+    // Only for JFONT
     data_node->text_bg = false;
 	data_node->text_size = 40;
 
-    data_node->frames = 0;
-    data_node->current_frame = 0;
+    // Only for JANIMATION
+    //data_node->frames = 0;
+    //data_node->current_frame = 0;
 
+    // Only for JIMAGE/JANIMATION
     data_node->rect = NULL;
 
 	if(type == JIMAGE || type == JANIMATION){
@@ -43,9 +45,10 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
         memset(_path, '\0', 128);
 
         if(type == JANIMATION){
-            data_node->frames = f_count(path);
+            data_node->aux.frames.x = f_count(path);
+            data_node->aux.frames.y = 0;
             // Load the first image
-            sprintf(_path, "%s%04d.bmp", path, data_node->current_frame);
+            sprintf(_path, "%s%04d.bmp", path, data_node->aux.frames.y);
         }else{
             sprintf(_path, "%s", path);
         }
@@ -59,6 +62,8 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 		SDL_SetSurfaceColorKey(data_node->data, true, SDL_MapSurfaceRGB(data_node->data, 0, 0, 0));
 
 	}else if(type == JFONT){
+        data_node->aux.string = SDL_strdup(string);
+
 		// Load font .ttf
 		data_node->fnt = TTF_OpenFont(path, data_node->text_size);
         assert(data_node->fnt != NULL);
@@ -72,9 +77,9 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 
 		// Render font
 		if(data_node->text_bg)
-			data_node->data = TTF_RenderText_Shaded(data_node->fnt, data_node->string, 0, data_node->fgColour, data_node->bgColour);
+			data_node->data = TTF_RenderText_Shaded(data_node->fnt, data_node->aux.string, 0, data_node->fgColour, data_node->bgColour);
 		else
-			data_node->data = TTF_RenderText_Solid(data_node->fnt, data_node->string, 0, data_node->fgColour);
+			data_node->data = TTF_RenderText_Solid(data_node->fnt, data_node->aux.string, 0, data_node->fgColour);
 	}
 
     debug("jdata.c : [%d] %s is done loading!", id, data_node->name);
@@ -95,19 +100,18 @@ void render(struct Jdata* node){
     }else if(node->type == JANIMATION){
         char _path[128];
         memset(_path, '\0', 128);
-        node->current_frame = (node->current_frame+1)%node->frames;
-        sprintf(_path, "%s%04d.bmp", node->path, node->current_frame);
+        node->aux.frames.y = (node->aux.frames.y+1)%node->aux.frames.x;
+        sprintf(_path, "%s%04d.bmp", node->path, node->aux.frames.y);
         node->data = SDL_LoadBMP(_path);
 		SDL_SetSurfaceColorKey(node->data, true, SDL_MapSurfaceRGB(node->data, 0, 0, 0));
     
     }else if(node->type == JFONT){
 		assert(node->fnt != NULL);
-        assert(node->string[127] == '\0');
 		
 		if(node->text_bg)
-			node->data = TTF_RenderText_Shaded(node->fnt, node->string, 0, node->fgColour, node->bgColour);
+			node->data = TTF_RenderText_Shaded(node->fnt, node->aux.string, 0, node->fgColour, node->bgColour);
 		else
-			node->data = TTF_RenderText_Solid(node->fnt, node->string, 0, node->fgColour);
+			node->data = TTF_RenderText_Solid(node->fnt, node->aux.string, 0, node->fgColour);
     }
 
 	assert(node->data != NULL);
@@ -134,6 +138,17 @@ SDL_Rect* get_rect(struct Jdata* node, Jgame* game_state){
 	rect->w = node->data->w;
 	
     return rect;
+}
+
+void set_string(struct Jdata* node, char* str){
+    if(node->aux.string == NULL || (SDL_strlen(node->aux.string) < SDL_strlen(str))){
+        debug("jdata.c : String Alloc [%ld] -> [%ld]", SDL_strlen(node->aux.string), SDL_strlen(str));
+        if(node->aux.string != NULL)
+            SDL_free(node->aux.string);
+        node->aux.string = SDL_strdup(str);
+    }else{
+        SDL_strlcpy(node->aux.string, str, SDL_strlen(str)+1);
+    }
 }
 
 void set_fgColour(struct Jdata* node, short int r, short int g, short int b){
@@ -184,9 +199,9 @@ void jdata_free(struct Jdata* node){
     }
 
     // Free the text string
-    if(node->string != NULL){
-        SDL_free(node->string);
-        node->string = NULL;
+    if(node->aux.string != NULL){
+        SDL_free(node->aux.string);
+        node->aux.string = NULL;
     }
 
     // Free the rect

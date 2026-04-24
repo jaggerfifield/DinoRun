@@ -97,13 +97,13 @@ static void _update(Jgame* game_state, struct Jdata** data){
         bool do_update = true;
 
         if( ( SDL_GetTicksNS() - game_state->time_tick ) < 1000000000 )
-			sprintf(timer_node->string, "3");
+			set_string(timer_node, "3");
         else if( ( SDL_GetTicksNS() - game_state->time_tick ) < 2000000000 )
-			sprintf(timer_node->string, "2");
+			set_string(timer_node, "2");
 		else if( ( SDL_GetTicksNS() - game_state->time_tick ) < 3000000000 )
-			sprintf(timer_node->string, "1");
+			set_string(timer_node, "1");
 		else if( ( SDL_GetTicksNS() - game_state->time_tick ) < 4000000000 )
-            sprintf(timer_node->string, "Go!");
+            set_string(timer_node, "Go!");
         else
             do_update = false;
 
@@ -137,12 +137,12 @@ static void _update(Jgame* game_state, struct Jdata** data){
 
 		// Update score count here.
 		game_state->score += game_state->point_mult;
-		sprintf(score->string, "SCORE: %d", game_state->score);
+		sprintf(score->aux.string, "SCORE: %d", game_state->score);
 		render(score);
 
         // Update coin count
         if(game_state->coin_get){
-            sprintf(coin_t->string, "COINS: %d", game_state->coins);
+            sprintf(coin_t->aux.string, "COINS: %d", game_state->coins);
             render(coin_t);
             game_state->coin_get = false;
         }
@@ -150,7 +150,7 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		// Update HiScore here
 		if(game_state->score > game_state->hiscore)
 			game_state->hiscore = game_state->score;
-		sprintf(hiscore->string, "High Score: %d", game_state->hiscore);
+		sprintf(hiscore->aux.string, "High Score: %d", game_state->hiscore);
 		render(hiscore);
 		hiscore->x = game_state->display_w - hiscore->data->w;
 
@@ -199,7 +199,7 @@ static void _update(Jgame* game_state, struct Jdata** data){
 			double avgFPS = 1000000000.0 / (double)game_state->render_tick;
 
 			// Update string
-			sprintf(debug->string, "FPS: %0.2f S: %d M: %d", avgFPS, game_state->game_speed, game_state->point_mult);
+			sprintf(debug->aux.string, "FPS: %0.2f S: %d M: %d", avgFPS, game_state->game_speed, game_state->point_mult);
 			render(debug);
 			
             if(debug->rect == NULL)
