@@ -87,7 +87,6 @@ struct Jdata{
 	// fgColour - foreground text colour
 	// bgColour - background text colour
 	bool text_bg;
-	size_t string_len;
 
     TTF_Font* fnt;
 	

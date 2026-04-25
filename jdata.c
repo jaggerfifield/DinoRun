@@ -52,7 +52,6 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 
 	}else if(type == JFONT){
         data_node->aux.string = SDL_strdup(string);
-        data_node->string_len = SDL_strlen(string);
 
 		// Load font .ttf
         data_node->fnt = NULL;
