@@ -18,6 +18,9 @@ void gameover_state(Jgame* game_state){
 
 	SDL_Event e;
 
+    set_pos_x(DTA[ID_GAMEOVER_PLAY], get_pos_x(DTA[ID_GAMEOVER_PLAY])-100, game_state);
+    set_pos_x(DTA[ID_GAMEOVER_EXIT], get_pos_x(DTA[ID_GAMEOVER_EXIT])+100, game_state);
+
 	while(!choice){
 		while(SDL_PollEvent(&e)){
 			if(e.type == SDL_EVENT_QUIT){
@@ -56,12 +59,12 @@ static void update(Jgame* game_state, struct Jdata** DTA, int sel){
 
 
     if(title->rect == NULL)
-	    title->rect = get_rect(title, game_state);
+	    title->rect = get_rect(title);
 	if(play->rect == NULL){
-        play->rect = get_rect(play, game_state);
+        play->rect = get_rect(play);
         play->rect->x -= 100;
     }if(exit->rect == NULL){
-        exit->rect = get_rect(exit, game_state);
+        exit->rect = get_rect(exit);
         exit->rect->x += 100;
     }
 

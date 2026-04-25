@@ -139,7 +139,7 @@ static void update(Jgame* game_state, struct Jdata** data){
 		struct Jdata* node = data[i];
         int location = node->id-ID_SETTINGS-1;
 
-		node->rect = get_rect(node, game_state);
+		node->rect = get_rect(node); // TODO rect is generated in render(), do we need this?
 
 		if(node->type == JFONT){
 			if(game_state->ra == location){

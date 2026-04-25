@@ -79,28 +79,28 @@ static void update(Jgame* game_state, struct Jdata** data){
 	int gravity = 4;
 
 	// Move dino up
-	if(!down && up && dino->y > 0)
-		dino->y = dino->y - gravity;
+	if(!down && up && get_pos_y(dino) > 0)
+		set_pos_y(dino, get_pos_y(dino) - gravity, game_state);
 	else{
 		down = true;
 		up = false;
 	}
 
 	// Move dino back down
-	if(dino->y < game_state->display_h - dino->data->h && down)
-		dino->y = dino->y + (gravity);
+	if(get_pos_y(dino) < game_state->display_h - dino->data->h && down)
+		set_pos_y(dino, get_pos_y(dino) + (gravity), game_state);
 	else
 		down = false;
 
 	// Move left and right
-	if(right && !left && dino->x < game_state->display_w)
-		dino->x = dino->x + 1;
+	if(right && !left && get_pos_x(dino) < game_state->display_w)
+		set_pos_x(dino, get_pos_x(dino) + 1, game_state);
 
-	if(left && !right && dino->x > 0)
-		dino->x = dino->x - 1;
+	if(left && !right && get_pos_x(dino) > 0)
+		set_pos_x(dino, get_pos_x(dino) - 1, game_state);
 
-	bg->rect = get_rect(bg, game_state);
-	dino->rect = get_rect(dino, game_state);
+	bg->rect = get_rect(bg);
+	dino->rect = get_rect(dino);
 
 	// Blit the surfaces in order: bg, objects, score, player
 	SDL_BlitSurface(bg->data, NULL, game_state->surface, bg->rect);
@@ -117,7 +117,7 @@ static void update(Jgame* game_state, struct Jdata** data){
         set_string(debug, "FPS: %.3f", avgFPS);
 		render(debug);
 			
-		debug->rect = get_rect(debug, game_state);
+		debug->rect = get_rect(debug);
 
 		SDL_BlitSurface(debug->data, NULL, game_state->surface, debug->rect);
 	}

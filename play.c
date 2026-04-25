@@ -49,22 +49,29 @@ void play_state(Jgame* game_state){
 	set_font_size(DTA[ID_PLAY_DEBUG], 10);
 
 	// Set object positions
-    DTA[ID_PLAY_COINS]->y = DTA[ID_PLAY_SCORE]->data->h+10;
+    //DTA[ID_PLAY_COINS]->y = DTA[ID_PLAY_SCORE]->data->h+10;
+    set_pos_y(DTA[ID_PLAY_COINS], DTA[ID_PLAY_SCORE]->data->h+10, game_state);
     
-    DTA[ID_PLAY_OBJECT]->x = game_state->display_w;
-    DTA[ID_PLAY_OBJECT2]->x = game_state->display_w;
-    DTA[ID_PLAY_OBJECT3]->x = game_state->display_w;
-    DTA[ID_PLAY_OBJECT4]->x = game_state->display_w;
-	DTA[ID_PLAY_PLAYER]->y = game_state->display_h-DTA[ID_PLAY_PLAYER]->data->h;
+    //DTA[ID_PLAY_OBJECT]->x = game_state->display_w;
+    //DTA[ID_PLAY_OBJECT2]->x = game_state->display_w;
+    //DTA[ID_PLAY_OBJECT3]->x = game_state->display_w;
+    //DTA[ID_PLAY_OBJECT4]->x = game_state->display_w;
+    int disp_w = game_state->display_w;
+    set_pos_x(DTA[ID_PLAY_OBJECT], disp_w, game_state);
+    set_pos_x(DTA[ID_PLAY_OBJECT2], disp_w, game_state);
+    set_pos_x(DTA[ID_PLAY_OBJECT3], disp_w, game_state);
+    set_pos_x(DTA[ID_PLAY_OBJECT4], disp_w, game_state);
+
+	set_pos_y(DTA[ID_PLAY_PLAYER], game_state->display_h-DTA[ID_PLAY_PLAYER]->data->h, game_state);
     
-    DTA[ID_PLAY_COIN]->y = game_state->display_h-DTA[ID_PLAY_PLAYER]->data->h-DTA[ID_PLAY_COIN]->data->h-50;
-    DTA[ID_PLAY_COIN]->x = game_state->display_w;
+    set_pos_x(DTA[ID_PLAY_COIN], disp_w, game_state);
+    set_pos_y(DTA[ID_PLAY_COIN], game_state->display_h-DTA[ID_PLAY_PLAYER]->data->h-DTA[ID_PLAY_COIN]->data->h-50, game_state);
 
 	game_state->jump_height = game_state->display_h - DTA[ID_PLAY_PLAYER]->data->h - 280;
 	
     set_string(DTA[ID_PLAY_HISCORE], "High Score: %d", game_state->hiscore);
     render(DTA[ID_PLAY_HISCORE]);
-	DTA[ID_PLAY_HISCORE]->x = game_state->display_w - DTA[ID_PLAY_HISCORE]->data->w;
+	set_pos_x(DTA[ID_PLAY_HISCORE], disp_w - DTA[ID_PLAY_HISCORE]->data->w, game_state);
 
 	// Apply a seed for random
 	srand(time(NULL));
@@ -124,13 +131,13 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		    struct Jdata* bg = data[ID_DATA_BACKGROUND];
 		    
             if(bg->rect == NULL)
-                bg->rect = get_rect(bg, game_state);
+                bg->rect = get_rect(bg);
 
 		    SDL_BlitSurface(bg->data, NULL, game_state->surface, bg->rect);
 				
 		    // Blit the countdown
             if(timer_node->rect == NULL)
-		        timer_node->rect = get_rect(timer_node, game_state);
+		        timer_node->rect = get_rect(timer_node);
 
 		    SDL_BlitSurface(timer_node->data, NULL, game_state->surface, timer_node->rect);
 
@@ -162,36 +169,38 @@ static void _update(Jgame* game_state, struct Jdata** data){
 			game_state->hiscore = game_state->score;
 		    set_string(hiscore, "High Score: %d", game_state->hiscore);
 		    render(hiscore);
-		    hiscore->x = game_state->display_w - hiscore->data->w;
+		    set_pos_x(hiscore, game_state->display_w - hiscore->data->w, game_state);
         }
 		// Apply jump physics (up/down movement)
+        int dino_y = get_pos_y(dino);
 
 		switch(game_state->motion){
 			case IDLE:
 				break;
 			case UP:
-				if(dino->y > game_state->jump_height)
-					dino->y = dino->y - (int)(game_state->game_speed * (30.0 / game_state->fps_limit));
+
+				if(dino_y > game_state->jump_height)
+					set_pos_y(dino, dino_y - (int)(game_state->game_speed * (30.0 / game_state->fps_limit)), game_state);
 				else
 				  	game_state->motion = DOWN;
 				break;
 			case DOWN:
-			  	if(dino->y < game_state->display_h - dino->data->h)
-					dino->y = dino->y + (int)(game_state->game_speed * (30.0 / game_state->fps_limit));
-			  	else if(dino->y >= game_state->display_h - dino->data->h)
+			  	if(dino_y < game_state->display_h - dino->data->h)
+					set_pos_y(dino, dino_y + (int)(game_state->game_speed * (30.0 / game_state->fps_limit)), game_state);
+			  	else if(dino_y >= game_state->display_h - dino->data->h)
 				  	game_state->motion = IDLE;
 			  	break;
 		}
 		
         if(bg->rect == NULL)
-		    bg->rect = get_rect(bg, game_state);
+		    bg->rect = get_rect(bg);
 		if(score->rect == NULL)
-            score->rect = get_rect(score, game_state);
-		hiscore->rect = get_rect(hiscore, game_state);
+            score->rect = get_rect(score);
+		hiscore->rect = get_rect(hiscore);
 		if(dino->rect == NULL)
-            dino->rect = get_rect(dino, game_state);
+            dino->rect = get_rect(dino);
         if(coin_t->rect == NULL)
-            coin_t->rect = get_rect(coin_t, game_state);
+            coin_t->rect = get_rect(coin_t);
 
 		// Blit the surfaces in order: bg, objects, score, player
 		SDL_BlitSurface(bg->data, NULL, game_state->surface, bg->rect);
@@ -213,7 +222,7 @@ static void _update(Jgame* game_state, struct Jdata** data){
 			render(debug);
 			
             if(debug->rect == NULL)
-			    debug->rect = get_rect(debug, game_state);
+			    debug->rect = get_rect(debug);
 
 			SDL_BlitSurface(debug->data, NULL, game_state->surface, debug->rect);
 		}
@@ -252,7 +261,7 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
     // Generate player rect
 	struct Jdata* player = data[ID_PLAY_PLAYER];
 	
-    player->rect = get_rect(player, game_state);
+    player->rect = get_rect(player); // TODO Rects are generated in render() calls, do we need to do this?
 
     if(game_state->treasure[0]){
         
@@ -266,19 +275,19 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
             render(coin);
         }
 
-        coin->x = coin->x - (int)(game_state->game_speed * (30.0 / game_state->fps_limit));
+        set_pos_x(coin, get_pos_x(coin) - (int)(game_state->game_speed * (30.0 / game_state->fps_limit)), game_state);
 
-        coin->rect = get_rect(coin, game_state);
+        coin->rect = get_rect(coin); // TODO Rects are genereated in render() calls, do we need to do this?
 
         if(check_collision(coin->rect, player->rect)){
-            coin->x = -coin->data->w;
+            set_pos_x(coin, -coin->data->w, game_state);
             game_state->coin_get = true;
             game_state->coins += 1;
         }
 
-        if(coin->x < -coin->data->w){
+        if(get_pos_x(coin) < -coin->data->w){
             game_state->treasure[0] = 0;
-            coin->x = game_state->display_w;
+            set_pos_x(coin, game_state->display_w, game_state);
         }
     
         SDL_BlitSurface(coin->data, NULL, game_state->surface, coin->rect);
@@ -288,10 +297,10 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 	for(int i = 0; i < game_state->objects; i++){
 		struct Jdata* obj = data[ID_PLAY_OBJECT + i];
 		if(obj != NULL && game_state->obstacle[i]){
-			obj->y = game_state->display_h - obj->data->h;
-			obj->x = obj->x - (int)(game_state->game_speed * (30.0 / game_state->fps_limit));
+			set_pos_y(obj, game_state->display_h - obj->data->h, game_state);
+			set_pos_x(obj, get_pos_x(obj) - (int)(game_state->game_speed * (30.0 / game_state->fps_limit)), game_state);
 
-			obj->rect = get_rect(obj, game_state);
+			obj->rect = get_rect(obj); // TODO Rects are generated in render() calls, do we need to do this?
 
 			// Detect collision and end play state if true
 			if(check_collision(obj->rect, player->rect)){
@@ -307,8 +316,8 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 			}
 
 			// Once object is off the screen we turn it off
-			if(obj->x < -obj->data->w){
-				obj->x = game_state->display_w;
+			if(get_pos_x(obj) < -obj->data->w){
+				set_pos_x(obj, game_state->display_w, game_state);
 				game_state->obstacle[i] = 0;
 			}
 

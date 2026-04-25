@@ -9,7 +9,7 @@
 #include "main.h"
 #include "jio.h"
 
-struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char* string){  
+struct Jdata* init(int id, int type, char* name, char* path){  
 	struct Jdata* data_node = SDL_malloc(sizeof(struct Jdata));
 
     // All jdata have id, type, and name
@@ -19,16 +19,15 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 	data_node->path = path;
 
 	data_node->aux.string = NULL;
-
-    // TODO we could probably remove x and y and just use the rects to set location
-	data_node->x = x;
-	data_node->y = y;
+    data_node->data = NULL;
 
     // Only for JFONT
     data_node->text_bg = false;
 
-    // Only for JIMAGE/JANIMATION
-    data_node->rect = NULL;
+    // Allocate rect for JIMAGE/JANIMATION/JFONT
+    data_node->rect = SDL_malloc(sizeof(SDL_Rect));
+    data_node->rect->x = 0;
+    data_node->rect->y = 0;
 
 	if(type == JIMAGE || type == JANIMATION){
         // Animated JIMAGE has a directory not a .bmp
@@ -46,15 +45,13 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 
 		// Render the image
 		data_node->data = SDL_LoadBMP(_path);
-	    if(data_node->data == NULL)
+        if(data_node->data == NULL)
             error("jdata.c : Could not load bmp Error: %s", SDL_GetError());
 
 		// Apply color key
 		SDL_SetSurfaceColorKey(data_node->data, true, SDL_MapSurfaceRGB(data_node->data, 0, 0, 0));
 
 	}else if(type == JFONT){
-        data_node->aux.string = SDL_strdup(string);
-
 		// Load font .ttf
         data_node->fnt = NULL;
         set_font_size(data_node, 40);
@@ -65,12 +62,6 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 		
 		SDL_Color transparent = {0, 0, 0};
 		data_node->bgColour = transparent;
-
-		// Render font
-		if(data_node->text_bg)
-			data_node->data = TTF_RenderText_Shaded(data_node->fnt, data_node->aux.string, 0, data_node->fgColour, data_node->bgColour);
-		else
-			data_node->data = TTF_RenderText_Solid(data_node->fnt, data_node->aux.string, 0, data_node->fgColour);
 	}
 
     debug("jdata.c : [%d] %s is done loading!", id, data_node->name);
@@ -105,30 +96,81 @@ void render(struct Jdata* node){
 			node->data = TTF_RenderText_Solid(node->fnt, node->aux.string, 0, node->fgColour);
     }
 
+    get_rect(node);
+
 	assert(node->data != NULL);
 }
 
-SDL_Rect* get_rect(struct Jdata* node, Jgame* game_state){
-	SDL_Rect* rect;
+SDL_Rect* get_rect(struct Jdata* node){
+    if(node == NULL || node->rect == NULL){
+        error("jdata.c : Cannot generate rect for NULL node");
+        return NULL;
+    }
+
+	node->rect->h = node->data->h;
+	node->rect->w = node->data->w;
+	
+    return node->rect;
+}
+
+int get_pos_x(struct Jdata* node){
+    if(node == NULL || node->rect == NULL){
+        error("jdata.c : Cannot get position of node or rect of NULL");
+        return -1; // This will be seen as a valid position for the object :(
+    }
+
+    return node->rect->x;
+}
+
+int get_pos_y(struct Jdata* node){
+    if(node == NULL || node->rect == NULL){
+        error("jdata.c : Cannot get position of node or rect of NULL");
+        return -1; // This will be seen as a valid position for the object :(
+    }
+
+    return node->rect->y;
+
+}
+
+void set_position(struct Jdata* node, int x, int y, Jgame* game_state){
+    if(node->rect == NULL){
+        error("jdata.c : Node rect is NULL");
+        return;
+    }
+ 
+    node->rect->x = x;
+	node->rect->y = y;
     
-    if(node->rect == NULL)
-        rect = SDL_malloc(sizeof(SDL_Rect));
-    else
-        rect = node->rect;
+    if(node->rect->x == CENTER)
+        node->rect->x = (game_state->display_w / 2) - (node->data->w / 2);
+    if(node->rect->y == CENTER)
+        node->rect->y = (game_state->display_h / 2) - (node->data->h / 2);
 
-    rect->x = node->x;
-	rect->y = node->y;
-	
-    if(rect->x == CENTER)
-        rect->x = (game_state->display_w / 2) - (node->data->w / 2);
-    if(rect->y == CENTER)
-        rect->y = (game_state->display_h / 2) - (node->data->h / 2);
+}
 
-    assert(node->data != NULL);
-	rect->h = node->data->h;
-	rect->w = node->data->w;
-	
-    return rect;
+void set_pos_x(struct Jdata* node, int x, Jgame* game_state){
+    if(node->rect == NULL){
+        error("jdata.c : Node rect is NULL");
+        return;
+    }
+
+    node->rect->x = x;
+
+    if(node->rect->x == CENTER)
+        node->rect->x = (game_state->display_w / 2) - (node->data->w / 2);
+}
+
+void set_pos_y(struct Jdata* node, int y, Jgame* game_state){
+    if(node->rect == NULL){
+        error("jdata.c : Node rect is NULL");
+        return;
+    }
+
+    node->rect->y = y;
+    
+    if(node->rect->y == CENTER)
+        node->rect->y = (game_state->display_h / 2) - (node->data->h / 2);
+
 }
 
 void set_string(struct Jdata* node, char* str, ...){
@@ -199,7 +241,7 @@ void jdata_free(struct Jdata* node){
 	}
 
     // Free the text string
-    if(node->aux.string != NULL){
+    if(node->type == JFONT && node->aux.string != NULL){
         SDL_free(node->aux.string);
         node->aux.string = NULL;
     }
@@ -217,7 +259,7 @@ void jdata_print(struct Jdata* node){
 	debug("=====Printing Jdata node=====");
 	debug("    ID: %d", node->id);
 	debug("    TYPE: %d", node->type);
-	debug("    X, Y: %d,%d", node->x, node->y);
+	debug("    X, Y: %d,%d", node->rect->x, node->rect->y);
 	debug("    NAME: %s", node->name);
 }
 

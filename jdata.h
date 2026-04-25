@@ -63,50 +63,52 @@ struct Jdata{
 	// For all types
 	// id - unique number of data package
 	// type - enum of data type (image, font)
-	// x - the x position of top right corner
-	// y - the y posotion of top right corner
 	// name - human readible name
 	// path - path to the resource/image
-	// data - the data package, a rendered surface
 	int id;
 	int type;
-	int x;
-	int y;
 	char* name;
 	char* path;
 
+    // Shared between JANIMATION and JFONT
     union{
         char* string;
         vec2 frames; 
     }aux;
 
-	// For font types
+	// For JFONT
 	// text_bg - true/false to render background
-	// text_size - size of the font
 	// fnt - loaded font package from path
 	// fgColour - foreground text colour
 	// bgColour - background text colour
 	bool text_bg;
-
     TTF_Font* fnt;
-	
     SDL_Color fgColour;
 	SDL_Color bgColour;
+	
+    // SDL rendering data for JFONT JIMAGE JANIMATION
+    // data - the data package, a rendered surface
+    // rect - the SDL rect, define the location of the object
 	SDL_Surface* data;
     SDL_Rect* rect;
 };
 
 
-struct Jdata* init(int, int, int, int, char*, char*, char*);
+struct Jdata* init(int, int, char*, char*);
 void render(struct Jdata*);
 
 void set_string(struct Jdata*, char*, ...);
+void set_position(struct Jdata*, int, int, Jgame*);
+void set_pos_x(struct Jdata*, int, Jgame*);
+void set_pos_y(struct Jdata*, int, Jgame*);
 void set_text_bg(struct Jdata*);
 void set_fgColour(struct Jdata*, short int, short int, short int);
 void set_bgColour(struct Jdata*, short int, short int, short int);
 void set_font_size(struct Jdata*, int);
 
-SDL_Rect* get_rect(struct Jdata*, Jgame*);
+SDL_Rect* get_rect(struct Jdata*);
+int get_pos_x(struct Jdata*);
+int get_pos_y(struct Jdata*);
 
 void jdata_free(struct Jdata*);
 void jdata_print(struct Jdata*);

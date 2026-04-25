@@ -81,7 +81,7 @@ void update(Jgame* game_state){
     struct Jdata* background = game_state->data_pack[ID_DATA_BACKGROUND];
     
     if(background->rect == NULL)
-        background->rect = get_rect(background, game_state);
+        background->rect = get_rect(background);
 
     SDL_BlitSurface(background->data, NULL, game_state->surface, background->rect);
     
@@ -90,8 +90,6 @@ void update(Jgame* game_state){
     struct Jdata* node = game_state->data_pack[ID_MAINMENU+i];
     
     while(node != NULL){
-        node->rect = get_rect(node, game_state);
- 
         if(game_state->ra == (node->id-ID_MAINMENU-1)){
             set_fgColour(node, 255, 0, 0); // TODO We are setting this every frame
             render(node);
