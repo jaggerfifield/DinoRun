@@ -18,6 +18,8 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 	data_node-> name = name;
 	data_node->path = path;
 
+	data_node->aux.string = NULL;
+
     // TODO we could probably remove x and y and just use the rects to set location
 	data_node->x = x;
 	data_node->y = y;
@@ -195,11 +197,6 @@ void jdata_free(struct Jdata* node){
 		TTF_CloseFont(node->fnt);
 		node->fnt = NULL;
 	}
-	
-    if(node->name != NULL){
-        SDL_free(node->name);
-        node->name = NULL;
-    }
 
     // Free the text string
     if(node->aux.string != NULL){
