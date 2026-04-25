@@ -47,7 +47,7 @@ typedef struct Jgame{
 	// Gameplay
 	int objects;
 	int obstacle[10];
-	int platforms[10];
+	int platform[10];
 	int treasure[10];
 	int motion; // Idle, Up, Down
 	int score;
@@ -74,43 +74,38 @@ struct Jdata{
 	int y;
 	char* name;
 	char* path;
-	SDL_Surface* data;
-    SDL_Rect* rect;
 
     union{
         char* string;
         vec2 frames; 
     }aux;
 
-	// For image types
-	// frames - the number of frames used for animation
-	//int frames;
-    //int current_frame;
-
 	// For font types
-	// string - the font string to render
 	// text_bg - true/false to render background
-	// text_size - size of the text
+	// text_size - size of the font
 	// fnt - loaded font package from path
 	// fgColour - foreground text colour
 	// bgColour - background text colour
-	//char* string;
 	bool text_bg;
-	unsigned short int text_size;
-	TTF_Font* fnt;
-	SDL_Color fgColour;
+	size_t string_len;
+
+    TTF_Font* fnt;
+	
+    SDL_Color fgColour;
 	SDL_Color bgColour;
+	SDL_Surface* data;
+    SDL_Rect* rect;
 };
 
 
 struct Jdata* init(int, int, int, int, char*, char*, char*);
 void render(struct Jdata*);
 
-void set_string(struct Jdata*, char*);
+void set_string(struct Jdata*, char*, ...);
 void set_text_bg(struct Jdata*);
 void set_fgColour(struct Jdata*, short int, short int, short int);
 void set_bgColour(struct Jdata*, short int, short int, short int);
-void set_text_size(struct Jdata*, unsigned short int);
+void set_font_size(struct Jdata*, int);
 
 SDL_Rect* get_rect(struct Jdata*, Jgame*);
 

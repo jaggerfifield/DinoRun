@@ -36,14 +36,14 @@ void settings_state(Jgame* game_state){
     struct Jdata** DTA = game_state->data_pack;
 
     // Load current volume level
-    sprintf(DTA[ID_SETTINGS_VOLUME]->aux.string, "<  Volume %.3d%%  >", game_state->volume);
+    set_string(DTA[ID_SETTINGS_VOLUME], "<  Volume %.3d%%  >", game_state->volume);
     render(DTA[ID_SETTINGS_VOLUME]);
     
     // Load current display
     update_display(game_state, DTA);
 
     // Load current resolution
-    sprintf(DTA[ID_SETTINGS_RESOLUTION]->aux.string, "<  Resolution: %d x %d  >", game_state->display_w, game_state->display_h);
+    set_string(DTA[ID_SETTINGS_RESOLUTION], "<  Resolution %d x %d  >", game_state->display_w, game_state->display_h);
     render(DTA[ID_SETTINGS_RESOLUTION]);
 
 	// Load current fullscreen state
@@ -51,8 +51,8 @@ void settings_state(Jgame* game_state){
     
     // Load current vsync state
     update_vsync(game_state, DTA);
-
-    sprintf(DTA[ID_SETTINGS_FPSLIMIT]->aux.string, "<  FPS Limit: %d  >", game_state->fps_limit);
+    
+    set_string(DTA[ID_SETTINGS_FPSLIMIT], "<  FPS Limit %d  >", game_state->fps_limit);
 
 	while(!game_state->quit && !go_back){
 		while(SDL_PollEvent(&e) != 0){
@@ -155,7 +155,7 @@ static void update(Jgame* game_state, struct Jdata** data){
 					// Turn volume down
                     if(game_state->volume > 0){
 					    game_state->volume -= 1;
-					    sprintf(node->aux.string, "<  Volume %.3d%%  >", game_state->volume);
+                        set_string(node, "<  Volume %.3d%%  >", game_state->volume);
                     }
 				}else if((node->id == ID_SETTINGS_DISPLAY) && (game_state->ra == location)){
                     // Swap selected monitor
@@ -172,7 +172,7 @@ static void update(Jgame* game_state, struct Jdata** data){
                     update_vsync(game_state, data);
                 }else if((node->id == ID_SETTINGS_FPSLIMIT) && (game_state->ra == location)){
                     if(game_state->fps_limit > 30){
-                        sprintf(node->aux.string, "<  FPS Limit: %d  >", game_state->fps_limit /2);
+                        set_string(node, "<  FPS Limit %d  >", game_state->fps_limit/2);
                         game_state->fps_limit = game_state->fps_limit / 2;
                     }
                 }
@@ -182,7 +182,7 @@ static void update(Jgame* game_state, struct Jdata** data){
                     // Turn Volume up
                     if(game_state->volume < 100){
 					    game_state->volume += 1;
-					    sprintf(node->aux.string, "<  Volume %.3d%%  >", game_state->volume);
+                        set_string(node, "<  Volume %.3d%%  >", game_state->volume);
                     }
 				}else if((node->id == ID_SETTINGS_DISPLAY) && (game_state->ra == location)){
                     // Change displays
@@ -202,7 +202,7 @@ static void update(Jgame* game_state, struct Jdata** data){
                     update_vsync(game_state, data);
                 }else if((node->id == ID_SETTINGS_FPSLIMIT) && (game_state->ra == location)){
                     if(game_state->fps_limit < 120){
-                        sprintf(node->aux.string, "<  FPS Limit: %d  >", game_state->fps_limit*2);
+                        set_string(node, "<  FPS Limit %d  >", game_state->fps_limit*2);
                         game_state->fps_limit = game_state->fps_limit * 2;
                     }
                 }
@@ -226,24 +226,24 @@ void update_display(Jgame* game_state, struct Jdata** DTA){
     if(name == NULL)
         error("settings.c : SDL could not get display name! Error: %s", SDL_GetError());
     else
-        sprintf(DTA[ID_SETTINGS_DISPLAY]->aux.string, "<  Display: %s  > *", name);
+        set_string(DTA[ID_SETTINGS_DISPLAY], "<  Display: %s  > *", name);
     render(DTA[ID_SETTINGS_DISPLAY]); 
 }
 
 void update_fullscreen(Jgame* game_state, struct Jdata** DTA){
 	if(game_state->is_fullscreen)
-		memcpy(DTA[ID_SETTINGS_FULLSCREEN]->aux.string, "<  Fullscreen: True  > *\0", 25);
+		set_string(DTA[ID_SETTINGS_FULLSCREEN], "<  Fullscreen: True  > *");
 	else
-		memcpy(DTA[ID_SETTINGS_FULLSCREEN]->aux.string, "<  Fullscreen: False  > *\0", 26);
+		set_string(DTA[ID_SETTINGS_FULLSCREEN], "<  Fullscreen: False  > *");
 	render(DTA[ID_SETTINGS_FULLSCREEN]);
 	
 }
 
 void update_vsync(Jgame* game_state, struct Jdata** DTA){
     if(game_state->is_vsync)
-        memcpy(DTA[ID_SETTINGS_VSYNC]->aux.string, "<  VSync: True  > *\0", 20);
+        set_string(DTA[ID_SETTINGS_VSYNC], "<  VSync: True  > *");
     else
-        memcpy(DTA[ID_SETTINGS_VSYNC]->aux.string, "<  VSync: False  > *\0", 21);
+        set_string(DTA[ID_SETTINGS_VSYNC], "<  VSync: False  > *");
     render(DTA[ID_SETTINGS_VSYNC]);
 }
 

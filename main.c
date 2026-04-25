@@ -93,8 +93,8 @@ int main(int argc, char* argv[]){
 
     // Save gamestate for next launch
     char data[256];
-    memset(data, '\0', 256);
-    sprintf(data, "display,resoultion,volume\n%d\n%d\n%d", game_state->monitor, -1, game_state->volume);
+    SDL_memset(data, '\0', 256);
+    SDL_snprintf(data, 256, "display,resoultion,volume\n%d\n%d\n%d", game_state->monitor, -1, game_state->volume);
 
     FILE* out = jaccess("./game_state", "w+");
     

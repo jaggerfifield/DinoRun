@@ -30,7 +30,7 @@ void story_state(Jgame* game_state){
 	// Enable background render on debug layer
 	set_text_bg(DTA[ID_PLAY_DEBUG]);
 	set_bgColour(DTA[ID_PLAY_DEBUG], 190, 190, 190);
-	set_text_size(DTA[ID_PLAY_DEBUG], 10);
+	set_font_size(DTA[ID_PLAY_DEBUG], 10);
 
 	int next_time = SDL_GetTicks() + 5;
 
@@ -113,14 +113,8 @@ static void update(Jgame* game_state, struct Jdata** data){
 
 		if(avgFPS > 2000000)
 			avgFPS = 0;
-
-        char str[32];
-        memset(str, '\0', 32);
-
-		// Update string
-		sprintf(str, "FPS: %f", avgFPS);
 		
-		debug->aux.string = str;
+        set_string(debug, "FPS: %.3f", avgFPS);
 		render(debug);
 			
 		debug->rect = get_rect(debug, game_state);

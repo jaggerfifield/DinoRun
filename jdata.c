@@ -21,20 +21,9 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
     // TODO we could probably remove x and y and just use the rects to set location
 	data_node->x = x;
 	data_node->y = y;
-	
-    // String is only set for JFONT TODO we need a set_string(node, string) function?
-    //if(string != NULL)
-	//    data_node->string = SDL_strdup(string);
-    //else
-    //   data_node->string = NULL;
 
     // Only for JFONT
     data_node->text_bg = false;
-	data_node->text_size = 40;
-
-    // Only for JANIMATION
-    //data_node->frames = 0;
-    //data_node->current_frame = 0;
 
     // Only for JIMAGE/JANIMATION
     data_node->rect = NULL;
@@ -63,10 +52,11 @@ struct Jdata* init(int id, int type, int x, int y, char* name, char* path, char*
 
 	}else if(type == JFONT){
         data_node->aux.string = SDL_strdup(string);
+        data_node->string_len = SDL_strlen(string);
 
 		// Load font .ttf
-		data_node->fnt = TTF_OpenFont(path, data_node->text_size);
-        assert(data_node->fnt != NULL);
+        data_node->fnt = NULL;
+        set_font_size(data_node, 40);
 
 		// Make font color black
 		SDL_Color colour = {0, 0, 0};
@@ -140,15 +130,23 @@ SDL_Rect* get_rect(struct Jdata* node, Jgame* game_state){
     return rect;
 }
 
-void set_string(struct Jdata* node, char* str){
-    if(node->aux.string == NULL || (SDL_strlen(node->aux.string) < SDL_strlen(str))){
-        debug("jdata.c : String Alloc [%ld] -> [%ld]", SDL_strlen(node->aux.string), SDL_strlen(str));
-        if(node->aux.string != NULL)
-            SDL_free(node->aux.string);
-        node->aux.string = SDL_strdup(str);
-    }else{
-        SDL_strlcpy(node->aux.string, str, SDL_strlen(str)+1);
-    }
+void set_string(struct Jdata* node, char* str, ...){
+    va_list va_args;
+    va_start(va_args, str);
+
+    if(SDL_strlen(str) > 64)
+        warn("jdata.c : String is larger than 64!");
+
+    char text[64];
+    SDL_vsnprintf(text, 63, str, va_args);
+    size_t max_l = SDL_strlen(text) + 1;
+
+    if(node->aux.string == NULL)
+        node->aux.string = SDL_strdup(text);
+    else
+        SDL_vsnprintf(node->aux.string, max_l, str, va_args);
+    
+    va_end(va_args);
 }
 
 void set_fgColour(struct Jdata* node, short int r, short int g, short int b){
@@ -165,15 +163,21 @@ void set_text_bg(struct Jdata* node){
 	node->text_bg = !node->text_bg;
 }
 
-void set_text_size(struct Jdata* node, unsigned short int size){
-	node->text_size = size;
-	
+void set_font_size(struct Jdata* node, int size){
+	if(node-> type != JFONT){
+        warn("jdata.c : Dont set font size on a non-font node!");
+        return;
+    }
+
 	if(node->fnt != NULL){
 		TTF_CloseFont(node->fnt);
         node->fnt = NULL;
     }
 	
-	node->fnt = TTF_OpenFont(node->path, node->text_size);
+	node->fnt = TTF_OpenFont(node->path, size);
+    
+    if(node->fnt == NULL)
+        error("jdata.c : Could not set font size, %s", SDL_GetError());
 }
 
 void jdata_free(struct Jdata* node){

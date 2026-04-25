@@ -29,6 +29,12 @@ void play_state(Jgame* game_state){
     game_state->coins = 0;
     game_state->coin_get = true; 
 
+    for(int i = 0; i < 10; i++){
+        game_state->obstacle[i] = 0;
+        game_state->platform[i] = 0;
+        game_state->treasure[i] = 0;
+    }
+
 	// TODO this is a temp key map, this nees to be set elsewhere!
 	game_state->jump1 = SDLK_UP;
     game_state->game_speed = 20; // Speed multiplier TODO
@@ -40,7 +46,7 @@ void play_state(Jgame* game_state){
 	// Enable background render on debug layer
 	set_text_bg(DTA[ID_PLAY_DEBUG]);
 	set_bgColour(DTA[ID_PLAY_DEBUG], 190, 190, 190);
-	set_text_size(DTA[ID_PLAY_DEBUG], 10);
+	set_font_size(DTA[ID_PLAY_DEBUG], 10);
 
 	// Set object positions
     DTA[ID_PLAY_COINS]->y = DTA[ID_PLAY_SCORE]->data->h+10;
@@ -55,6 +61,10 @@ void play_state(Jgame* game_state){
     DTA[ID_PLAY_COIN]->x = game_state->display_w;
 
 	game_state->jump_height = game_state->display_h - DTA[ID_PLAY_PLAYER]->data->h - 280;
+	
+    set_string(DTA[ID_PLAY_HISCORE], "High Score: %d", game_state->hiscore);
+    render(DTA[ID_PLAY_HISCORE]);
+	DTA[ID_PLAY_HISCORE]->x = game_state->display_w - DTA[ID_PLAY_HISCORE]->data->w;
 
 	// Apply a seed for random
 	srand(time(NULL));
@@ -137,23 +147,23 @@ static void _update(Jgame* game_state, struct Jdata** data){
 
 		// Update score count here.
 		game_state->score += game_state->point_mult;
-		sprintf(score->aux.string, "SCORE: %d", game_state->score);
+		set_string(score, "SCORE: %d", game_state->score);
 		render(score);
 
         // Update coin count
         if(game_state->coin_get){
-            sprintf(coin_t->aux.string, "COINS: %d", game_state->coins);
+            set_string(coin_t, "COINS: %d", game_state->coins);
             render(coin_t);
             game_state->coin_get = false;
         }
 
 		// Update HiScore here
-		if(game_state->score > game_state->hiscore)
+		if(game_state->score > game_state->hiscore){
 			game_state->hiscore = game_state->score;
-		sprintf(hiscore->aux.string, "High Score: %d", game_state->hiscore);
-		render(hiscore);
-		hiscore->x = game_state->display_w - hiscore->data->w;
-
+		    set_string(hiscore, "High Score: %d", game_state->hiscore);
+		    render(hiscore);
+		    hiscore->x = game_state->display_w - hiscore->data->w;
+        }
 		// Apply jump physics (up/down movement)
 
 		switch(game_state->motion){
@@ -199,7 +209,7 @@ static void _update(Jgame* game_state, struct Jdata** data){
 			double avgFPS = 1000000000.0 / (double)game_state->render_tick;
 
 			// Update string
-			sprintf(debug->aux.string, "FPS: %0.2f S: %d M: %d", avgFPS, game_state->game_speed, game_state->point_mult);
+			set_string(debug, "FPS: %0.2f S: %d M: %d", avgFPS, game_state->game_speed, game_state->point_mult);
 			render(debug);
 			
             if(debug->rect == NULL)
@@ -324,7 +334,7 @@ void read_score(Jgame* game_state){
 	FILE* f = jaccess("score", "r");
 	jread(f, value, 8);
 	fclose(f);
-	sscanf(value, "%d", &game_state->hiscore);
+	SDL_sscanf(value, "%d", &game_state->hiscore);
 	
 	debug("Read score to be: %d", game_state->hiscore);
 }
@@ -333,7 +343,7 @@ void write_score(Jgame* game_state){
 	FILE* f = jaccess("score", "w");
 	char content[64];
 	
-	sprintf(content, "%d\n", game_state->score);
+	SDL_snprintf(content, 64, "%d\n", game_state->score);
 	jwrite(f, content);
 	fclose(f);
 
