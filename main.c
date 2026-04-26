@@ -25,7 +25,7 @@ int main(int argc, char* argv[]){
     init_files();
  
     // Init SDL systems
-    if(!SDL_Init(SDL_INIT_VIDEO)){
+    if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)){
     	error("main.c : SDL cound not init! Error: %s", SDL_GetError());
         return 0;
     }
@@ -45,6 +45,31 @@ int main(int argc, char* argv[]){
     game_state->fps_limit = 60;
     game_state->is_fullscreen = false;
 
+    SDL_AudioSpec spec;
+
+    spec.format = SDL_AUDIO_S16LE;
+    spec.channels = 2;
+    spec.freq = 44100;
+
+    game_state->audio_stream = SDL_CreateAudioStream(&spec, &spec);
+    game_state->music_stream = SDL_CreateAudioStream(&spec, &spec);
+
+    if(game_state->audio_stream == NULL)
+        error("main.c : Could not create audio steam! [%s]", SDL_GetError());
+    if(game_state->music_stream == NULL)
+        error("main.c : Could not create audio steam! [%s]", SDL_GetError());
+
+    SDL_AudioDeviceID my_device = SDL_OpenAudioDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec);
+
+    if(my_device == 0)
+        error("main.c : could not open audio device! [%s]", SDL_GetError());
+
+    if(!SDL_BindAudioStream(my_device, game_state->audio_stream))
+        error("main.c : could not bind audio stream! [%s]", SDL_GetError());
+
+    if(!SDL_BindAudioStream(my_device, game_state->music_stream))
+        error("main.c : could not bind audio stream! [%s]", SDL_GetError());
+    
     // Determine the number of displayes
     game_state->display_id = SDL_GetDisplays(&game_state->n_displays);
 

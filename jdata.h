@@ -14,6 +14,8 @@ typedef struct Jgame{
     SDL_Window* window;
     SDL_Renderer* renderer;
     SDL_Surface* surface;
+    SDL_AudioStream* audio_stream; // A sound stream to play audio events
+    SDL_AudioStream* music_stream; // A sound stream to play music
     int display_w;
     int display_h;
     SDL_DisplayID* display_id; // A list of all displays 
@@ -89,13 +91,22 @@ struct Jdata{
     // SDL rendering data for JFONT JIMAGE JANIMATION
     // data - the data package, a rendered surface
     // rect - the SDL rect, define the location of the object
-	SDL_Surface* data;
-    SDL_Rect* rect;
+    union{
+	    SDL_Surface* data;
+        unsigned char* buffer;
+    }data;
+
+    union{
+        SDL_Rect* rect;
+        unsigned int length;
+    }pram;
 };
 
 
 struct Jdata* init(int, int, char*, char*);
 void render(struct Jdata*);
+void play_sound(struct Jdata*, SDL_AudioStream*);
+void stop_sound(SDL_AudioStream*);
 
 void set_string(struct Jdata*, char*, ...);
 void set_position(struct Jdata*, int, int, Jgame*);
@@ -109,6 +120,8 @@ void set_font_size(struct Jdata*, int);
 SDL_Rect* get_rect(struct Jdata*);
 int get_pos_x(struct Jdata*);
 int get_pos_y(struct Jdata*);
+SDL_Surface* get_data(struct Jdata*);
+SDL_Rect* get_rekt(struct Jdata*);
 
 void jdata_free(struct Jdata*);
 void jdata_print(struct Jdata*);

@@ -59,6 +59,7 @@ void menu_state(Jgame* game_state){
                     case 3:
                         // quit the game
 					    game_state->quit = true;
+                        stop_sound(game_state->audio_stream);
 			            break;
                 }
 		    }
@@ -80,10 +81,10 @@ void update(Jgame* game_state){
  
     struct Jdata* background = game_state->data_pack[ID_DATA_BACKGROUND];
     
-    if(background->rect == NULL)
-        background->rect = get_rect(background);
+    if(background->pram.rect == NULL)
+        background->pram.rect = get_rect(background);
 
-    SDL_BlitSurface(background->data, NULL, game_state->surface, background->rect);
+    SDL_BlitSurface(background->data.data, NULL, game_state->surface, background->pram.rect);
     
     int i = 1;
 
@@ -98,7 +99,7 @@ void update(Jgame* game_state){
             render(node);
         }
 
-        SDL_BlitSurface(node->data, NULL, game_state->surface, node->rect);
+        SDL_BlitSurface(node->data.data, NULL, game_state->surface, node->pram.rect);
         
         node = game_state->data_pack[ID_MAINMENU+(i++)];
     }
@@ -110,6 +111,8 @@ void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
 
 	int key = e.key;
 	
+    play_sound(game_state->data_pack[ID_SOUND_MENU], game_state->audio_stream);
+
 	if(key == SDLK_UP){
 		game_state->ra -= 1;
 

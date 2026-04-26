@@ -110,6 +110,8 @@ void settings_state(Jgame* game_state){
 static void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
 	
 	int key = e.key;
+
+    play_sound(game_state->data_pack[ID_SOUND_MENU], game_state->audio_stream);
 	
 	if(key == SDLK_UP){
 		game_state->ra -= 1;
@@ -131,7 +133,7 @@ static void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
 static void update(Jgame* game_state, struct Jdata** data){
 
     struct Jdata* bg = game_state->data_pack[ID_DATA_BACKGROUND];
-    SDL_BlitSurface(bg->data, NULL, game_state->surface, bg->rect);
+    SDL_BlitSurface(bg->data.data, NULL, game_state->surface, bg->pram.rect);
 
     int i = ID_SETTINGS+1;
 	
@@ -139,7 +141,7 @@ static void update(Jgame* game_state, struct Jdata** data){
 		struct Jdata* node = data[i];
         int location = node->id-ID_SETTINGS-1;
 
-		node->rect = get_rect(node); // TODO rect is generated in render(), do we need this?
+		node->pram.rect = get_rect(node); // TODO rect is generated in render(), do we need this?
 
 		if(node->type == JFONT){
 			if(game_state->ra == location){
@@ -209,9 +211,10 @@ static void update(Jgame* game_state, struct Jdata** data){
 			}
 
 		    render(node); // TODO : add update flag to node to check if it needs to be rendered!
+            set_pos_x(node, -1, game_state);
         }
 
-		SDL_BlitSurface(node->data, NULL, game_state->surface, node->rect);
+		SDL_BlitSurface(node->data.data, NULL, game_state->surface, node->pram.rect);
 	    i++;
     }
 

@@ -18,7 +18,7 @@ void loader(Jgame* game_state){
     debug("data.c : splash data loading");
     data_pack[ID_DATA_SPLASH] = build(ID_DATA_SPLASH, JIMAGE, -1, -1, "Splash Icon", "Assets/splash.bmp", NULL, game_state);
     
-    SDL_BlitSurface(data_pack[ID_DATA_SPLASH]->data, NULL, game_state->surface, get_rect(data_pack[ID_DATA_SPLASH]));
+    SDL_BlitSurface(data_pack[ID_DATA_SPLASH]->data.data, NULL, game_state->surface, get_rect(data_pack[ID_DATA_SPLASH]));
     SDL_UpdateWindowSurface(game_state->window);
 
     data_pack[ID_DATA_BACKGROUND] = build(ID_DATA_BACKGROUND, JIMAGE, 0, 0, "Background texture", "Assets/bg_fill.bmp", NULL, game_state);
@@ -68,6 +68,13 @@ void loader(Jgame* game_state){
     data_pack[ID_SETTINGS_FPSLIMIT] = build(ID_SETTINGS_FPSLIMIT, JFONT, CENTER, 700, "FPS Limit", "Assets/font.ttf", "<  FPS Limit:  >", game_state);
     data_pack[ID_SETTINGS_BACK] = build(ID_SETTINGS_BACK, JFONT, CENTER, 800, "Back", "Assets/font.ttf", "Back", game_state);
     
+    // Sounds
+    info("data.c : Loading sound data . . .");
+    data_pack[ID_SOUND] = NULL;
+    data_pack[ID_SOUND_JUMP] = init(ID_SOUND_JUMP, JSOUND, "Jumping sound", "Assets/sounds/jump.wav");
+    data_pack[ID_SOUND_MENU] = init(ID_SOUND_MENU, JSOUND, "Menu sound", "Assets/sounds/menu.wav");
+    data_pack[ID_SOUND_MUSIC] = init(ID_SOUND_MUSIC, JSOUND, "Background Music", "Assets/sounds/bg_music.wav");
+
     data_pack[ID_DATA_END] = NULL;
 
     game_state->data_pack = data_pack;
