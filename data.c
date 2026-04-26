@@ -12,7 +12,7 @@ struct Jdata* build(int, int, int, int, char*, char*, char*, Jgame*);
 
 void loader(Jgame* game_state){
 	info("data.c : Loading assets . . .");
-    struct Jdata** data_pack = SDL_malloc(sizeof(struct Jdata*) * ID_DATA_END);
+    struct Jdata** data_pack = SDL_malloc(sizeof(struct Jdata*) * (ID_DATA_END+1));
 
     // Splash Screen
     debug("data.c : splash data loading");
@@ -99,5 +99,6 @@ void free_data(Jgame* game_state){
 		game_state->data_pack[i] = NULL;
     }
     
+	SDL_free(game_state->data_pack);
 	game_state->data_pack = NULL;
 }

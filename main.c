@@ -44,6 +44,7 @@ int main(int argc, char* argv[]){
     game_state->is_vsync = false;
     game_state->fps_limit = 60;
     game_state->is_fullscreen = false;
+	game_state->quit = false;
 
     SDL_AudioSpec spec;
 

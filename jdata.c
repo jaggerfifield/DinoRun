@@ -25,9 +25,11 @@ struct Jdata* init(int id, int type, char* name, char* path){
     data_node->text_bg = false;
 
     // Allocate rect for JIMAGE/JANIMATION/JFONT
-    data_node->pram.rect = SDL_malloc(sizeof(SDL_Rect));
-    data_node->pram.rect->x = 0;
-    data_node->pram.rect->y = 0;
+	if(data_node->type != JSOUND){
+    	data_node->pram.rect = SDL_malloc(sizeof(SDL_Rect));
+    	data_node->pram.rect->x = 0;
+    	data_node->pram.rect->y = 0;
+	}
 
 	if(type == JIMAGE || type == JANIMATION){
         // Animated JIMAGE has a directory not a .bmp
@@ -223,14 +225,10 @@ void set_string(struct Jdata* node, char* str, ...){
     if(SDL_strlen(str) > 64)
         warn("jdata.c : String is larger than 64!");
 
-    char text[64];
-    SDL_vsnprintf(text, 63, str, va_args);
-    size_t max_l = SDL_strlen(text) + 1;
-
     if(node->aux.string == NULL)
-        node->aux.string = SDL_strdup(text);
-    else
-        SDL_vsnprintf(node->aux.string, max_l, str, va_args);
+        node->aux.string = SDL_malloc(64);
+
+	SDL_vsnprintf(node->aux.string, 64, str, va_args);
     
     va_end(va_args);
 }
