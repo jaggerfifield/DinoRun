@@ -32,7 +32,7 @@ WDIR := $(shell pwd)
 
 NAME := game
 
-DEP := jtime.o play.o story.o gameover.o menu.o settings.o jdata.o jio.o data.o main.o
+DEP := play.o story.o gameover.o menu.o settings.o jdata.o jio.o data.o main.o
 
 all : $(RESO) $(OS) $(DEP)
 	@echo =====Working Directory=====
@@ -49,11 +49,6 @@ all : $(RESO) $(OS) $(DEP)
 	cp -r Assets bin/$(OS)/
 	$(COPY1)
 	$(COPY2)
-	@echo
-
-jtime.o : jtime.c
-	@echo =====Compile jtime.c=====
-	gcc $(IPATH) $(DEF) -Wall -g -c jtime.c
 	@echo
 
 play.o : play.c

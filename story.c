@@ -4,7 +4,6 @@
 #include <time.h>
 
 #include "main.h"
-#include "jtime.h"
 #include "jio.h"
 
 // TODO: movement struct, remove the global varialbes.
@@ -15,15 +14,12 @@ static bool right = false;
 
 static bool debug_overlay = false;
 static unsigned int frameCount = 0;
-static struct Jtimer* fpsTimer;
 
 static void update(Jgame*, struct Jdata**);
 static void handle_keys(SDL_KeyboardEvent);
 static void handle_keyup(SDL_KeyboardEvent);
 
 void story_state(Jgame* game_state){
-
-	fpsTimer = timer_init();
 
 	struct Jdata** DTA = game_state->data_pack;
 
@@ -41,7 +37,6 @@ void story_state(Jgame* game_state){
 	SDL_Event e;
 
 	// Start fps timer
-	timer_start(fpsTimer);
 	frameCount = 0;
 
 	bool quit = false;
@@ -66,7 +61,6 @@ void story_state(Jgame* game_state){
 		}
 	}
 	
-	timer_free(fpsTimer);
 }
 
 static void update(Jgame* game_state, struct Jdata** data){
@@ -109,7 +103,7 @@ static void update(Jgame* game_state, struct Jdata** data){
 		
 	// Blit debug overlay if enabled
 	if(debug_overlay){
-		float avgFPS = frameCount / (timer_getTicks(fpsTimer) / 1000.f);
+		float avgFPS = frameCount / (0 / 1000.f);
 
 		if(avgFPS > 2000000)
 			avgFPS = 0;

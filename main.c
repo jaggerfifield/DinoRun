@@ -7,7 +7,6 @@
 
 #include "jio.h"
 #include "jdata.h"
-#include "jtime.h"
 #include "data.h"
 #include "menu.h"
 

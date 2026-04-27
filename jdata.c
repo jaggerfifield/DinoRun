@@ -33,20 +33,18 @@ struct Jdata* init(int id, int type, char* name, char* path){
 
 	if(type == JIMAGE || type == JANIMATION){
         // Animated JIMAGE has a directory not a .bmp
-        char _path[128];
-        memset(_path, '\0', 128);
-
         if(type == JANIMATION){
+            char* _path = NULL;
             data_node->aux.frames.x = f_count(path);
             data_node->aux.frames.y = 0;
             // Load the first image
-            sprintf(_path, "%s%04d.bmp", path, data_node->aux.frames.y);
+            SDL_asprintf(&_path, "%s%04d.bmp", path, data_node->aux.frames.y);
+		    data_node->data.data = SDL_LoadBMP(_path);
         }else{
-            sprintf(_path, "%s", path);
+            // Render the image
+		    data_node->data.data = SDL_LoadBMP(path);
         }
 
-		// Render the image
-		data_node->data.data = SDL_LoadBMP(_path);
         if(data_node->data.data == NULL)
             error("jdata.c : Could not load bmp Error: %s", SDL_GetError());
 
@@ -93,10 +91,9 @@ void render(struct Jdata* node){
 		SDL_SetSurfaceColorKey(node->data.data, true, SDL_MapSurfaceRGB(node->data.data, 0, 0, 0));
 	
     }else if(node->type == JANIMATION){
-        char _path[128];
-        memset(_path, '\0', 128);
+        char* _path = NULL;
         node->aux.frames.y = (node->aux.frames.y+1)%node->aux.frames.x;
-        sprintf(_path, "%s%04d.bmp", node->path, node->aux.frames.y);
+        SDL_asprintf(&_path, "%s%04d.bmp", node->path, node->aux.frames.y);
         node->data.data = SDL_LoadBMP(_path);
 		SDL_SetSurfaceColorKey(node->data.data, true, SDL_MapSurfaceRGB(node->data.data, 0, 0, 0));
     
@@ -225,8 +222,9 @@ void set_string(struct Jdata* node, char* str, ...){
     if(SDL_strlen(str) > 64)
         warn("jdata.c : String is larger than 64!");
 
-    if(node->aux.string == NULL)
+    if(node->aux.string == NULL){
         node->aux.string = SDL_malloc(64);
+    }
 
 	SDL_vsnprintf(node->aux.string, 64, str, va_args);
     

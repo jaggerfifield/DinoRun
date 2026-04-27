@@ -22,6 +22,7 @@ enum {IDLE, UP, DOWN};
 
 // ===== game_state registers =====
 // ra --> is the music playing?
+// rb --> Current area we are playing
 
 void play_state(Jgame* game_state){
 	game_state->score = 1;
@@ -54,13 +55,8 @@ void play_state(Jgame* game_state){
 	set_font_size(DTA[ID_PLAY_DEBUG], 10);
 
 	// Set object positions
-    //DTA[ID_PLAY_COINS]->y = DTA[ID_PLAY_SCORE]->data->h+10;
     set_pos_y(DTA[ID_PLAY_COINS], get_data(DTA[ID_PLAY_SCORE])->h+10, game_state);
     
-    //DTA[ID_PLAY_OBJECT]->x = game_state->display_w;
-    //DTA[ID_PLAY_OBJECT2]->x = game_state->display_w;
-    //DTA[ID_PLAY_OBJECT3]->x = game_state->display_w;
-    //DTA[ID_PLAY_OBJECT4]->x = game_state->display_w;
     int disp_w = game_state->display_w;
     set_pos_x(DTA[ID_PLAY_OBJECT], disp_w, game_state);
     set_pos_x(DTA[ID_PLAY_OBJECT2], disp_w, game_state);
@@ -328,8 +324,8 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 
 			// Once object is off the screen we turn it off
 			if(get_pos_x(obj) < -obj->data.data->w){
-				set_pos_x(obj, game_state->display_w, game_state);
 				game_state->obstacle[i] = 0;
+				set_pos_x(obj, game_state->display_w, game_state);
 			}
 
 			SDL_BlitSurface(obj->data.data, NULL, game_state->surface, obj->pram.rect);
