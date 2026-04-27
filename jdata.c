@@ -40,6 +40,7 @@ struct Jdata* init(int id, int type, char* name, char* path){
             // Load the first image
             SDL_asprintf(&_path, "%s%04d.bmp", path, data_node->aux.frames.y);
 		    data_node->data.data = SDL_LoadBMP(_path);
+            SDL_free(_path);
         }else{
             // Render the image
 		    data_node->data.data = SDL_LoadBMP(path);
@@ -95,7 +96,8 @@ void render(struct Jdata* node){
         node->aux.frames.y = (node->aux.frames.y+1)%node->aux.frames.x;
         SDL_asprintf(&_path, "%s%04d.bmp", node->path, node->aux.frames.y);
         node->data.data = SDL_LoadBMP(_path);
-		SDL_SetSurfaceColorKey(node->data.data, true, SDL_MapSurfaceRGB(node->data.data, 0, 0, 0));
+	    SDL_free(_path);
+        SDL_SetSurfaceColorKey(node->data.data, true, SDL_MapSurfaceRGB(node->data.data, 0, 0, 0));
     
     }else if(node->type == JFONT){
 		assert(node->fnt != NULL);
