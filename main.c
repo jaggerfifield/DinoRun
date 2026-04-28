@@ -39,7 +39,8 @@ int main(int argc, char* argv[]){
 	game_state->data_pack = NULL;
 
     game_state->monitor = 0; // TODO we need to store and remember the last monitor used
-    game_state->volume = 50; // TODO this need to be stored too
+    game_state->volume = 100; // TODO this need to be stored too
+    game_state->music_volume = 100; 
     game_state->is_vsync = false;
     game_state->fps_limit = 60;
     game_state->is_fullscreen = false;

@@ -104,13 +104,27 @@ void settings_state(Jgame* game_state){
                                 case 0 :
                                     // Switch pages
                                     game_state->rb = PAGE_3; // TODO if we add more pages this needs to change!
-                                    break ;
+                                    break;
 
                                 case 1:
+                                    // Change Audio device
+                                    break;
+
+                                case 2:
                                     // Adjust Volume
                                     if(game_state->volume > 0)
                                         game_state->volume -= 1;
+                                    if(!SDL_SetAudioStreamGain(game_state->audio_stream, (float)game_state->volume / 100.00))
+                                        error("settings.c : Could not set audio stream gain [%s]", SDL_GetError());
+                                    play_sound(game_state->data_pack[ID_SOUND_JUMP], game_state->audio_stream);
                                     break;
+
+                                case 3:
+                                    // Adjust music volume
+                                    if(game_state->music_volume > 0)
+                                        game_state->music_volume -= 1;
+                                    if(!SDL_SetAudioStreamGain(game_state->music_stream, (float)game_state->music_volume / 100.00))
+                                        error("settings.c : Could not set audio stream gain [%s]", SDL_GetError());
                             }
                             break;
 
@@ -174,9 +188,24 @@ void settings_state(Jgame* game_state){
                                     break;
 
                                 case 1:
+                                    // Change Audio Device
+                                    break;
+
+                                case 2:
                                     // Adjust volume
-                                    if(game_state->volume < 100)
+                                    if(game_state->volume < 200)
                                         game_state->volume += 1;
+                                    if(!SDL_SetAudioStreamGain(game_state->audio_stream, (float)game_state->volume / 100.00))
+                                        error("settings.c : Could not set audio stream gain [%s]", SDL_GetError());
+                                    play_sound(game_state->data_pack[ID_SOUND_JUMP], game_state->audio_stream);
+                                    break;
+
+                                case 3:
+                                    // Adjust music volume
+                                    if(game_state->music_volume < 200)
+                                        game_state->music_volume += 1;
+                                    if(!SDL_SetAudioStreamGain(game_state->music_stream, (float)game_state->music_volume / 100.00))
+                                        error("settings.c : Could not set audio stream gain [%s]", SDL_GetError());
                                     break;
                             }
                             break;
@@ -244,9 +273,9 @@ void load_page(Jgame* game_state){
     switch(game_state->rb){
         
         case PAGE_1:
-            set_string(game_state->data_pack[ID_SETTINGS_1], "<  Volume %.3d%%  >", game_state->volume);
-            set_string(game_state->data_pack[ID_SETTINGS_2], "<    >");
-            set_string(game_state->data_pack[ID_SETTINGS_3], "<    >");
+            set_string(game_state->data_pack[ID_SETTINGS_1], "<  Audio Device  >");
+            set_string(game_state->data_pack[ID_SETTINGS_2], "<  Volume %.3d%%  >", game_state->volume);
+            set_string(game_state->data_pack[ID_SETTINGS_3], "<  Music %.3d%%  >", game_state->music_volume);
             set_string(game_state->data_pack[ID_SETTINGS_4], "<    >");
             set_string(game_state->data_pack[ID_SETTINGS_5], "<    >");
             break;

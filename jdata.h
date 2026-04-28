@@ -26,6 +26,7 @@ typedef struct Jgame{
 	// Settings
     int monitor; // The monitor we are using
     int volume; // Current game volume
+    int music_volume; // Volume for music
     bool is_fullscreen; // Are we fullscreen
 	bool is_vsync;
     int fps_limit;
