@@ -58,15 +58,13 @@ void loader(Jgame* game_state){
     // Settings 
     info("data.c : Loading settings data . . .");
     data_pack[ID_SETTINGS] = NULL;
-    data_pack[ID_SETTINGS_VOLUME] = build(ID_SETTINGS_VOLUME, JFONT, CENTER, 0, "Volume", "Assets/font.ttf", "<  Volume ---%  >", game_state);
-    data_pack[ID_SETTINGS_DISPLAY] = build(ID_SETTINGS_DISPLAY, JFONT, CENTER, 100, "Display", "Assets/font.ttf", "<  Display:  >", game_state);
-    data_pack[ID_SETTINGS_RESOLUTION]= build(ID_SETTINGS_RESOLUTION, JFONT, CENTER, 200, "Resolution", "Assets/font.ttf", "<  Resolution ---- x ----  >", game_state);
-    data_pack[ID_SETTINGS_THEME] = build(ID_SETTINGS_THEME, JFONT, CENTER, 300, "Theme", "Assets/font.ttf", "<  Theme: Default  >", game_state);
-    data_pack[ID_SETTINGS_DIFFICULTY] = build(ID_SETTINGS_DIFFICULTY, JFONT, CENTER, 400, "Difficulty", "Assets/font.ttf", "<  Difficulty: Normal  >", game_state);
-    data_pack[ID_SETTINGS_FULLSCREEN] = build(ID_SETTINGS_FULLSCREEN, JFONT, CENTER, 500, "Fullscreen", "Assets/font.ttf", "<  Fullscreen:  >", game_state);
-    data_pack[ID_SETTINGS_VSYNC] = build(ID_SETTINGS_VSYNC, JFONT, CENTER, 600, "VSync", "Assets/font.ttf", "<  VSync :  >", game_state);
-    data_pack[ID_SETTINGS_FPSLIMIT] = build(ID_SETTINGS_FPSLIMIT, JFONT, CENTER, 700, "FPS Limit", "Assets/font.ttf", "<  FPS Limit:  >", game_state);
-    data_pack[ID_SETTINGS_BACK] = build(ID_SETTINGS_BACK, JFONT, CENTER, 800, "Back", "Assets/font.ttf", "Back", game_state);
+    data_pack[ID_SETTINGS_PAGE] = build(ID_SETTINGS_PAGE, JFONT, CENTER, 0, "Settings page", "Assets/font.ttf", "<  Settings Page  >", game_state);
+    data_pack[ID_SETTINGS_1] = build(ID_SETTINGS_1, JFONT, CENTER, 100, "Settings page", "Assets/font.ttf", "<    >", game_state);
+    data_pack[ID_SETTINGS_2] = build(ID_SETTINGS_2, JFONT, CENTER, 200, "Settings page", "Assets/font.ttf", "<    >", game_state);
+    data_pack[ID_SETTINGS_3] = build(ID_SETTINGS_3, JFONT, CENTER, 300, "Settings page", "Assets/font.ttf", "<    >", game_state);
+    data_pack[ID_SETTINGS_4] = build(ID_SETTINGS_4, JFONT, CENTER, 400, "Settings page", "Assets/font.ttf", "<    >", game_state);
+    data_pack[ID_SETTINGS_5] = build(ID_SETTINGS_5, JFONT, CENTER, 500, "Settings page", "Assets/font.ttf", "<    >", game_state);
+    data_pack[ID_SETTINGS_BACK] = build(ID_SETTINGS_BACK, JFONT, CENTER, 600, "Back", "Assets/font.ttf", "Back", game_state);
     
     // Sounds
     info("data.c : Loading sound data . . .");

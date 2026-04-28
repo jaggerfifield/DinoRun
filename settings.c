@@ -7,18 +7,18 @@
 
 // ===== settings registers =====
 // ra --> Current loaction in settings
-// rb --> size of the settings menu
-// rc --> did we push enter
-// rd --> the direction 
+// rb --> Current page in settings
+// rc --> Input event
 
 // Define functions
 static void handle_keys(SDL_KeyboardEvent, Jgame*);
-void* load_data(void);
+void load_page(Jgame*);
 static void update(Jgame*, struct Jdata**);
-void update_display(Jgame*, struct Jdata**);
-void update_fullscreen(Jgame*, struct Jdata**);
-void update_vsync(Jgame*, struct Jdata**);
+const char* get_display_name(Jgame*);
 void restore_changes(Jgame* game_state);
+
+enum {PAGE_1, PAGE_2, PAGE_3};
+enum {IDLE, ENTER, LEFT, RIGHT};
 
 void settings_state(Jgame* game_state){
 
@@ -28,31 +28,14 @@ void settings_state(Jgame* game_state){
 
     // Clear registers
     game_state->ra = 0;
-    game_state->rb = 8;
+    game_state->rb = 0;
     game_state->rc = 0;
-    game_state->rd = 0;
 
 	// Load assets
     struct Jdata** DTA = game_state->data_pack;
 
-    // Load current volume level
-    set_string(DTA[ID_SETTINGS_VOLUME], "<  Volume %.3d%%  >", game_state->volume);
-    render(DTA[ID_SETTINGS_VOLUME]);
-    
-    // Load current display
-    update_display(game_state, DTA);
-
-    // Load current resolution
-    set_string(DTA[ID_SETTINGS_RESOLUTION], "<  Resolution %d x %d  >", game_state->display_w, game_state->display_h);
-    render(DTA[ID_SETTINGS_RESOLUTION]);
-
-	// Load current fullscreen state
-	update_fullscreen(game_state, DTA);
-    
-    // Load current vsync state
-    update_vsync(game_state, DTA);
-    
-    set_string(DTA[ID_SETTINGS_FPSLIMIT], "<  FPS Limit %d  >", game_state->fps_limit);
+    // Load the strings of current page
+    load_page(game_state);
 
 	while(!game_state->quit && !go_back){
 		while(SDL_PollEvent(&e) != 0){
@@ -64,39 +47,188 @@ void settings_state(Jgame* game_state){
                 game_state = resize_window(game_state);
 
             // Handle pressing/clicking
-            if(game_state->rc){
-				game_state->rc = false;
-			
-                int location = ID_SETTINGS+game_state->ra+1;
+            switch(game_state->rc){
+                case IDLE:
+                    break;
 
-                if(location == ID_SETTINGS_VOLUME)
-					info("settings.c : Current volume is %d", game_state->volume);
-				
-                else if(location == ID_SETTINGS_DISPLAY){
-                    int win_x, win_y;
-                    SDL_Rect bounds;
-                    SDL_GetWindowPosition(game_state->window, &win_x, &win_y);
-                    SDL_GetDisplayBounds(game_state->display_id[game_state->monitor], &bounds);
-					SDL_SetWindowPosition(game_state->window, bounds.x+(bounds.w-game_state->display_w)/2, bounds.y+(bounds.h-game_state->display_h)/2);
-                    info("settings.c : Current display is [%d]", game_state->monitor);
-                
-                }else if(location == ID_SETTINGS_RESOLUTION){
-                    info("WIP");
-                
-                }else if(location == ID_SETTINGS_THEME)
-					info("TODO");
+                case ENTER:
+                    switch(game_state->rb){
+                        case PAGE_1:
+                            switch(game_state->ra){
+                                case 1:
+					                info("settings.c : Current volume is %d", game_state->volume);
+                            }break;
 
-                else if(location == ID_SETTINGS_FULLSCREEN){
-                    if(!SDL_SetWindowFullscreen(game_state->window, game_state->is_fullscreen))
-                        error("settings.c : Could not set fullscreen to %d. Error: %s", game_state->is_fullscreen, SDL_GetError());
-                }else if(location == ID_SETTINGS_VSYNC){
-                    if(!SDL_SetRenderVSync(game_state->renderer, ( game_state->is_vsync ) ? 1 : SDL_RENDERER_VSYNC_DISABLED)){
-                        error("settings.c : Could not set vsync Error: %s", SDL_GetError());
+                        case PAGE_2:
+                            switch(game_state->ra){
+                                case 1:
+                                    int win_x, win_y;
+                                    SDL_Rect bounds;
+                                    SDL_GetWindowPosition(game_state->window, &win_x, &win_y);
+                                    SDL_GetDisplayBounds(game_state->display_id[game_state->monitor], &bounds);
+					                SDL_SetWindowPosition(game_state->window, bounds.x+(bounds.w-game_state->display_w)/2, bounds.y+(bounds.h-game_state->display_h)/2);
+                                    info("settings.c : Current display is [%d]", game_state->monitor);
+                                    break;
+                                
+                                case 2:
+                                    info("WIP");
+                                    break;
+                
+                                case 3:
+                                    if(!SDL_SetWindowFullscreen(game_state->window, game_state->is_fullscreen))
+                                        error("settings.c : Could not set fullscreen to %d. Error: %s", game_state->is_fullscreen, SDL_GetError());
+                                    break;
+                                
+                                case 5:
+                                    if(!SDL_SetRenderVSync(game_state->renderer, ( game_state->is_vsync ) ? 1 : SDL_RENDERER_VSYNC_DISABLED))
+                                        error("settings.c : Could not set vsync Error: %s", SDL_GetError());
+                            }
+                            break;
+
+                        case PAGE_3:
+                            break;
+                    
                     }
-                }else if(location == ID_SETTINGS_BACK){
-				    debug("Go Back");
-                    go_back = true;	
-                }
+                
+                    if(game_state->ra == 6)
+                        go_back = true;	
+
+                    game_state->rc = IDLE;
+                    load_page(game_state);
+                    break;
+
+                case LEFT:
+                    switch(game_state->rb){
+                        case PAGE_1:
+                            switch(game_state->ra){
+                                case 0 :
+                                    // Switch pages
+                                    game_state->rb = PAGE_3; // TODO if we add more pages this needs to change!
+                                    break ;
+
+                                case 1:
+                                    // Adjust Volume
+                                    if(game_state->volume > 0)
+                                        game_state->volume -= 1;
+                                    break;
+                            }
+                            break;
+
+                        case PAGE_2:
+                            switch(game_state->ra){
+                                case 0:
+                                    // Switch pages
+                                    game_state->rb = PAGE_1;
+                                    break;
+                                case 1:
+                                    // Swap selected monitor
+                                    if(game_state->monitor == 0)
+                                        game_state->monitor = game_state->n_displays-1;
+                                    else
+                                        game_state->monitor -= 1;
+                                    break;
+                                
+                                case 2:
+                                    // Change Resolution
+                                    break;
+
+                                case 3:
+                                    // Change Fullscreen
+                                    game_state->is_fullscreen = !game_state->is_fullscreen;
+                                    break;
+                                
+                                case 4:
+                                    // Change FPS Limit
+                                    if(game_state->fps_limit > 30)
+                                        game_state->fps_limit = (int)(game_state->fps_limit / 2);
+                                    break;
+
+                                case 5:
+                                    // Change VSync
+                                    game_state->is_vsync = !game_state->is_vsync;
+                                    break;
+
+                            }
+                            break;
+
+                        case PAGE_3:
+                            switch(game_state->ra){
+                                case 0:
+                                    // Switch pages
+                                    game_state->rb = PAGE_2;
+                                    break;
+                            }
+                            break;
+                    }
+                    game_state->rc = IDLE;
+                    load_page(game_state);
+                    break;
+
+                case RIGHT:
+                    switch(game_state->rb){
+                        case PAGE_1:
+                            switch(game_state->ra){
+                                case 0:
+                                    // Switch pages
+                                    game_state->rb = PAGE_2;
+                                    break;
+
+                                case 1:
+                                    // Adjust volume
+                                    if(game_state->volume < 100)
+                                        game_state->volume += 1;
+                                    break;
+                            }
+                            break;
+                        case PAGE_2:
+                            switch(game_state->ra){
+                                case 0:
+                                    // Switch pages
+                                    game_state->rb = PAGE_3;
+                                    break;
+                                    
+                                case 1:
+                                    // Change Display
+                                    if(game_state->monitor >= game_state->n_displays-1)
+                                        game_state->monitor = 0;
+                                    else
+                                        game_state->monitor += 1;
+                                    break;
+
+                                case 2:
+                                    // Change Resolution
+                                    break;
+
+                                case 3:
+                                    // Change Fullscreen
+                                    game_state->is_fullscreen = !game_state->is_fullscreen;
+                                    break;
+
+                                case 4:
+                                    // Change FPS Limit
+                                    if(game_state->fps_limit < 120)
+                                        game_state->fps_limit = game_state->fps_limit * 2;
+                                    break;
+
+                                case 5:
+                                    // Change VSync
+                                    game_state->is_vsync = !game_state->is_vsync;
+                                    break;
+                            }
+                            break;
+                        case PAGE_3:
+                            switch(game_state->ra){
+                                case 0:
+                                    // Switch pages
+                                    game_state->rb = PAGE_1;
+                                    break;
+                            }
+                            break;
+                    }
+                    game_state->rc = IDLE;
+                    load_page(game_state);
+                    break;
+
             }
 		}
 		update(game_state, DTA);
@@ -105,6 +237,37 @@ void settings_state(Jgame* game_state){
     restore_changes(game_state);
 
 	return;	
+}
+
+void load_page(Jgame* game_state){
+
+    switch(game_state->rb){
+        
+        case PAGE_1:
+            set_string(game_state->data_pack[ID_SETTINGS_1], "<  Volume %.3d%%  >", game_state->volume);
+            set_string(game_state->data_pack[ID_SETTINGS_2], "<    >");
+            set_string(game_state->data_pack[ID_SETTINGS_3], "<    >");
+            set_string(game_state->data_pack[ID_SETTINGS_4], "<    >");
+            set_string(game_state->data_pack[ID_SETTINGS_5], "<    >");
+            break;
+
+        case PAGE_2:
+            set_string(game_state->data_pack[ID_SETTINGS_1], "<  Display: %s  > *", get_display_name(game_state));
+            set_string(game_state->data_pack[ID_SETTINGS_2], "<  Resolution %d x %d  >", game_state->display_w, game_state->display_h);
+            set_string(game_state->data_pack[ID_SETTINGS_3], "<  Fullscreen %s  >", game_state->is_fullscreen ? "True" : "False");
+            set_string(game_state->data_pack[ID_SETTINGS_4], "<  FPS Limit %d  >", game_state->fps_limit);
+            set_string(game_state->data_pack[ID_SETTINGS_5], "<  VSync %s  >", game_state->is_vsync ? "True" : "False");
+            break;
+
+        case PAGE_3:
+            set_string(game_state->data_pack[ID_SETTINGS_1], "<    >");
+            set_string(game_state->data_pack[ID_SETTINGS_2], "<    >");
+            set_string(game_state->data_pack[ID_SETTINGS_3], "<    >");
+            set_string(game_state->data_pack[ID_SETTINGS_4], "<    >");
+            set_string(game_state->data_pack[ID_SETTINGS_5], "<    >");
+            break;
+    
+    }
 }
 
 static void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
@@ -116,17 +279,17 @@ static void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
 	if(key == SDLK_UP){
 		game_state->ra -= 1;
         if(game_state->ra < 0)
-            game_state->ra = game_state->rb;
+            game_state->ra = 6;
 	}else if(key == SDLK_DOWN){
 		game_state->ra += 1;
-        if(game_state->ra > game_state->rb)
+        if(game_state->ra > 6)
             game_state->ra = 0;
 	}else if(key == SDLK_RIGHT)
-		game_state->rd = 2;
+		game_state->rc = RIGHT;
 	else if(key == SDLK_LEFT)
-		game_state->rd = 1;
+		game_state->rc = LEFT;
 	else if(key == SDLK_RETURN)
-		game_state->rc = true;
+		game_state->rc = ENTER;
 	
 }
 
@@ -149,105 +312,26 @@ static void update(Jgame* game_state, struct Jdata** data){
 			}else{
 				set_fgColour(node, 0, 0, 0);
 			}
-
-            // Handle left right settings here
-			if(game_state->rd == 1){
-				// Left
-				if((game_state->ra == location) && (node->id == ID_SETTINGS_VOLUME)){
-					// Turn volume down
-                    if(game_state->volume > 0){
-					    game_state->volume -= 1;
-                        set_string(node, "<  Volume %.3d%%  >", game_state->volume);
-                    }
-				}else if((node->id == ID_SETTINGS_DISPLAY) && (game_state->ra == location)){
-                    // Swap selected monitor
-                    if(game_state->monitor == 0)
-                        game_state->monitor = game_state->n_displays-1;
-                    else
-                        game_state->monitor -= 1;
-                    update_display(game_state, data);
-                }else if((node->id == ID_SETTINGS_FULLSCREEN) && (game_state->ra == location)){
-					game_state->is_fullscreen = !game_state->is_fullscreen;
-					update_fullscreen(game_state, data);
-				}else if((node->id == ID_SETTINGS_VSYNC) && (game_state->ra == location)){
-                    game_state->is_vsync = !game_state->is_vsync;
-                    update_vsync(game_state, data);
-                }else if((node->id == ID_SETTINGS_FPSLIMIT) && (game_state->ra == location)){
-                    if(game_state->fps_limit > 30){
-                        set_string(node, "<  FPS Limit %d  >", game_state->fps_limit/2);
-                        game_state->fps_limit = game_state->fps_limit / 2;
-                    }
-                }
-			}else if(game_state->rd == 2){
-                // Right
-				if((node->id == ID_SETTINGS_VOLUME) && (game_state->ra == location)){
-                    // Turn Volume up
-                    if(game_state->volume < 100){
-					    game_state->volume += 1;
-                        set_string(node, "<  Volume %.3d%%  >", game_state->volume);
-                    }
-				}else if((node->id == ID_SETTINGS_DISPLAY) && (game_state->ra == location)){
-                    // Change displays
-                    if(game_state->monitor == game_state->n_displays-1){
-                        game_state->monitor = 0;
-                    }else
-                        game_state->monitor += 1;
-                    update_display(game_state, data);
-                }else if((node->id == ID_SETTINGS_RESOLUTION) && (game_state->ra == location)){
-                    // Change resolution
-                    info("WIP");
-                }else if((node->id == ID_SETTINGS_FULLSCREEN) && (game_state->ra == location)){
-					game_state->is_fullscreen = !game_state->is_fullscreen;
-					update_fullscreen(game_state, data);
-				}else if((node->id == ID_SETTINGS_VSYNC) && (game_state->ra == location)){
-                    game_state->is_vsync = !game_state->is_vsync;
-                    update_vsync(game_state, data);
-                }else if((node->id == ID_SETTINGS_FPSLIMIT) && (game_state->ra == location)){
-                    if(game_state->fps_limit < 120){
-                        set_string(node, "<  FPS Limit %d  >", game_state->fps_limit*2);
-                        game_state->fps_limit = game_state->fps_limit * 2;
-                    }
-                }
-			}
-
-		    render(node); // TODO : add update flag to node to check if it needs to be rendered!
+		    
+            render(node); // TODO : add update flag to node to check if it needs to be rendered!
             set_pos_x(node, -1, game_state);
         }
 
 		SDL_BlitSurface(node->data.data, NULL, game_state->surface, node->pram.rect);
 	    i++;
     }
-
-    game_state->rd = 0;
     
 	SDL_UpdateWindowSurface(game_state->window);
 }
 
-void update_display(Jgame* game_state, struct Jdata** DTA){
+const char* get_display_name(Jgame* game_state){
     // Load current display
     const char* name = SDL_GetDisplayName(game_state->display_id[game_state->monitor]);
+    
     if(name == NULL)
         error("settings.c : SDL could not get display name! Error: %s", SDL_GetError());
-    else
-        set_string(DTA[ID_SETTINGS_DISPLAY], "<  Display: %s  > *", name);
-    render(DTA[ID_SETTINGS_DISPLAY]); 
-}
-
-void update_fullscreen(Jgame* game_state, struct Jdata** DTA){
-	if(game_state->is_fullscreen)
-		set_string(DTA[ID_SETTINGS_FULLSCREEN], "<  Fullscreen: True  > *");
-	else
-		set_string(DTA[ID_SETTINGS_FULLSCREEN], "<  Fullscreen: False  > *");
-	render(DTA[ID_SETTINGS_FULLSCREEN]);
-	
-}
-
-void update_vsync(Jgame* game_state, struct Jdata** DTA){
-    if(game_state->is_vsync)
-        set_string(DTA[ID_SETTINGS_VSYNC], "<  VSync: True  > *");
-    else
-        set_string(DTA[ID_SETTINGS_VSYNC], "<  VSync: False  > *");
-    render(DTA[ID_SETTINGS_VSYNC]);
+    
+    return name;
 }
 
 void restore_changes(Jgame* game_state){
