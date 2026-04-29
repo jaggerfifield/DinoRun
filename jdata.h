@@ -104,7 +104,7 @@ struct Jdata{
 };
 
 
-struct Jdata* init(int, int, char*, char*);
+struct Jdata* init(int, int, char*, char*, Jgame*);
 void render(struct Jdata*);
 void play_sound(struct Jdata*, SDL_AudioStream*);
 void stop_sound(SDL_AudioStream*);

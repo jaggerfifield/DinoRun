@@ -9,7 +9,7 @@
 #include "main.h"
 #include "jio.h"
 
-struct Jdata* init(int id, int type, char* name, char* path){  
+struct Jdata* init(int id, int type, char* name, char* path, Jgame* game_state){  
 	struct Jdata* data_node = SDL_malloc(sizeof(struct Jdata));
 
     // All jdata have id, type, and name
@@ -48,6 +48,16 @@ struct Jdata* init(int id, int type, char* name, char* path){
 
         if(data_node->data.data == NULL)
             error("jdata.c : Could not load bmp Error: %s", SDL_GetError());
+		else{
+			SDL_Surface* opt = NULL;
+			opt = SDL_ConvertSurface(data_node->data.data, game_state->surface->format);
+			if(opt == NULL)
+				error("jdata.c : Could not convert surface! [%s]", SDL_GetError());
+			else{
+				SDL_DestroySurface(data_node->data.data);
+				data_node->data.data = opt;
+			}
+		}	
 
 		// Apply color key
 		SDL_SetSurfaceColorKey(data_node->data.data, true, SDL_MapSurfaceRGB(data_node->data.data, 0, 0, 0));

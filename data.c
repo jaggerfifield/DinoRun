@@ -69,9 +69,9 @@ void loader(Jgame* game_state){
     // Sounds
     info("data.c : Loading sound data . . .");
     data_pack[ID_SOUND] = NULL;
-    data_pack[ID_SOUND_JUMP] = init(ID_SOUND_JUMP, JSOUND, "Jumping sound", "Assets/sounds/jump.wav");
-    data_pack[ID_SOUND_MENU] = init(ID_SOUND_MENU, JSOUND, "Menu sound", "Assets/sounds/menu.wav");
-    data_pack[ID_SOUND_MUSIC] = init(ID_SOUND_MUSIC, JSOUND, "Background Music", "Assets/sounds/bg_music.wav");
+    data_pack[ID_SOUND_JUMP] = init(ID_SOUND_JUMP, JSOUND, "Jumping sound", "Assets/sounds/jump.wav", game_state);
+    data_pack[ID_SOUND_MENU] = init(ID_SOUND_MENU, JSOUND, "Menu sound", "Assets/sounds/menu.wav", game_state);
+    data_pack[ID_SOUND_MUSIC] = init(ID_SOUND_MUSIC, JSOUND, "Background Music", "Assets/sounds/bg_music.wav", game_state);
 
     data_pack[ID_DATA_END] = NULL;
 
@@ -79,7 +79,7 @@ void loader(Jgame* game_state){
 }
 
 struct Jdata* build(int id, int type, int x, int y, char* title, char* path, char* string, Jgame* game_state){
-    struct Jdata* node = init(id, type, title, path);
+    struct Jdata* node = init(id, type, title, path, game_state);
 
     if(string != NULL){
         set_string(node, string);
