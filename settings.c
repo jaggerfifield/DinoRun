@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include "main.h"
+#include "menu.h"
 #include "jio.h"
 
 // ===== settings registers =====
@@ -45,6 +46,11 @@ void settings_state(Jgame* game_state){
 				handle_keys(e.key, game_state);
 	        else if(e.type == SDL_EVENT_WINDOW_RESIZED)
                 game_state = resize_window(game_state);
+            else if(e.type == SDL_EVENT_MOUSE_MOTION)
+                handle_mouse(e, ID_SETTINGS, game_state);
+            else if(e.type == SDL_EVENT_MOUSE_BUTTON_UP)
+                if(e.button.button == 1)
+                    game_state->rc = 1;
 
             // Handle pressing/clicking
             switch(game_state->rc){

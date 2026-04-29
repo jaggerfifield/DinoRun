@@ -14,7 +14,7 @@ int distance = 100;
 static void _update(Jgame*, struct Jdata**);
 static void handle_keys(SDL_KeyboardEvent, Jgame*);
 static void object_handler(struct Jdata**, Jgame*);
-static bool check_collision(SDL_Rect*, SDL_Rect*);
+bool check_collision(SDL_Rect*, SDL_Rect*);
 void read_score(Jgame*);
 void write_score(Jgame*);
 
@@ -333,7 +333,7 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 	}
 }
 
-static bool check_collision(SDL_Rect* a, SDL_Rect* b){
+bool check_collision(SDL_Rect* a, SDL_Rect* b){
 	if(a->y + a->h <= b->y)
 		return false;
 	if(a->y >= b->y + b->h)

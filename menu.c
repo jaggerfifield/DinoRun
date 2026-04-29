@@ -19,6 +19,7 @@
 void handle_keys(SDL_KeyboardEvent, Jgame*);
 void update(Jgame*);
 void update_registers(Jgame*);
+void handle_mouse(SDL_Event, int, Jgame*);
 
 void menu_state(Jgame* game_state){
 
@@ -36,6 +37,11 @@ void menu_state(Jgame* game_state){
                 game_state = resize_window(game_state);
             else if(e.type == SDL_EVENT_KEY_DOWN)
 				handle_keys(e.key, game_state);
+            else if(e.type == SDL_EVENT_MOUSE_MOTION)
+                handle_mouse(e, ID_MAINMENU, game_state);
+            else if(e.type == SDL_EVENT_MOUSE_BUTTON_UP)
+                if(e.button.button == 1)
+                    game_state->rc = 1;
 			
             // Chck if enter was pressed
             if(game_state->rc){
@@ -129,5 +135,28 @@ void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
 	}else if(key == SDLK_RETURN)
 		game_state->rc = true;
 	
+}
+
+void handle_mouse(SDL_Event e, int index, Jgame* game_state){
+    // TODO this is slow running every mouse motion event 
+    SDL_Rect mouse;
+    mouse.x = e.motion.x;
+    mouse.y = e.motion.y;
+    mouse.w = 5;
+    mouse.h = 5;
+
+   struct Jdata* node = game_state->data_pack[index+1];
+   int i = 1;
+
+   while(node != NULL){
+        if(node->type == JFONT){
+            if(check_collision(&mouse, node->pram.rect))
+                game_state->ra = node->id-index-1;
+        }
+   
+        node = game_state->data_pack[index+1+i];
+        i++;
+   }
+
 }
 
