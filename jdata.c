@@ -74,7 +74,6 @@ struct Jdata* init(int id, int type, char* name, char* path, Jgame* game_state){
                 error("jdata.c : Could not load bmp [%s]", SDL_GetError());
         }
 
-
 	}else if(type == JFONT){
 		// Load font .ttf
         data_node->fnt = NULL;
