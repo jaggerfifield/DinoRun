@@ -49,32 +49,20 @@ static void update(Jgame* game_state, struct Jdata** DTA, int sel){
 		
 	if(sel){
 		set_fgColour(play, 255, 0, 0);
-		render(play);
 		set_fgColour(exit, 0, 0, 0);
-		render(exit);
 	}else{
 		set_fgColour(play, 0, 0, 0);
-		render(play);
 		set_fgColour(exit, 255, 0, 0);
-		render(exit);
 	}
 
+    draw_font(play, game_state);
+    draw_font(exit, game_state);
 
-    if(title->pram.rect == NULL)
-	    title->pram.rect = get_rect(title);
-	if(play->pram.rect == NULL){
-        play->pram.rect = get_rect(play);
-        play->pram.rect->x -= 100;
-    }if(exit->pram.rect == NULL){
-        exit->pram.rect = get_rect(exit);
-        exit->pram.rect->x += 100;
-    }
+    render(title, game_state);
+    render(play, game_state);
+    render(exit, game_state);
 
-	SDL_BlitSurface(title->data.data, NULL, game_state->surface, title->pram.rect);
-	SDL_BlitSurface(play->data.data, NULL, game_state->surface, play->pram.rect);
-	SDL_BlitSurface(exit->data.data, NULL, game_state->surface, exit->pram.rect);
-
-	SDL_UpdateWindowSurface(game_state->window);
+    SDL_RenderPresent(game_state->renderer);
 }
 
 static int handle_keys(SDL_KeyboardEvent e, Jgame* game_state){

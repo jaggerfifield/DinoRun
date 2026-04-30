@@ -14,7 +14,7 @@ int distance = 100;
 static void _update(Jgame*, struct Jdata**);
 static void handle_keys(SDL_KeyboardEvent, Jgame*);
 static void object_handler(struct Jdata**, Jgame*);
-bool check_collision(SDL_Rect*, SDL_Rect*);
+bool check_collision(SDL_FRect*, SDL_FRect*);
 void read_score(Jgame*);
 void write_score(Jgame*);
 
@@ -23,6 +23,8 @@ enum {IDLE, UP, DOWN};
 // ===== game_state registers =====
 // ra --> is the music playing?
 // rb --> Current area we are playing
+// rc --> nothing
+// rd --> Frame Update Type
 
 void play_state(Jgame* game_state){
 	game_state->score = 1;
@@ -34,6 +36,14 @@ void play_state(Jgame* game_state){
     game_state->coin_get = true; 
 
     game_state->ra = 0;
+    game_state->rd = UPDATE_FRAME; // We want to update often since we are playing
+
+    instance(game_state->trees, game_state->data_pack[ID_SPRITE_TREE], 10, game_state);
+    
+    for(int i = 0; i < 10; i++){
+        set_pos_x(game_state->trees[i], (game_state->display_w/8)*i - (game_state->trees[i]->texture->w/2), game_state);
+        set_pos_y(game_state->trees[i], game_state->display_h-game_state->trees[i]->texture->h, game_state);
+    }
 
     for(int i = 0; i < 10; i++){
         game_state->obstacle[i] = 0;
@@ -55,7 +65,7 @@ void play_state(Jgame* game_state){
 	set_font_size(DTA[ID_PLAY_DEBUG], 10);
 
 	// Set object positions
-    set_pos_y(DTA[ID_PLAY_COINS], get_data(DTA[ID_PLAY_SCORE])->h+10, game_state);
+    set_pos_y(DTA[ID_PLAY_COINS], DTA[ID_PLAY_SCORE]->texture->h+10, game_state);
     
     int disp_w = game_state->display_w;
     set_pos_x(DTA[ID_PLAY_OBJECT], disp_w, game_state);
@@ -63,16 +73,16 @@ void play_state(Jgame* game_state){
     set_pos_x(DTA[ID_PLAY_OBJECT3], disp_w, game_state);
     set_pos_x(DTA[ID_PLAY_OBJECT4], disp_w, game_state);
 
-	set_pos_y(DTA[ID_PLAY_PLAYER], game_state->display_h-get_data(DTA[ID_PLAY_PLAYER])->h, game_state);
+	set_pos_y(DTA[ID_PLAY_PLAYER], game_state->display_h-DTA[ID_PLAY_PLAYER]->texture->h, game_state);
     
     set_pos_x(DTA[ID_PLAY_COIN], disp_w, game_state);
-    set_pos_y(DTA[ID_PLAY_COIN], game_state->display_h-get_data(DTA[ID_PLAY_PLAYER])->h-get_data(DTA[ID_PLAY_COIN])->h-50, game_state);
+    set_pos_y(DTA[ID_PLAY_COIN], game_state->display_h-DTA[ID_PLAY_PLAYER]->texture->h-DTA[ID_PLAY_COIN]->texture->h-50, game_state);
 
-	game_state->jump_height = game_state->display_h - get_data(DTA[ID_PLAY_PLAYER])->h - 280;
+	game_state->jump_height = game_state->display_h - DTA[ID_PLAY_PLAYER]->texture->h - 280;
 	
     set_string(DTA[ID_PLAY_HISCORE], "High Score: %d", game_state->hiscore);
-    render(DTA[ID_PLAY_HISCORE]);
-	set_pos_x(DTA[ID_PLAY_HISCORE], disp_w - get_data(DTA[ID_PLAY_HISCORE])->w, game_state);
+    draw_font(DTA[ID_PLAY_HISCORE], game_state);
+	set_pos_x(DTA[ID_PLAY_HISCORE], disp_w - DTA[ID_PLAY_HISCORE]->texture->w, game_state);
 
 	// Apply a seed for random
 	srand(time(NULL));
@@ -111,6 +121,10 @@ void play_state(Jgame* game_state){
 }
 
 static void _update(Jgame* game_state, struct Jdata** data){
+    if(SDL_GetTicksNS() - game_state->animation_tick > ANIMATION_TIME){
+        game_state->animation_tick = SDL_GetTicksNS();
+        game_state->rd = ANIMATION_FRAME;
+    }
 
 	if ( ( SDL_GetTicksNS() - game_state->time_tick ) < 4000000000){
         struct Jdata* timer_node = data[ID_PLAY_TIMER];
@@ -128,22 +142,10 @@ static void _update(Jgame* game_state, struct Jdata** data){
             do_update = false;
 
         if(do_update){
-            render(timer_node);
+            draw_font(timer_node, game_state);
 
-		    // Clear the screen first!
-		    struct Jdata* bg = data[ID_DATA_BACKGROUND];
-		    
-            if(get_rekt(bg) == NULL)
-                get_rect(bg);
-
-		    SDL_BlitSurface(get_data(bg), NULL, game_state->surface, get_rekt(bg));
-				
-		    // Blit the countdown
-            if(timer_node->pram.rect == NULL)
-		        timer_node->pram.rect = get_rect(timer_node);
-
-		    SDL_BlitSurface(timer_node->data.data, NULL, game_state->surface, timer_node->pram.rect);
-
+            render(game_state->data_pack[ID_DATA_BACKGROUND], game_state);
+            render(timer_node, game_state);
         }
 	// This is the main update, where we hande the gameplay
 	}else{
@@ -163,12 +165,12 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		// Update score count here.
 		game_state->score += game_state->point_mult;
 		set_string(score, "SCORE: %d", game_state->score);
-		render(score);
+        draw_font(score, game_state);
 
         // Update coin count
         if(game_state->coin_get){
             set_string(coin_t, "COINS: %d", game_state->coins);
-            render(coin_t);
+            draw_font(coin_t, game_state);
             game_state->coin_get = false;
         }
 
@@ -176,8 +178,8 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		if(game_state->score > game_state->hiscore){
 			game_state->hiscore = game_state->score;
 		    set_string(hiscore, "High Score: %d", game_state->hiscore);
-		    render(hiscore);
-		    set_pos_x(hiscore, game_state->display_w - hiscore->data.data->w, game_state);
+            draw_font(hiscore, game_state);
+		    set_pos_x(hiscore, game_state->display_w - hiscore->texture->w, game_state);
         }
 		// Apply jump physics (up/down movement)
         int dino_y = get_pos_y(dino);
@@ -192,50 +194,41 @@ static void _update(Jgame* game_state, struct Jdata** data){
 				  	game_state->motion = DOWN;
 				break;
 			case DOWN:
-			  	if(dino_y < game_state->display_h - dino->data.data->h)
+			  	if(dino_y < game_state->display_h - dino->texture->h)
 					set_pos_y(dino, dino_y + (int)(game_state->game_speed * (30.0 / game_state->fps_limit)), game_state);
-			  	else if(dino_y >= game_state->display_h - dino->data.data->h)
+			  	else if(dino_y >= game_state->display_h - dino->texture->h)
 				  	game_state->motion = IDLE;
 			  	break;
 		}
 		
-        if(bg->pram.rect == NULL)
-		    bg->pram.rect = get_rect(bg);
-		if(score->pram.rect == NULL)
-            score->pram.rect = get_rect(score);
-		hiscore->pram.rect = get_rect(hiscore);
-		if(dino->pram.rect == NULL)
-            dino->pram.rect = get_rect(dino);
-        if(coin_t->pram.rect == NULL)
-            coin_t->pram.rect = get_rect(coin_t);
-
 		// Blit the surfaces in order: bg, objects, score, player
-		SDL_BlitSurface(bg->data.data, NULL, game_state->surface, bg->pram.rect);
+        render(bg, game_state);
+
+        for(int i = 0; i < 10; i++){
+            render(game_state->trees[i], game_state);
+        }
 
 		// Update object position and generate new objects
 		object_handler(data, game_state);		
 
-		SDL_BlitSurface(score->data.data,   NULL, game_state->surface, score->pram.rect);
-		SDL_BlitSurface(hiscore->data.data, NULL, game_state->surface, hiscore->pram.rect);
-		SDL_BlitSurface(coin_t->data.data,  NULL, game_state->surface, coin_t->pram.rect);
-        SDL_BlitSurface(dino->data.data,    NULL, game_state->surface, dino->pram.rect);
-		
+        render(score, game_state);
+        render(hiscore, game_state);
+        render(coin_t, game_state);
+        render(dino, game_state);
+
 		// Blit debug overlay if enabled
 		if(debug_overlay && ( game_state->render_tick != 0 ) ){
 			double avgFPS = 1000000000.0 / (double)game_state->render_tick;
 
 			// Update string
 			set_string(debug, "FPS: %0.2f S: %d M: %d", avgFPS, game_state->game_speed, game_state->point_mult);
-			render(debug);
-			
-            if(debug->pram.rect == NULL)
-			    debug->pram.rect = get_rect(debug);
-
-			SDL_BlitSurface(debug->data.data, NULL, game_state->surface, debug->pram.rect);
+			draw_font(debug, game_state);
+            render(debug, game_state);
 		}
 	}
 
-	SDL_UpdateWindowSurface(game_state->window);
+	//SDL_UpdateWindowSurface(game_state->window);
+    SDL_RenderPresent(game_state->renderer);
     
     // Frame render time
     game_state->render_tick = SDL_GetTicksNS() - game_state->start_tick;
@@ -246,6 +239,8 @@ static void _update(Jgame* game_state, struct Jdata** data){
         
         game_state->render_tick = SDL_GetTicksNS() - game_state->start_tick;
     }
+
+    game_state->rd = UPDATE_FRAME; // Update often since we are playing
 }
 
 static void object_handler(struct Jdata** data, Jgame* game_state){
@@ -268,49 +263,38 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
     // Generate player rect
 	struct Jdata* player = data[ID_PLAY_PLAYER];
 	
-    player->pram.rect = get_rect(player); // TODO Rects are generated in render() calls, do we need to do this?
-
     if(game_state->treasure[0]){
         
         struct Jdata* coin = data[ID_PLAY_COIN];
-        unsigned long long int ns = SDL_GetTicksNS();
 
-        if( (ns - game_state->animation_tick) > 83333333 ){
-            game_state->animation_tick = ns;
-        
-            // Update all animation frames
-            render(coin);
-        }
+        if(game_state->rd == ANIMATION_FRAME)
+            next_frame(coin);
 
         set_pos_x(coin, get_pos_x(coin) - (int)(game_state->game_speed * (30.0 / game_state->fps_limit)), game_state);
 
-        coin->pram.rect = get_rect(coin); // TODO Rects are genereated in render() calls, do we need to do this?
-
-        if(check_collision(coin->pram.rect, player->pram.rect)){
-            set_pos_x(coin, -coin->data.data->w, game_state);
+        if(check_collision(coin->rect, player->rect)){
+            set_pos_x(coin, -coin->texture->w, game_state);
             game_state->coin_get = true;
             game_state->coins += 1;
         }
 
-        if(get_pos_x(coin) < -coin->data.data->w){
+        if(get_pos_x(coin) < -coin->texture->w){
             game_state->treasure[0] = 0;
             set_pos_x(coin, game_state->display_w, game_state);
         }
     
-        SDL_BlitSurface(coin->data.data, NULL, game_state->surface, coin->pram.rect);
+        render(coin, game_state);
     }
 
     // Move and blit objects.
 	for(int i = 0; i < game_state->objects; i++){
 		struct Jdata* obj = data[ID_PLAY_OBJECT + i];
 		if(obj != NULL && game_state->obstacle[i]){
-			set_pos_y(obj, game_state->display_h - obj->data.data->h, game_state);
+			set_pos_y(obj, game_state->display_h - obj->texture->h, game_state);
 			set_pos_x(obj, get_pos_x(obj) - (int)(game_state->game_speed * (30.0 / game_state->fps_limit)), game_state);
 
-			obj->pram.rect = get_rect(obj); // TODO Rects are generated in render() calls, do we need to do this?
-
 			// Detect collision and end play state if true
-			if(check_collision(obj->pram.rect, player->pram.rect)){
+			if(check_collision(obj->rect, player->rect)){
 				game_state->game_over = true;
 
 				// Reset active objects
@@ -323,17 +307,17 @@ static void object_handler(struct Jdata** data, Jgame* game_state){
 			}
 
 			// Once object is off the screen we turn it off
-			if(get_pos_x(obj) < -obj->data.data->w){
+			if(get_pos_x(obj) < -obj->texture->w){
 				game_state->obstacle[i] = 0;
 				set_pos_x(obj, game_state->display_w, game_state);
 			}
 
-			SDL_BlitSurface(obj->data.data, NULL, game_state->surface, obj->pram.rect);
+            render(obj, game_state);
 		}
 	}
 }
 
-bool check_collision(SDL_Rect* a, SDL_Rect* b){
+bool check_collision(SDL_FRect* a, SDL_FRect* b){
 	if(a->y + a->h <= b->y)
 		return false;
 	if(a->y >= b->y + b->h)
@@ -350,7 +334,7 @@ void read_score(Jgame* game_state){
 	FILE* f = jaccess("score", "r");
 	jread(f, value, 8);
 	fclose(f);
-	SDL_sscanf(value, "%d", &game_state->hiscore);
+    SDL_sscanf(value, "%d", &game_state->hiscore);
 	
 	debug("Read score to be: %d", game_state->hiscore);
 }

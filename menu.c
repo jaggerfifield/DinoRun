@@ -14,6 +14,7 @@
 // ra --> Current location in menu
 // rb --> Size of the menu
 // rc --> did we push enter
+// rd --> do update on render?
 
 // Define functions
 void handle_keys(SDL_KeyboardEvent, Jgame*);
@@ -28,7 +29,12 @@ void menu_state(Jgame* game_state){
     // Init registers
 	update_registers(game_state);
 
+    game_state->time_tick = SDL_GetTicksNS();
+    game_state->animation_tick = SDL_GetTicksNS();
+
     while(!game_state->quit){
+        game_state->start_tick = SDL_GetTicksNS();
+
 		while(SDL_PollEvent(&e) != 0){
 			
             if(e.type == SDL_EVENT_QUIT)
@@ -81,36 +87,46 @@ void update_registers(Jgame* game_state){
     game_state->ra = 0;
     game_state->rb = 3;
     game_state->rc = 0;
+    game_state->rd = UPDATE_FRAME;
 }
 
 void update(Jgame* game_state){
- 
-    struct Jdata* background = game_state->data_pack[ID_DATA_BACKGROUND];
-    
-    if(background->pram.rect == NULL)
-        background->pram.rect = get_rect(background);
+    if(SDL_GetTicks() - game_state->animation_tick > ANIMATION_TIME){
+        game_state->animation_tick = SDL_GetTicksNS();
+        game_state->rd = ANIMATION_FRAME;
+    }
 
-    SDL_BlitSurface(background->data.data, NULL, game_state->surface, background->pram.rect);
+    if(game_state->rd == IDLE_FRAME)
+        return;
+
+    // Always render the background
+    render(game_state->data_pack[ID_DATA_BACKGROUND], game_state);
     
     int i = 1;
 
     struct Jdata* node = game_state->data_pack[ID_MAINMENU+i];
     
     while(node != NULL){
-        if(game_state->ra == (node->id-ID_MAINMENU-1)){
-            set_fgColour(node, 255, 0, 0); // TODO We are setting this every frame
-            render(node);
-        }else{
-            set_fgColour(node, 0, 0, 0); // TODO We are setting this evey frame
-            render(node);
+        if(node->type == JFONT){
+            if(game_state->ra == (node->id-ID_MAINMENU-1)){
+                set_fgColour(node, 255, 0, 0);
+            }else{
+                set_fgColour(node, 0, 0, 0);
+            }
+            draw_font(node, game_state);
         }
 
-        SDL_BlitSurface(node->data.data, NULL, game_state->surface, node->pram.rect);
-        
+        if(node->type == JANIMATION)
+            if(game_state->rd == ANIMATION_FRAME)
+                next_frame(node);
+
+        render(node, game_state);
         node = game_state->data_pack[ID_MAINMENU+(i++)];
     }
-
-    SDL_UpdateWindowSurface(game_state->window);
+    
+    SDL_RenderPresent(game_state->renderer);
+    
+    game_state->rd = IDLE_FRAME;
 }
 
 void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
@@ -118,6 +134,7 @@ void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
 	int key = e.key;
 	
     play_sound(game_state->data_pack[ID_SOUND_MENU], game_state->audio_stream);
+    game_state->rd = UPDATE_FRAME;
 
 	if(key == SDLK_UP){
 		game_state->ra -= 1;
@@ -139,19 +156,21 @@ void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
 
 void handle_mouse(SDL_Event e, int index, Jgame* game_state){
     // TODO this is slow running every mouse motion event 
-    SDL_Rect mouse;
-    mouse.x = e.motion.x;
-    mouse.y = e.motion.y;
-    mouse.w = 5;
-    mouse.h = 5;
+    SDL_FRect mouse;
+    mouse.x = (float)e.motion.x;
+    mouse.y = (float)e.motion.y;
+    mouse.w = 5.0f;
+    mouse.h = 5.0f;
 
    struct Jdata* node = game_state->data_pack[index+1];
    int i = 1;
 
    while(node != NULL){
         if(node->type == JFONT){
-            if(check_collision(&mouse, node->pram.rect))
+            if(check_collision(&mouse, node->rect)){
                 game_state->ra = node->id-index-1;
+                game_state->rd = UPDATE_FRAME;
+            }
         }
    
         node = game_state->data_pack[index+1+i];

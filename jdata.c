@@ -9,7 +9,7 @@
 #include "main.h"
 #include "jio.h"
 
-struct Jdata* init(int id, int type, char* name, char* path){  
+struct Jdata* init(int id, int type, char* name, char* path, Jgame* game_state){  
 	struct Jdata* data_node = SDL_malloc(sizeof(struct Jdata));
 
     // All jdata have id, type, and name
@@ -18,39 +18,62 @@ struct Jdata* init(int id, int type, char* name, char* path){
 	data_node-> name = name;
 	data_node->path = path;
 
-	data_node->aux.string = NULL;
-    data_node->data.data = NULL;
+	data_node->string = NULL;
+
+    data_node->texture = NULL;
+    data_node->rect = NULL;
 
     // Only for JFONT
     data_node->text_bg = false;
 
     // Allocate rect for JIMAGE/JANIMATION/JFONT
 	if(data_node->type != JSOUND){
-    	data_node->pram.rect = SDL_malloc(sizeof(SDL_Rect));
-    	data_node->pram.rect->x = 0;
-    	data_node->pram.rect->y = 0;
+    	data_node->rect = SDL_malloc(sizeof(SDL_Rect));
+    	data_node->rect->x = 0;
+    	data_node->rect->y = 0;
 	}
 
-	if(type == JIMAGE || type == JANIMATION){
+    SDL_Surface* loaded = NULL;    
+	
+    if(type == JIMAGE || type == JANIMATION){
+    
         // Animated JIMAGE has a directory not a .bmp
         if(type == JANIMATION){
             char* _path = NULL;
-            data_node->aux.frames.x = f_count(path);
-            data_node->aux.frames.y = 0;
-            // Load the first image
-            SDL_asprintf(&_path, "%s%04d.bmp", path, data_node->aux.frames.y);
-		    data_node->data.data = SDL_LoadBMP(_path);
-            SDL_free(_path);
+            
+            data_node->n_frames = f_count(path);
+            data_node->current_frame = 0;
+            
+            // Load all images
+            data_node->textures = SDL_malloc(sizeof(SDL_Texture*)*data_node->n_frames);
+            
+            for(int i = 0; i < data_node->n_frames; i++){
+                data_node->textures[i] = NULL;
+                SDL_asprintf(&_path, "%s%04d.bmp", path, i);
+                
+                loaded = SDL_LoadBMP(_path);
+                if(loaded == NULL)
+                    error("jdata.c : Could not load animation surface [%s]", SDL_GetError());
+
+                data_node->textures[i] = SDL_CreateTextureFromSurface(game_state->renderer, loaded);
+                if(data_node->textures[i] == NULL)
+                    error("jdata.c : Could not load animation textures [%s]", SDL_GetError());
+
+                SDL_free(_path);
+                SDL_DestroySurface(loaded);
+                
+                _path = NULL;
+                loaded = NULL;
+            }
+            // Place the first frame into the texture slot for rendering
+            data_node->texture = data_node->textures[0];
         }else{
             // Render the image
-		    data_node->data.data = SDL_LoadBMP(path);
+		    loaded = SDL_LoadBMP(path);
+            if(loaded == NULL)
+                error("jdata.c : Could not load bmp [%s]", SDL_GetError());
         }
 
-        if(data_node->data.data == NULL)
-            error("jdata.c : Could not load bmp Error: %s", SDL_GetError());
-
-		// Apply color key
-		SDL_SetSurfaceColorKey(data_node->data.data, true, SDL_MapSurfaceRGB(data_node->data.data, 0, 0, 0));
 
 	}else if(type == JFONT){
 		// Load font .ttf
@@ -63,54 +86,90 @@ struct Jdata* init(int id, int type, char* name, char* path){
 		
 		SDL_Color transparent = {0, 0, 0};
 		data_node->bgColour = transparent;
-	}else if(type == JSOUND){
+
+    }else if(type == JSOUND){
         SDL_AudioSpec spec;
 
         spec.format = SDL_AUDIO_S16LE;
         spec.channels = 2;
         spec.freq = 44100;
 
-        data_node->data.buffer = NULL;
+        data_node->buffer = NULL;
 
-        if(!SDL_LoadWAV(path, &spec, &data_node->data.buffer, &data_node->pram.length))
+        if(!SDL_LoadWAV(path, &spec, &data_node->buffer, &data_node->length))
             error("jdata.c : Could not load WAV data! [%s]", SDL_GetError());
+    }
+
+    if(loaded != NULL){
+        data_node->texture = SDL_CreateTextureFromSurface(game_state->renderer, loaded);
+        if(data_node->texture == NULL)
+            error("jdata.c : Could not create texture from surface! [%s]", SDL_GetError());
+        SDL_SetTextureBlendMode(data_node->texture, SDL_BLENDMODE_BLEND);
+    
+        data_node->rect->x = 0.0f;
+        data_node->rect->y = 0.0f;
+        data_node->rect->w = (float)loaded->w;
+        data_node->rect->h = (float)loaded->h;
+        SDL_DestroySurface(loaded);
+        loaded = NULL;
     }
 
     debug("jdata.c : [%d] %s is done loading!", id, data_node->name);
 	
+    if(data_node->type == JIMAGE)
+        assert(data_node->texture != NULL);
+
     return data_node;
 }
 
-void render(struct Jdata* node){
-	if(node->data.data != NULL){
-		SDL_DestroySurface(node->data.data);
-		node->data.data = NULL;
-	}
-
-	if(node->type == JIMAGE){
-		node->data.data = SDL_LoadBMP(node->path);
-		SDL_SetSurfaceColorKey(node->data.data, true, SDL_MapSurfaceRGB(node->data.data, 0, 0, 0));
-	
-    }else if(node->type == JANIMATION){
-        char* _path = NULL;
-        node->aux.frames.y = (node->aux.frames.y+1)%node->aux.frames.x;
-        SDL_asprintf(&_path, "%s%04d.bmp", node->path, node->aux.frames.y);
-        node->data.data = SDL_LoadBMP(_path);
-	    SDL_free(_path);
-        SDL_SetSurfaceColorKey(node->data.data, true, SDL_MapSurfaceRGB(node->data.data, 0, 0, 0));
-    
-    }else if(node->type == JFONT){
-		assert(node->fnt != NULL);
-		
-		if(node->text_bg)
-			node->data.data = TTF_RenderText_Shaded(node->fnt, node->aux.string, 0, node->fgColour, node->bgColour);
-		else
-			node->data.data = TTF_RenderText_Solid(node->fnt, node->aux.string, 0, node->fgColour);
+void instance(struct Jdata** dest, struct Jdata* node, int n, Jgame* game_state){
+    for(int i = 0; i < n; i++){
+        dest[i] = init(-node->id, node->type, node->name, node->path, game_state);
     }
+}
+
+void render(struct Jdata* node, Jgame* game_state){
+	// We call render to render the texture
+
 
     get_rect(node);
 
-	assert(node->data.data != NULL);
+    SDL_RenderTexture(game_state->renderer, node->texture, NULL, node->rect);
+}
+
+void draw_font(struct Jdata* node, Jgame* game_state){
+    // If text changes we need to draw it again
+    if(node->type == JFONT && (node->string != NULL)){
+        SDL_Surface* new_surface = NULL;
+		
+		if(node->text_bg)
+			new_surface = TTF_RenderText_Shaded(node->fnt, node->string, 0, node->fgColour, node->bgColour);
+		else
+			new_surface = TTF_RenderText_Solid(node->fnt, node->string, 0, node->fgColour);
+    
+        if(new_surface == NULL)
+            error("jdata.c : Could not render JFONT [%s]", SDL_GetError());
+
+        if(node->texture != NULL){
+            SDL_DestroyTexture(node->texture);
+            node->texture = NULL;
+        }
+
+        node->texture = SDL_CreateTextureFromSurface(game_state->renderer, new_surface);
+        if(node->texture == NULL)
+            error("jdata.c : Could not render animation texture [%s]", SDL_GetError());
+    }
+
+}
+
+void next_frame(struct Jdata* node){
+    // We need to change frames!
+    if(node->type == JANIMATION){
+        node->current_frame = node->current_frame + 1;
+        if(node->current_frame > node->n_frames-1)
+            node->current_frame = 0;
+        node->texture = node->textures[node->current_frame];
+    }
 }
 
 void play_sound(struct Jdata* node, SDL_AudioStream* stream){
@@ -121,7 +180,7 @@ void play_sound(struct Jdata* node, SDL_AudioStream* stream){
     if(!SDL_ClearAudioStream(stream))
         error("jdata.c : Cound not clear audio stream! [%s]", SDL_GetError());
 
-    if(!SDL_PutAudioStreamData(stream, node->data.buffer, node->pram.length))
+    if(!SDL_PutAudioStreamData(stream, node->buffer, node->length))
         error("jdata.c : Could not put audio buffer into audio stream [%s]", SDL_GetError());
 
     if(!SDL_FlushAudioStream(stream))
@@ -134,87 +193,78 @@ void stop_sound(SDL_AudioStream* stream){
         error("jdata.c : Could not clear audio stream! [%s]", SDL_GetError());
 }
 
-SDL_Rect* get_rect(struct Jdata* node){
-    if(node == NULL || node->pram.rect == NULL){
+SDL_FRect* get_rect(struct Jdata* node){
+    if(node == NULL || node->rect == NULL){
         error("jdata.c : Cannot generate rect for NULL node");
         return NULL;
     }
 
-	node->pram.rect->h = node->data.data->h;
-	node->pram.rect->w = node->data.data->w;
+	node->rect->h = node->texture->h;
+	node->rect->w = node->texture->w;
 	
-    return node->pram.rect;
+    return node->rect;
 }
 
-int get_pos_x(struct Jdata* node){
-    if(node == NULL || node->pram.rect == NULL){
+float get_pos_x(struct Jdata* node){
+    if(node == NULL || node->rect == NULL){
         error("jdata.c : Cannot get position of node or rect of NULL");
         return -1; // This will be seen as a valid position for the object :(
     }
 
-    return node->pram.rect->x;
+    return node->rect->x;
 }
 
-int get_pos_y(struct Jdata* node){
-    if(node == NULL || node->pram.rect == NULL){
+float get_pos_y(struct Jdata* node){
+    if(node == NULL || node->rect == NULL){
         error("jdata.c : Cannot get position of node or rect of NULL");
         return -1; // This will be seen as a valid position for the object :(
     }
 
-    return node->pram.rect->y;
+    return node->rect->y;
 
 }
 
-SDL_Surface* get_data(struct Jdata* node){
-    if(node->data.data == NULL)
-        error("jdata.c : Return null data!");
-
-    return node->data.data;
-}
-
-SDL_Rect* get_rekt(struct Jdata* node){
-    return node->pram.rect;
-}
-
-void set_position(struct Jdata* node, int x, int y, Jgame* game_state){
-    if(node->pram.rect == NULL){
+void set_position(struct Jdata* node, float x, float y, Jgame* game_state){
+    if(node->rect == NULL){
         error("jdata.c : Node rect is NULL");
         return;
     }
  
-    node->pram.rect->x = x;
-	node->pram.rect->y = y;
-    
-    if(node->pram.rect->x == CENTER)
-        node->pram.rect->x = (game_state->display_w / 2) - (node->data.data->w / 2);
-    if(node->pram.rect->y == CENTER)
-        node->pram.rect->y = (game_state->display_h / 2) - (node->data.data->h / 2);
+    node->rect->x = x;
+	node->rect->y = y;
+ 
+
+    if(node->rect->x == CENTER)
+        node->rect->x = (game_state->display_w / 2.0f) - (node->texture->w / 2.0f);
+    if(node->rect->y == CENTER)
+        node->rect->y = (game_state->display_h / 2.0f) - (node->texture->h / 2.0f);
 
 }
 
-void set_pos_x(struct Jdata* node, int x, Jgame* game_state){
-    if(node->pram.rect == NULL){
+void set_pos_x(struct Jdata* node, float x, Jgame* game_state){
+    if(node->rect == NULL){
         error("jdata.c : Node rect is NULL");
         return;
     }
 
-    node->pram.rect->x = x;
+    node->rect->x = x;
 
-    if(node->pram.rect->x == CENTER)
-        node->pram.rect->x = (game_state->display_w / 2) - (node->data.data->w / 2);
+    if(node->rect->x == CENTER)
+        node->rect->x = (game_state->display_w / 2.0f) - (node->texture->w / 2.0f);
+    
 }
 
-void set_pos_y(struct Jdata* node, int y, Jgame* game_state){
-    if(node->pram.rect == NULL){
+void set_pos_y(struct Jdata* node, float y, Jgame* game_state){
+    if(node->rect == NULL){
         error("jdata.c : Node rect is NULL");
         return;
     }
 
-    node->pram.rect->y = y;
+    node->rect->y = y;
     
-    if(node->pram.rect->y == CENTER)
-        node->pram.rect->y = (game_state->display_h / 2) - (node->data.data->h / 2);
-
+    if(node->rect->y == CENTER)
+        node->rect->y = (game_state->display_h / 2.0f) - (node->texture->h / 2.0f);
+    
 }
 
 void set_string(struct Jdata* node, char* str, ...){
@@ -224,11 +274,11 @@ void set_string(struct Jdata* node, char* str, ...){
     if(SDL_strlen(str) > 64)
         warn("jdata.c : String is larger than 64!");
 
-    if(node->aux.string == NULL){
-        node->aux.string = SDL_malloc(64);
+    if(node->string == NULL){
+        node->string = SDL_malloc(64);
     }
 
-	SDL_vsnprintf(node->aux.string, 64, str, va_args);
+	SDL_vsnprintf(node->string, 64, str, va_args);
     
     va_end(va_args);
 }
@@ -270,9 +320,9 @@ void jdata_free(struct Jdata* node){
     }
 
 	// Free the surface
-	if(node->type != JSOUND && (node->data.data != NULL)){
-		SDL_DestroySurface(node->data.data);
-		node->data.data = NULL;
+	if(node->type != JSOUND && (node->texture != NULL)){
+		SDL_DestroyTexture(node->texture);
+		node->texture = NULL;
 	}
 
 	// Free loaded font .ttf
@@ -282,20 +332,20 @@ void jdata_free(struct Jdata* node){
 	}
 
     // Free the text string
-    if(node->type == JFONT && node->aux.string != NULL){
-        SDL_free(node->aux.string);
-        node->aux.string = NULL;
+    if(node->type == JFONT && node->string != NULL){
+        SDL_free(node->string);
+        node->string = NULL;
     }
 
     // Free the rect
-    if(node->type != JSOUND && (node->pram.rect != NULL)){
-        SDL_free(node->pram.rect);
-        node->pram.rect = NULL;
+    if(node->type != JSOUND && (node->rect != NULL)){
+        SDL_free(node->rect);
+        node->rect = NULL;
     }
 
     // Free the sound data
     if(node->type == JSOUND){
-        SDL_free(node->data.buffer);
+        SDL_free(node->buffer);
     }
 
 
@@ -306,7 +356,7 @@ void jdata_print(struct Jdata* node){
 	debug("=====Printing Jdata node=====");
 	debug("    ID: %d", node->id);
 	debug("    TYPE: %d", node->type);
-	debug("    X, Y: %d,%d", node->pram.rect->x, node->pram.rect->y);
+	debug("    X, Y: %f,%f", node->rect->x, node->rect->y);
 	debug("    NAME: %s", node->name);
 }
 

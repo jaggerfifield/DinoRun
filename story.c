@@ -81,7 +81,7 @@ static void update(Jgame* game_state, struct Jdata** data){
 	}
 
 	// Move dino back down
-	if(get_pos_y(dino) < game_state->display_h - dino->data.data->h && down)
+	if(get_pos_y(dino) < game_state->display_h - dino->texture->h && down)
 		set_pos_y(dino, get_pos_y(dino) + (gravity), game_state);
 	else
 		down = false;
@@ -93,13 +93,9 @@ static void update(Jgame* game_state, struct Jdata** data){
 	if(left && !right && get_pos_x(dino) > 0)
 		set_pos_x(dino, get_pos_x(dino) - 1, game_state);
 
-	bg->pram.rect = get_rect(bg);
-	dino->pram.rect = get_rect(dino);
-
 	// Blit the surfaces in order: bg, objects, score, player
-	SDL_BlitSurface(bg->data.data, NULL, game_state->surface, bg->pram.rect);
-
-	SDL_BlitSurface(dino->data.data,    NULL, game_state->surface, dino->pram.rect);
+	SDL_RenderTexture(game_state->renderer, bg->texture, NULL, bg->rect);
+	SDL_RenderTexture(game_state->renderer, dino->texture, NULL, dino->rect);
 		
 	// Blit debug overlay if enabled
 	if(debug_overlay){
@@ -109,11 +105,10 @@ static void update(Jgame* game_state, struct Jdata** data){
 			avgFPS = 0;
 		
         set_string(debug, "FPS: %.3f", avgFPS);
-		render(debug);
+		draw_font(debug, game_state);
+        render(debug, game_state);
 			
-		debug->pram.rect = get_rect(debug);
-
-		SDL_BlitSurface(debug->data.data, NULL, game_state->surface, debug->pram.rect);
+		SDL_RenderTexture(game_state->renderer, debug->texture, NULL, debug->rect);
 	}
 
 	frameCount = frameCount + 1;

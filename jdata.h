@@ -52,7 +52,8 @@ typedef struct Jgame{
 	int obstacle[10];
 	int platform[10];
 	int treasure[10];
-	int motion; // Idle, Up, Down
+	struct Jdata* trees[10];
+    int motion; // Idle, Up, Down
 	int score;
 	int hiscore;
 	int coins;
@@ -73,56 +74,49 @@ struct Jdata{
 	char* name;
 	char* path;
 
-    // Shared between JANIMATION and JFONT
-    union{
-        char* string;
-        vec2 frames; 
-    }aux;
+    char* string;
+    int n_frames;
+    int current_frame;
 
 	// For JFONT
 	// text_bg - true/false to render background
 	// fnt - loaded font package from path
 	// fgColour - foreground text colour
 	// bgColour - background text colour
-	bool text_bg;
+    bool text_bg;
     TTF_Font* fnt;
     SDL_Color fgColour;
 	SDL_Color bgColour;
 	
-    // SDL rendering data for JFONT JIMAGE JANIMATION
-    // data - the data package, a rendered surface
-    // rect - the SDL rect, define the location of the object
-    union{
-	    SDL_Surface* data;
-        unsigned char* buffer;
-    }data;
-
-    union{
-        SDL_Rect* rect;
-        unsigned int length;
-    }pram;
+    unsigned char* buffer; // JSOUND buffer
+    unsigned int length;   // Length of JSOUND buffer
+    
+    SDL_Texture* texture;
+    SDL_Texture** textures;
+    SDL_FRect* rect;
 };
 
 
-struct Jdata* init(int, int, char*, char*);
-void render(struct Jdata*);
+struct Jdata* init(int, int, char*, char*, Jgame*);
+void instance(struct Jdata**, struct Jdata*, int, Jgame*);
+void render(struct Jdata*, Jgame*);
+void draw_font(struct Jdata*, Jgame*);
+void next_frame(struct Jdata*);
 void play_sound(struct Jdata*, SDL_AudioStream*);
 void stop_sound(SDL_AudioStream*);
 
 void set_string(struct Jdata*, char*, ...);
-void set_position(struct Jdata*, int, int, Jgame*);
-void set_pos_x(struct Jdata*, int, Jgame*);
-void set_pos_y(struct Jdata*, int, Jgame*);
+void set_position(struct Jdata*, float, float, Jgame*);
+void set_pos_x(struct Jdata*, float, Jgame*);
+void set_pos_y(struct Jdata*, float, Jgame*);
 void set_text_bg(struct Jdata*);
 void set_fgColour(struct Jdata*, short int, short int, short int);
 void set_bgColour(struct Jdata*, short int, short int, short int);
 void set_font_size(struct Jdata*, int);
 
-SDL_Rect* get_rect(struct Jdata*);
-int get_pos_x(struct Jdata*);
-int get_pos_y(struct Jdata*);
-SDL_Surface* get_data(struct Jdata*);
-SDL_Rect* get_rekt(struct Jdata*);
+SDL_FRect* get_rect(struct Jdata*);
+float get_pos_x(struct Jdata*);
+float get_pos_y(struct Jdata*);
 
 void jdata_free(struct Jdata*);
 void jdata_print(struct Jdata*);

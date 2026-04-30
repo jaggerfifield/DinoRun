@@ -10,6 +10,7 @@
 // ra --> Current loaction in settings
 // rb --> Current page in settings
 // rc --> Input event
+// rd --> Do update?
 
 // Define functions
 static void handle_keys(SDL_KeyboardEvent, Jgame*);
@@ -31,6 +32,7 @@ void settings_state(Jgame* game_state){
     game_state->ra = 0;
     game_state->rb = 0;
     game_state->rc = 0;
+    game_state->rd = IDLE_FRAME;
 
 	// Load assets
     struct Jdata** DTA = game_state->data_pack;
@@ -38,7 +40,12 @@ void settings_state(Jgame* game_state){
     // Load the strings of current page
     load_page(game_state);
 
+    game_state->time_tick = SDL_GetTicksNS();
+    game_state->animation_tick = SDL_GetTicksNS();
+
 	while(!game_state->quit && !go_back){
+        game_state->start_tick = SDL_GetTicksNS();
+
 		while(SDL_PollEvent(&e) != 0){
 			if(e.type == SDL_EVENT_QUIT)
 				game_state->quit = true;
@@ -275,6 +282,7 @@ void settings_state(Jgame* game_state){
 }
 
 void load_page(Jgame* game_state){
+    game_state->rd = UPDATE_FRAME;
 
     switch(game_state->rb){
         
@@ -308,6 +316,7 @@ void load_page(Jgame* game_state){
 static void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
 	
 	int key = e.key;
+    game_state->rd = UPDATE_FRAME;
 
     play_sound(game_state->data_pack[ID_SOUND_MENU], game_state->audio_stream);
 	
@@ -329,17 +338,21 @@ static void handle_keys(SDL_KeyboardEvent e, Jgame* game_state){
 }
 
 static void update(Jgame* game_state, struct Jdata** data){
+    if(SDL_GetTicksNS() - game_state->animation_tick > ANIMATION_TIME){
+        game_state->animation_tick = SDL_GetTicksNS();
+        game_state->rd = ANIMATION_FRAME;
+    }
 
-    struct Jdata* bg = game_state->data_pack[ID_DATA_BACKGROUND];
-    SDL_BlitSurface(bg->data.data, NULL, game_state->surface, bg->pram.rect);
+    if(game_state->rd == IDLE_FRAME)
+        return;
+
+    render(game_state->data_pack[ID_DATA_BACKGROUND], game_state);
 
     int i = ID_SETTINGS+1;
 	
     while(data[i] != NULL){
 		struct Jdata* node = data[i];
         int location = node->id-ID_SETTINGS-1;
-
-		node->pram.rect = get_rect(node); // TODO rect is generated in render(), do we need this?
 
 		if(node->type == JFONT){
 			if(game_state->ra == location){
@@ -348,15 +361,29 @@ static void update(Jgame* game_state, struct Jdata** data){
 				set_fgColour(node, 0, 0, 0);
 			}
 		    
-            render(node); // TODO : add update flag to node to check if it needs to be rendered!
+            draw_font(node, game_state);
             set_pos_x(node, -1, game_state);
+        }else if(node->type == JANIMATION){
+            if(game_state->rd == ANIMATION_FRAME)
+                next_frame(node);
         }
 
-		SDL_BlitSurface(node->data.data, NULL, game_state->surface, node->pram.rect);
-	    i++;
+        render(node, game_state);
+        i++;
     }
     
-	SDL_UpdateWindowSurface(game_state->window);
+	SDL_RenderPresent(game_state->renderer);
+
+    game_state->render_tick = SDL_GetTicksNS() - game_state->start_tick;
+
+    if(game_state->render_tick < (int)(1000000000 / game_state->fps_limit) ){
+        unsigned int sleep = (1000000000 / game_state->fps_limit) - game_state->render_tick;
+        SDL_DelayNS(sleep);
+
+        game_state->render_tick = SDL_GetTicksNS() - game_state->start_tick;
+    }
+
+    game_state->rd = IDLE_FRAME;
 }
 
 const char* get_display_name(Jgame* game_state){
