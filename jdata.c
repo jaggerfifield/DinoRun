@@ -121,15 +121,22 @@ struct Jdata* init(int id, int type, char* name, char* path, Jgame* game_state){
     return data_node;
 }
 
-void instance(struct Jdata** dest, struct Jdata* node, int n, Jgame* game_state){
-    for(int i = 0; i < n; i++){
-        dest[i] = init(-node->id, node->type, node->name, node->path, game_state);
-    }
+void instance(struct Jdata* dest, struct Jdata* node, Jgame* game_state){
+    // An instance forgets itself
+    //dest[i] = init(-node->id, node->type, node->name, node->path, game_state);
+        
+    // Just instace the texture 
+    dest->id = -node->id;
+    dest->texture = node->texture;
+}
+
+void irender(struct Jdata* node, SDL_FRect rect, Jgame* game_state){
+    // Render an instance of node at rect location
+    SDL_RenderTexture(game_state->renderer, node->texture, NULL, &rect);
 }
 
 void render(struct Jdata* node, Jgame* game_state){
 	// We call render to render the texture
-
 
     get_rect(node);
 

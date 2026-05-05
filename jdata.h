@@ -98,8 +98,9 @@ struct Jdata{
 
 
 struct Jdata* init(int, int, char*, char*, Jgame*);
-void instance(struct Jdata**, struct Jdata*, int, Jgame*);
+void instance(struct Jdata*, struct Jdata*, Jgame*);
 void render(struct Jdata*, Jgame*);
+void irender(struct Jdata*, SDL_FRect, Jgame*);
 void draw_font(struct Jdata*, Jgame*);
 void next_frame(struct Jdata*);
 void play_sound(struct Jdata*, SDL_AudioStream*);

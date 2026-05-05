@@ -38,13 +38,6 @@ void play_state(Jgame* game_state){
     game_state->ra = 0;
     game_state->rd = UPDATE_FRAME; // We want to update often since we are playing
 
-    instance(game_state->trees, game_state->data_pack[ID_SPRITE_TREE], 10, game_state);
-    
-    for(int i = 0; i < 10; i++){
-        set_pos_x(game_state->trees[i], (game_state->display_w/8)*i - (game_state->trees[i]->texture->w/2), game_state);
-        set_pos_y(game_state->trees[i], game_state->display_h-game_state->trees[i]->texture->h, game_state);
-    }
-
     for(int i = 0; i < 10; i++){
         game_state->obstacle[i] = 0;
         game_state->platform[i] = 0;
@@ -204,8 +197,23 @@ static void _update(Jgame* game_state, struct Jdata** data){
 		// Blit the surfaces in order: bg, objects, score, player
         render(bg, game_state);
 
+        // Instance Render Trees!
         for(int i = 0; i < 10; i++){
-            render(game_state->trees[i], game_state);
+            SDL_FRect tree_rect;
+            tree_rect.x = (game_state->display_w/8)*i - (game_state->data_pack[ID_SPRITE_TREE]->texture->w/2);
+            tree_rect.y = game_state->display_h-game_state->data_pack[ID_SPRITE_TREE]->texture->h;
+            tree_rect.w = game_state->data_pack[ID_SPRITE_TREE]->texture->w;
+            tree_rect.h = game_state->data_pack[ID_SPRITE_TREE]->texture->h;
+
+            // TODO I dont know if this is the final form of instance rendering. I think we need to build Jdata nodes
+            // who are instances referencing the parent texture. This way they would hold their rects internally and
+            // we could use our existing jdata functions to set posistions and stuff. Right now we are building rects
+            // external to the node (look above) and rendering the parent node (see below) but using the generated rects.
+            // 
+            // I think there will be a container in game_state that holds a aray of instances that need to be rendered.
+            // The list will be null terminated so we know when all instances have been rendered. The only problem being
+            // we need to have INSTANCE_ID tags to reference our instances.
+            irender(game_state->data_pack[ID_SPRITE_TREE], tree_rect, game_state);
         }
 
 		// Update object position and generate new objects
